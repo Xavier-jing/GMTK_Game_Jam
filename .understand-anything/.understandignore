@@ -1,0 +1,32 @@
+# Files and directories excluded from architecture analysis.
+# This file does not affect Unity imports or builds.
+
+Library/
+Temp/
+Logs/
+obj/
+UserSettings/
+
+Assets/Plugins/
+Assets/TextMesh Pro/
+Assets/Settings/
+
+*.csproj
+*.sln
+*.meta
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ttf
+*.pdf
+*.dll
+*.mdb
+*.xml
+
+# Keep project scenes and prefabs available for manual review, but exclude them
+# from the generated code knowledge graph unless explicitly needed.
+*.unity
+*.prefab
+*.asset
+*.mixer

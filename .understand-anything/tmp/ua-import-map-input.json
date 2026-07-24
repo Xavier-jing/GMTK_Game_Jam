@@ -1,0 +1,170 @@
+{
+  "projectRoot": "C:\\Users\\Administrator\\gmtk_game_jam",
+  "files": [
+    {
+      "path": ".claude/skills/funplay-unity-mcp-workflow/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".funplay/skills/manifest.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-import-map-input.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-import-map-output.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-scan-files.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/AppContext.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/Bootstrap.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/BuildSettingsSceneSync.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/ServiceRegistry.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/ISceneTransition.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/SceneId.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/SceneLoader.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Time/GamePause.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Settings/SettingsService.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/Audio/AudioService.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/Input/InputReader.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/GameplayUIController.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/HudScreen.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/LoadingScreen.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/MainMenuSceneController.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/MainMenuScreen.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/PauseScreen.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/ScreenBase.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/ScreenId.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/SettingsScreen.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/UIService.cs",
+      "language": "csharp",
+      "fileCategory": "code"
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "Packages/manifest.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "Packages/packages-lock.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "PROJECT_ARCHITECTURE_ZH.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ProjectSettings/ProjectVersion.txt",
+      "language": "txt",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ProjectSettings/SceneTemplateSettings.json",
+      "language": "json",
+      "fileCategory": "config"
+    }
+  ]
+}

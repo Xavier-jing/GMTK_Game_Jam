@@ -1,0 +1,43 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 33,
+    "filesWithImports": 0,
+    "totalEdges": 0
+  },
+  "importMap": {
+    ".claude/skills/funplay-unity-mcp-workflow/SKILL.md": [],
+    ".funplay/skills/manifest.json": [],
+    ".understand-anything/.understandignore": [],
+    ".understand-anything/tmp/ua-import-map-input.json": [],
+    ".understand-anything/tmp/ua-import-map-output.json": [],
+    ".understand-anything/tmp/ua-scan-files.json": [],
+    "Assets/_Project/Scripts/Core/App/AppContext.cs": [],
+    "Assets/_Project/Scripts/Core/App/Bootstrap.cs": [],
+    "Assets/_Project/Scripts/Core/App/BuildSettingsSceneSync.cs": [],
+    "Assets/_Project/Scripts/Core/App/ServiceRegistry.cs": [],
+    "Assets/_Project/Scripts/Core/Scene/ISceneTransition.cs": [],
+    "Assets/_Project/Scripts/Core/Scene/SceneId.cs": [],
+    "Assets/_Project/Scripts/Core/Scene/SceneLoader.cs": [],
+    "Assets/_Project/Scripts/Core/Time/GamePause.cs": [],
+    "Assets/_Project/Scripts/Settings/SettingsService.cs": [],
+    "Assets/_Project/Scripts/Systems/Audio/AudioService.cs": [],
+    "Assets/_Project/Scripts/Systems/Input/InputReader.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/GameplayUIController.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/HudScreen.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/LoadingScreen.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/MainMenuSceneController.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/MainMenuScreen.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/PauseScreen.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/ScreenBase.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/ScreenId.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/SettingsScreen.cs": [],
+    "Assets/_Project/Scripts/Systems/UI/UIService.cs": [],
+    "CLAUDE.md": [],
+    "Packages/manifest.json": [],
+    "Packages/packages-lock.json": [],
+    "PROJECT_ARCHITECTURE_ZH.md": [],
+    "ProjectSettings/ProjectVersion.txt": [],
+    "ProjectSettings/SceneTemplateSettings.json": []
+  }
+}

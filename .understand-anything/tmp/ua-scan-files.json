@@ -1,0 +1,221 @@
+{
+  "scriptCompleted": true,
+  "files": [
+    {
+      "path": ".claude/skills/funplay-unity-mcp-workflow/SKILL.md",
+      "language": "markdown",
+      "sizeLines": 256,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".funplay/skills/manifest.json",
+      "language": "json",
+      "sizeLines": 11,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-import-map-input.json",
+      "language": "json",
+      "sizeLines": 185,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-import-map-output.json",
+      "language": "json",
+      "sizeLines": 39,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".understand-anything/tmp/ua-scan-files.json",
+      "language": "json",
+      "sizeLines": 202,
+      "fileCategory": "config"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/AppContext.cs",
+      "language": "csharp",
+      "sizeLines": 101,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/Bootstrap.cs",
+      "language": "csharp",
+      "sizeLines": 55,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/BuildSettingsSceneSync.cs",
+      "language": "csharp",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/App/ServiceRegistry.cs",
+      "language": "csharp",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/ISceneTransition.cs",
+      "language": "csharp",
+      "sizeLines": 10,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/SceneId.cs",
+      "language": "csharp",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Scene/SceneLoader.cs",
+      "language": "csharp",
+      "sizeLines": 225,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Core/Time/GamePause.cs",
+      "language": "csharp",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Settings/SettingsService.cs",
+      "language": "csharp",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/Audio/AudioService.cs",
+      "language": "csharp",
+      "sizeLines": 241,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/Input/InputReader.cs",
+      "language": "csharp",
+      "sizeLines": 82,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/GameplayUIController.cs",
+      "language": "csharp",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/HudScreen.cs",
+      "language": "csharp",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/LoadingScreen.cs",
+      "language": "csharp",
+      "sizeLines": 259,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/MainMenuSceneController.cs",
+      "language": "csharp",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/MainMenuScreen.cs",
+      "language": "csharp",
+      "sizeLines": 96,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/PauseScreen.cs",
+      "language": "csharp",
+      "sizeLines": 86,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/ScreenBase.cs",
+      "language": "csharp",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/ScreenId.cs",
+      "language": "csharp",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/SettingsScreen.cs",
+      "language": "csharp",
+      "sizeLines": 95,
+      "fileCategory": "code"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Systems/UI/UIService.cs",
+      "language": "csharp",
+      "sizeLines": 126,
+      "fileCategory": "code"
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "sizeLines": 39,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "Packages/manifest.json",
+      "language": "json",
+      "sizeLines": 48,
+      "fileCategory": "config"
+    },
+    {
+      "path": "Packages/packages-lock.json",
+      "language": "json",
+      "sizeLines": 550,
+      "fileCategory": "config"
+    },
+    {
+      "path": "PROJECT_ARCHITECTURE_ZH.md",
+      "language": "markdown",
+      "sizeLines": 722,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ProjectSettings/ProjectVersion.txt",
+      "language": "txt",
+      "sizeLines": 2,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ProjectSettings/SceneTemplateSettings.json",
+      "language": "json",
+      "sizeLines": 120,
+      "fileCategory": "config"
+    }
+  ],
+  "totalFiles": 33,
+  "filteredByIgnore": 34803,
+  "estimatedComplexity": "moderate",
+  "stats": {
+    "filesScanned": 33,
+    "byCategory": {
+      "docs": 4,
+      "config": 7,
+      "code": 22
+    },
+    "byLanguage": {
+      "markdown": 3,
+      "json": 7,
+      "unknown": 1,
+      "csharp": 21,
+      "txt": 1
+    }
+  }
+}
