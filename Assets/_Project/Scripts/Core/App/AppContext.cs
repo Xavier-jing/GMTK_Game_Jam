@@ -18,6 +18,8 @@ public sealed class AppContext : MonoBehaviour
 
     public TurnManager TurnManager { get; private set; }
 
+    public Inventory Inventory { get; private set; }
+
     public bool IsInitialized { get; private set; }
 
     public static AppContext EnsureExists()
@@ -74,6 +76,9 @@ public sealed class AppContext : MonoBehaviour
 
         TurnManager = new TurnManager(maxTurns: 30);
         Services.Register(TurnManager);
+
+        Inventory = new Inventory();
+        Services.Register(Inventory);
 
         Audio = new AudioService();
         Audio.Initialize();

@@ -69,6 +69,7 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\Input\PlayerInputHandler.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractionDetector.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\GameplayUIController.cs" />
+    <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractor.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Debug\Tset.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerJumpState.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\App\Bootstrap.cs" />
@@ -81,7 +82,9 @@
     <Compile Include="Assets\_Project\Scripts\Systems\UI\MainMenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\InteractionOption.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SuperStates\PlayerGroundedState.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Config\ItemDefinition.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerFSM\Player.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Runtime\Inventory.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\HudScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Scene\ISceneTransition.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerGameplayStatus.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\Data\PlayerData.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\PauseScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\Input\UIInputHandler.cs" />
+    <Compile Include="Assets\_Project\Scripts\Game\Interaction\ItemRequirement.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\App\ServiceRegistry.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Scene\SceneLoader.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerAscendState.cs" />
