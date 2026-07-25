@@ -67,6 +67,7 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerSinkingState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraInputController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\Input\PlayerInputHandler.cs" />
+    <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerAnimationController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractionDetector.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\GameplayUIController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractor.cs" />
@@ -75,9 +76,12 @@
     <Compile Include="Assets\_Project\Scripts\Core\App\Bootstrap.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerBillboard.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\IInteractable.cs" />
+    <Compile Include="Assets\_Project\Scripts\Core\Turn\ActionResolver.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\App\AppContext.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Time\GamePause.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Debug\TurnSystemTest.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerFSM\PlayerStateMachine.cs" />
+    <Compile Include="Assets\_Project\Scripts\Core\Loop\LoopManager.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerMoveState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\MainMenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\InteractionOption.cs" />
@@ -90,8 +94,10 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerGameplayStatus.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\UIService.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerInAirState.cs" />
+    <Compile Include="Assets\_Project\Scripts\Core\Loop\RunState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerFSM\PlayerState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\Data\PlayerData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Core\Loop\RunEndReason.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\PauseScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\Input\UIInputHandler.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\ItemRequirement.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="Assets\_Project\Scripts\Core\App\BuildSettingsSceneSync.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneSettings.cs" />
+    <Compile Include="Assets\_Project\Scripts\Core\Loop\LoopProgress.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\MainMenuSceneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SuperStates\PlayerAbilityState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerFloatingSwimState.cs" />

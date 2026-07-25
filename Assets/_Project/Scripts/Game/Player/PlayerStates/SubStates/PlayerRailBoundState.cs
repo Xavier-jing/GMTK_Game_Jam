@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerRailBoundState : PlayerState
 {
@@ -8,10 +8,9 @@ public sealed class PlayerRailBoundState : PlayerState
     private float railInput;
     private bool wasKinematic;
     private bool usedGravity;
-    private bool isMoving;
 
     public PlayerRailBoundState(Player player, PlayerStateMachine stateMachine, PlayerData playerData)
-        : base(player, stateMachine, playerData, string.Empty)
+        : base(player, stateMachine, playerData)
     {
     }
 
@@ -28,14 +27,12 @@ public sealed class PlayerRailBoundState : PlayerState
         wasKinematic = player.RB.isKinematic;
         usedGravity = player.RB.useGravity;
 
-        player.RB.velocity = Vector3.zero;
-        player.RB.angularVelocity = Vector3.zero;
+        ClearRigidbodyMotion();
         player.RB.useGravity = false;
         player.RB.isKinematic = true;
 
         player.SetRailDistance(player.CurrentRail.GetClosestDistance(player.RB.position));
         player.RB.position = player.CurrentRail.GetPosition(player.RailDistance);
-        SetMovementAnimation(false);
     }
 
     public override void LogicUpdate()
@@ -51,13 +48,6 @@ public sealed class PlayerRailBoundState : PlayerState
         {
             railInput = 0f;
         }
-
-        if (railInput != 0f)
-        {
-            player.CheckIfShouldFlip(railInput > 0f ? 1 : -1);
-        }
-
-        SetMovementAnimation(railInput != 0f);
     }
 
     private float GetScreenRelativeRailInput(Vector2 rawInput)
@@ -122,26 +112,23 @@ public sealed class PlayerRailBoundState : PlayerState
 
     public override void Exit()
     {
-        SetMovementAnimation(false);
 
         player.RB.isKinematic = wasKinematic;
         player.RB.useGravity = usedGravity;
-        player.RB.velocity = Vector3.zero;
-        player.RB.angularVelocity = Vector3.zero;
+        ClearRigidbodyMotion();
         player.ReleaseRail();
 
         base.Exit();
     }
 
-    private void SetMovementAnimation(bool moving)
+    private void ClearRigidbodyMotion()
     {
-        if (isMoving == moving)
+        if (player.RB.isKinematic)
         {
             return;
         }
 
-        isMoving = moving;
-        player.SetAnimationBool("idle", !moving);
-        player.SetAnimationBool("move", moving);
+        player.RB.velocity = Vector3.zero;
+        player.RB.angularVelocity = Vector3.zero;
     }
 }

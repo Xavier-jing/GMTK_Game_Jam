@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,7 +32,6 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Components
-    public Animator Anim { get; private set; }
     public PlayerInputHandler InputHandler { get; private set; }
     public Rigidbody RB { get; private set; }
     public BoxCollider Collider3D { get; private set; }
@@ -53,22 +52,20 @@ public class Player : MonoBehaviour
     public void Awake()
     {
         stateMachine = new PlayerStateMachine();
-
-        Anim = GetComponentInChildren<Animator>();
         InputHandler = GetComponent<PlayerInputHandler>();
         RB = GetComponent<Rigidbody>();
         Collider3D = GetComponent<BoxCollider>();
         GameplayStatus = GetComponent<PlayerGameplayStatus>();
         InteractionDetector = GetComponent<PlayerInteractionDetector>();
 
-        IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
-        MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
-        JumpState = new PlayerJumpState(this, stateMachine, playerData, "inair");
-        InAirState = new PlayerInAirState(this, stateMachine, playerData, "inair");
+        IdleState = new PlayerIdleState(this, stateMachine, playerData);
+        MoveState = new PlayerMoveState(this, stateMachine, playerData);
+        JumpState = new PlayerJumpState(this, stateMachine, playerData);
+        InAirState = new PlayerInAirState(this, stateMachine, playerData);
         RailBoundState = new PlayerRailBoundState(this, stateMachine, playerData);
-        AscendState = new PlayerAscendState(this, stateMachine, playerData, "inair");
-        FloatingSwimState = new PlayerFloatingSwimState(this, stateMachine, playerData, "inair");
-        SinkingState = new PlayerSinkingState(this, stateMachine, playerData, "inair");
+        AscendState = new PlayerAscendState(this, stateMachine, playerData);
+        FloatingSwimState = new PlayerFloatingSwimState(this, stateMachine, playerData);
+        SinkingState = new PlayerSinkingState(this, stateMachine, playerData);
 
         FacingDirection = 1;
     }
@@ -187,20 +184,6 @@ public class Player : MonoBehaviour
 
         return right * input.x + forward * input.y;
     }
-
-    public void SetAnimationBool(string parameterName, bool value)
-    {
-        int parameterHash = Animator.StringToHash(parameterName);
-        foreach (AnimatorControllerParameter parameter in Anim.parameters)
-        {
-            if (parameter.nameHash == parameterHash &&
-                parameter.type == AnimatorControllerParameterType.Bool)
-            {
-                Anim.SetBool(parameterHash, value);
-                return;
-            }
-        }
-    }
     #endregion
 
     #region Check Functions
@@ -208,22 +191,9 @@ public class Player : MonoBehaviour
     {
         return Physics.OverlapSphere(groundcheck.position, playerData.groundCheckRadius, playerData.whatIsGround).Length > 0;
     }
-
-    public void CheckIfShouldFlip(int xInput)
-    {
-        if (xInput != 0 && xInput != FacingDirection)
-        {
-            Flip();
-        }
-    }
     #endregion
 
     #region other Functions
-    private void Flip()
-    {
-        FacingDirection *= -1;
-        transform.Rotate(0.0f, 180.0f, 0.0f);
-    }
 
     public void SetControlled(bool controlled)
     {
