@@ -1,0 +1,101 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_tea_set",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】一套摆放整齐的茶具。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "放入携带槽",
+          "TargetScriptId": "prop_tea_set",
+          "TargetNodeId": "take",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_tea_set",
+              "StringValue": "TakeIntoCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "放下",
+          "TargetScriptId": "prop_tea_set",
+          "TargetNodeId": "drop",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_tea_set",
+              "StringValue": "DropFromCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_tea_set",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "take",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_tea_set",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "drop",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_tea_set",
+            "StringValue": "DropFromCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

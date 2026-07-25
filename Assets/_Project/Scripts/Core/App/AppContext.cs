@@ -2,6 +2,8 @@ using UnityEngine;
 
 public sealed class AppContext : MonoBehaviour
 {
+    private const int InitialTurns = 5;
+
     private static AppContext instance;
 
     public static AppContext Instance => instance != null ? instance : EnsureExists();
@@ -17,6 +19,14 @@ public sealed class AppContext : MonoBehaviour
     public AudioService Audio { get; private set; }
 
     public TurnManager TurnManager { get; private set; }
+
+    public ActionResolver ActionResolver { get; private set; }
+
+    public LoopManager LoopManager { get; private set; }
+
+    public LoopProgress LoopProgress { get; private set; }
+
+    public RunState RunState { get; private set; }
 
     public Inventory Inventory { get; private set; }
 
@@ -76,11 +86,28 @@ public sealed class AppContext : MonoBehaviour
         settings.Load();
         Services.Register(settings);
 
-        TurnManager = new TurnManager(maxTurns: 30);
+        TurnManager = new TurnManager(initialTurns: InitialTurns);
         Services.Register(TurnManager);
 
         Inventory = new Inventory();
         Services.Register(Inventory);
+
+        LoopProgress = new LoopProgress();
+        Services.Register(LoopProgress);
+
+        RunState = new RunState();
+        Services.Register(RunState);
+
+        LoopManager = new LoopManager(
+            TurnManager,
+            Inventory,
+            SceneLoader,
+            LoopProgress,
+            RunState);
+        Services.Register(LoopManager);
+
+        ActionResolver = new ActionResolver(TurnManager, LoopManager);
+        Services.Register(ActionResolver);
 
         StoryProgress = new StoryProgress();
         Services.Register(StoryProgress);
@@ -105,6 +132,7 @@ public sealed class AppContext : MonoBehaviour
 
         SceneLoader?.Dispose();
         GamePause?.Resume();
+        LoopManager?.Dispose();
         Audio?.Dispose();
         IsInitialized = false;
         instance = null;

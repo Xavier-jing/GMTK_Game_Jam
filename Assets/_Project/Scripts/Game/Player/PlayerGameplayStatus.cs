@@ -10,7 +10,13 @@ public enum PlayerWorldLayer
 public enum PlayerSlotItemKind
 {
     None,
-    FloatingSmallItem
+    FloatingSmallItem,
+    Dresser,
+    CableBed,
+    TeaSet,
+    Vase,
+    Plank,
+    Refrigerator
 }
 
 [DisallowMultipleComponent]
@@ -44,9 +50,9 @@ public sealed class PlayerGameplayStatus : MonoBehaviour
     public bool HasFloatingSmallItem => slotItemKind == PlayerSlotItemKind.FloatingSmallItem;
 
     public bool CanFloatSwim => hasWrench && railRemoved && IsUpperLayer && !HasSlotItem;
-    public bool ShouldSink => hasWrench && railRemoved && IsUpperLayer && HasFloatingSmallItem;
+    public bool ShouldSink => hasWrench && railRemoved && IsUpperLayer && HasSlotItem;
     public bool ShouldRise => hasWrench && railRemoved && IsLowerLayer && !HasSlotItem;
-    public bool CanUseWeightedGroundJump => hasWrench && railRemoved && IsLowerLayer && HasFloatingSmallItem;
+    public bool CanUseWeightedGroundJump => hasWrench && railRemoved && IsLowerLayer && HasSlotItem;
 
     public void AcquireWrench()
     {

@@ -53,6 +53,24 @@ public sealed class Inventory
 
     public InventoryAddResult TryAdd(ItemDefinition item)
     {
+        InventoryAddResult result = GetAddResult(item);
+        if (result != InventoryAddResult.Added)
+        {
+            return result;
+        }
+
+        ownedItems.Add(item);
+        if (item.ShowInManagedInventory)
+        {
+            visibleItems.Add(item);
+        }
+
+        Changed?.Invoke();
+        return InventoryAddResult.Added;
+    }
+
+    public InventoryAddResult GetAddResult(ItemDefinition item)
+    {
         if (item == null)
         {
             return InventoryAddResult.InvalidItem;
@@ -69,13 +87,6 @@ public sealed class Inventory
             return InventoryAddResult.ManagedSlotsFull;
         }
 
-        ownedItems.Add(item);
-        if (item.ShowInManagedInventory)
-        {
-            visibleItems.Add(item);
-        }
-
-        Changed?.Invoke();
         return InventoryAddResult.Added;
     }
 

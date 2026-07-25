@@ -1,0 +1,120 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_cable_bed",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】床的一侧拖着一根数据线，不知道通向哪里。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "放入携带槽",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "take",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_cable_bed",
+              "StringValue": "TakeIntoCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "放下",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "drop",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_cable_bed",
+              "StringValue": "DropFromCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_cable_bed",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "take",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_cable_bed",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "drop",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_cable_bed",
+            "StringValue": "DropFromCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

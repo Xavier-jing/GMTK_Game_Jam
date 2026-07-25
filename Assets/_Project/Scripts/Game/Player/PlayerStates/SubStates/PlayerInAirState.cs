@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ public class PlayerInAirState : PlayerAbilityState
     private bool isGrounded;
     private int xInput;
     private int yInput;
-    public PlayerInAirState(Player player, PlayerStateMachine stateMachine, PlayerData playerData, string animBoolName) : base(player, stateMachine, playerData, animBoolName)
+    public PlayerInAirState(Player player, PlayerStateMachine stateMachine, PlayerData playerData) : base(player, stateMachine, playerData)
     {
     }
 
@@ -40,7 +40,6 @@ public class PlayerInAirState : PlayerAbilityState
         }
         else
         {
-            player.CheckIfShouldFlip(xInput);
 
             float rad = playerData.movementAngle * Mathf.Deg2Rad;
             float worldX = xInput * Mathf.Cos(rad) - yInput * Mathf.Sin(rad);

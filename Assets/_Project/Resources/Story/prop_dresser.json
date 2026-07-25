@@ -1,0 +1,160 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_dresser",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】一张旧梳妆台，抽屉似乎还能打开。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "打开抽屉",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "open",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_dresser",
+              "StringValue": "OpenDresser"
+            }
+          }
+        },
+        {
+          "Dialog": "放入携带槽",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "take",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_dresser",
+              "StringValue": "TakeIntoCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "放下",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "drop",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_dresser",
+              "StringValue": "DropFromCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_dresser",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "open",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_dresser",
+            "StringValue": "OpenDresser"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "opened"
+    },
+    {
+      "Id": "opened",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】抽屉打开了，里面放着剪刀和扳手。",
+      "Next": "complete"
+    },
+    {
+      "Id": "take",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_dresser",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "drop",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_dresser",
+            "StringValue": "DropFromCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_large_wall_hole",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】墙上的洞比记忆中更大，后面似乎藏着什么。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "用扳手第二次砸开墙面",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "second_strike",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_large_wall_hole",
+              "StringValue": "SecondWallStrike"
+            }
+          }
+        },
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "second_strike",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_large_wall_hole",
+            "StringValue": "SecondWallStrike"
+          }
+        }
+      ],
+      "Next": "truth"
+    },
+    {
+      "Id": "truth",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】墙后的真相显露出来，房屋随之坠毁。",
+      "Next": "complete"
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_large_wall_hole",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "TruthRevealed"
+    }
+  ]
+}

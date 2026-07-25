@@ -1,0 +1,128 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_small_wall_hole",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】墙面上有一道不自然的裂缝。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_small_wall_hole",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "用扳手第一次砸开墙面",
+          "TargetScriptId": "prop_small_wall_hole",
+          "TargetNodeId": "first_strike",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_small_wall_hole",
+              "StringValue": "FirstWallStrike"
+            }
+          }
+        },
+        {
+          "Dialog": "用木板修补墙洞",
+          "TargetScriptId": "prop_small_wall_hole",
+          "TargetNodeId": "install_plank",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_small_wall_hole",
+              "StringValue": "InstallPlank"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_small_wall_hole",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_small_wall_hole",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "first_strike",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_small_wall_hole",
+            "StringValue": "FirstWallStrike"
+          }
+        }
+      ],
+      "Next": "first_strike_text"
+    },
+    {
+      "Id": "first_strike_text",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】墙面被砸开了一部分。随着一阵失重感，本周目结束了。",
+      "Next": "complete"
+    },
+    {
+      "Id": "install_plank",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_small_wall_hole",
+            "StringValue": "InstallPlank"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "plank_installed"
+    },
+    {
+      "Id": "plank_installed",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】木板被固定在墙洞上。",
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

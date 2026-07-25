@@ -14,7 +14,13 @@ public sealed class HudScreen : ScreenBase
 
     protected override void OnShow()
     {
+        UnsubscribeTurnManager();
         turnManager = AppContext.Instance.TurnManager;
+        if (turnManager != null)
+        {
+            turnManager.OnTurnsChanged += HandleTurnsChanged;
+        }
+
         RefreshTurnDisplay();
     }
 

@@ -1,0 +1,134 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_rope",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】床帘附近挂着一捆结实的绳子。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "拾取绳子",
+          "TargetScriptId": "prop_rope",
+          "TargetNodeId": "acquire",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_rope",
+              "StringValue": "AcquireInventoryItem"
+            }
+          }
+        },
+        {
+          "Dialog": "拾取绳子并执行结局三方案",
+          "TargetScriptId": "prop_rope",
+          "TargetNodeId": "ending_three",
+          "Condition": {
+            "Id": "LoopProgressFlagEquals",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "StringValue": "TruthKnown",
+              "BoolValue": true
+            }
+          }
+        },
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_rope",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_rope",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "acquire",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_rope",
+            "StringValue": "AcquireInventoryItem"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "acquired"
+    },
+    {
+      "Id": "acquired",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】获得了绳子。",
+      "Next": "complete"
+    },
+    {
+      "Id": "ending_three",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_rope",
+            "StringValue": "AcquireInventoryItem"
+          }
+        },
+        {
+          "Id": "RequestRunEnd",
+          "Params": {
+            "StringValue": "EndingThree"
+          }
+        }
+      ],
+      "Next": "ending_text"
+    },
+    {
+      "Id": "ending_text",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】绳子被用于最终方案。结局三达成。",
+      "Next": "complete"
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_rope",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

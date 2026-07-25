@@ -1,0 +1,94 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_scissors",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】一把锋利的剪刀。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "拾取",
+          "TargetScriptId": "prop_scissors",
+          "TargetNodeId": "acquire",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_scissors",
+              "StringValue": "AcquireInventoryItem"
+            }
+          }
+        },
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_scissors",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_scissors",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "acquire",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_scissors",
+            "StringValue": "AcquireInventoryItem"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "acquired"
+    },
+    {
+      "Id": "acquired",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】获得了剪刀。",
+      "Next": "complete"
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_scissors",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

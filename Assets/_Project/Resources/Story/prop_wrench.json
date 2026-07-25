@@ -1,0 +1,94 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_wrench",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】一把沉甸甸的扳手，也许能破坏某些结构。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "拾取",
+          "TargetScriptId": "prop_wrench",
+          "TargetNodeId": "acquire",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_wrench",
+              "StringValue": "AcquireInventoryItem"
+            }
+          }
+        },
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_wrench",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_wrench",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "acquire",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_wrench",
+            "StringValue": "AcquireInventoryItem"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "acquired"
+    },
+    {
+      "Id": "acquired",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】获得了扳手。",
+      "Next": "complete"
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_wrench",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_bed_blanket",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】真相揭晓后，床被下面显得格外可疑。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "掀开并用剪刀剪碎",
+          "TargetScriptId": "prop_bed_blanket",
+          "TargetNodeId": "cut",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_bed_blanket",
+              "StringValue": "CutBlanket"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_bed_blanket",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "cut",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_bed_blanket",
+            "StringValue": "CutBlanket"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "cut_text"
+    },
+    {
+      "Id": "cut_text",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】床被被剪开，一个隐藏开关露了出来。",
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "FabricPrepared"
+    }
+  ]
+}

@@ -3,43 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[RequireComponent(typeof(PlayerInteractionDetector))]
 public sealed class PlayerInteractor : MonoBehaviour
 {
-    private sealed class Candidate
-    {
-        public readonly MonoBehaviour Behaviour;
-        public readonly IInteractable Interactable;
+    private readonly List<IInteractable> nearbyInteractables =
+        new List<IInteractable>(8);
 
-        public int OverlapCount;
-        public bool MissingInteractionPointReported;
-
-        public Candidate(MonoBehaviour behaviour, IInteractable interactable)
-        {
-            Behaviour = behaviour;
-            Interactable = interactable;
-            OverlapCount = 1;
-        }
-    }
-
-    [SerializeField]
-    private CircleCollider2D interactionSensor;
-
-    private readonly Dictionary<MonoBehaviour, Candidate> candidates =
-        new Dictionary<MonoBehaviour, Candidate>();
-
-    private readonly Dictionary<Collider2D, MonoBehaviour> colliderOwners =
-        new Dictionary<Collider2D, MonoBehaviour>();
-
-    private readonly List<MonoBehaviour> staleCandidates = new List<MonoBehaviour>();
-
-    private readonly List<KeyValuePair<Collider2D, MonoBehaviour>> staleColliderMappings =
-        new List<KeyValuePair<Collider2D, MonoBehaviour>>();
-
-    private readonly List<Collider2D> overlappingColliders = new List<Collider2D>();
-
-    private Candidate currentCandidate;
+    private PlayerInteractionDetector interactionDetector;
+    private PlayerCarrySlot carrySlot;
     private GamePause gamePause;
     private InteractionContext interactionContext;
+    private IInteractable currentTarget;
     private string currentPrompt = string.Empty;
     private bool currentTargetCanInteract;
     private bool isInteracting;
@@ -47,8 +21,7 @@ public sealed class PlayerInteractor : MonoBehaviour
 
     public event Action<string, bool> PromptChanged;
 
-    public IInteractable CurrentTarget =>
-        currentCandidate != null ? currentCandidate.Interactable : null;
+    public IInteractable CurrentTarget => currentTarget;
 
     public string CurrentPrompt => currentPrompt;
 
@@ -56,32 +29,8 @@ public sealed class PlayerInteractor : MonoBehaviour
 
     private void Awake()
     {
-        if (interactionSensor == null)
-        {
-            Debug.LogError(
-                $"PlayerInteractor on '{name}' is missing its interaction sensor reference.",
-                this);
-            enabled = false;
-            return;
-        }
-
-        if (interactionSensor.gameObject != gameObject)
-        {
-            Debug.LogError(
-                $"PlayerInteractor on '{name}' requires its interaction sensor on the same GameObject.",
-                this);
-            enabled = false;
-            return;
-        }
-
-        if (!interactionSensor.isTrigger)
-        {
-            Debug.LogError(
-                $"PlayerInteractor on '{name}' requires interaction sensor '{interactionSensor.name}' " +
-                "to have Is Trigger enabled.",
-                this);
-            enabled = false;
-        }
+        interactionDetector = GetComponent<PlayerInteractionDetector>();
+        carrySlot = GetComponent<PlayerCarrySlot>();
     }
 
     private void Start()
@@ -93,37 +42,16 @@ public sealed class PlayerInteractor : MonoBehaviour
 
     private void OnEnable()
     {
-        if (interactionSensor == null ||
-            !interactionSensor.enabled ||
-            !interactionSensor.gameObject.activeInHierarchy)
-        {
-            return;
-        }
-
         PlayerInputHandler.OnInteractPressed += HandleInteractPressed;
-
-        overlappingColliders.Clear();
-        ContactFilter2D contactFilter = new ContactFilter2D();
-        contactFilter.NoFilter();
-        interactionSensor.OverlapCollider(contactFilter, overlappingColliders);
-
-        foreach (Collider2D overlappingCollider in overlappingColliders)
-        {
-            RegisterCandidate(overlappingCollider);
-        }
     }
 
     private void OnDisable()
     {
-        candidates.Clear();
-        colliderOwners.Clear();
-        staleCandidates.Clear();
-        staleColliderMappings.Clear();
-        overlappingColliders.Clear();
-        SetCurrentCandidate(null, false);
+        PlayerInputHandler.OnInteractPressed -= HandleInteractPressed;
+        nearbyInteractables.Clear();
+        SetCurrentTarget(null, false);
         isInteracting = false;
         interactPressed = false;
-        PlayerInputHandler.OnInteractPressed -= HandleInteractPressed;
     }
 
     private void Update()
@@ -136,11 +64,13 @@ public sealed class PlayerInteractor : MonoBehaviour
             return;
         }
 
-        if (interactPressed)
+        if (!interactPressed)
         {
-            interactPressed = false;
-            InteractWithCurrentTarget();
+            return;
         }
+
+        interactPressed = false;
+        InteractWithCurrentTarget();
     }
 
     private void HandleInteractPressed(PlayerInputHandler inputHandler)
@@ -151,191 +81,90 @@ public sealed class PlayerInteractor : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!isActiveAndEnabled)
-        {
-            return;
-        }
-
-        RegisterCandidate(other);
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!isActiveAndEnabled)
-        {
-            return;
-        }
-
-        if (!colliderOwners.TryGetValue(other, out MonoBehaviour behaviour))
-        {
-            return;
-        }
-
-        colliderOwners.Remove(other);
-
-        if (!candidates.TryGetValue(behaviour, out Candidate candidate))
-        {
-            return;
-        }
-
-        candidate.OverlapCount--;
-        if (candidate.OverlapCount > 0)
-        {
-            return;
-        }
-
-        candidates.Remove(behaviour);
-        if (currentCandidate == candidate)
-        {
-            RefreshCurrentTarget();
-        }
-    }
-
     private void RefreshCurrentTarget()
     {
-        RemoveDestroyedCandidates();
+        interactionDetector.GetNearbyInteractables(nearbyInteractables);
 
-        Candidate nearestAvailableCandidate = null;
-        Candidate nearestBlockedCandidate = null;
-        float nearestAvailableSqrDistance = float.PositiveInfinity;
-        float nearestBlockedSqrDistance = float.PositiveInfinity;
-        int nearestAvailableInstanceId = int.MaxValue;
-        int nearestBlockedInstanceId = int.MaxValue;
-        Vector2 interactorPosition = transform.position;
+        WorldStoryInteractable carriedProp =
+            carrySlot != null ? carrySlot.CurrentProp : null;
 
-        foreach (Candidate candidate in candidates.Values)
+        IInteractable nearestAvailable = null;
+        IInteractable nearestBlocked = null;
+        float nearestAvailableDistance = float.PositiveInfinity;
+        float nearestBlockedDistance = float.PositiveInfinity;
+        int nearestAvailableId = int.MaxValue;
+        int nearestBlockedId = int.MaxValue;
+
+        for (int i = 0; i < nearbyInteractables.Count; i++)
         {
-            MonoBehaviour behaviour = candidate.Behaviour;
-            if (!behaviour.isActiveAndEnabled)
+            IInteractable interactable = nearbyInteractables[i];
+            Component component = interactable as Component;
+            if (component == null ||
+                component.gameObject == null ||
+                !component.gameObject.activeInHierarchy)
             {
                 continue;
             }
 
-            Transform interactionPoint = candidate.Interactable.InteractionPoint;
-            if (interactionPoint == null)
+            Transform point = interactable.InteractionPoint;
+            if (point == null)
             {
-                ReportMissingInteractionPoint(candidate);
                 continue;
             }
 
-            float sqrDistance = ((Vector2)interactionPoint.position - interactorPosition).sqrMagnitude;
-            int instanceId = behaviour.GetInstanceID();
-            bool canInteract = candidate.Interactable.CanInteract(interactionContext);
+            float sqrDistance =
+                (point.position - transform.position).sqrMagnitude;
+            int instanceId = component.GetInstanceID();
+            bool canInteract = interactable.CanInteract(interactionContext);
 
-            if (canInteract)
-            {
-                if (!IsPreferredCandidate(
-                        sqrDistance,
-                        instanceId,
-                        nearestAvailableSqrDistance,
-                        nearestAvailableInstanceId))
-                {
-                    continue;
-                }
-
-                nearestAvailableCandidate = candidate;
-                nearestAvailableSqrDistance = sqrDistance;
-                nearestAvailableInstanceId = instanceId;
-                continue;
-            }
-
-            if (!IsPreferredCandidate(
+            if (canInteract &&
+                IsPreferred(
                     sqrDistance,
                     instanceId,
-                    nearestBlockedSqrDistance,
-                    nearestBlockedInstanceId))
+                    nearestAvailableDistance,
+                    nearestAvailableId))
             {
-                continue;
+                nearestAvailable = interactable;
+                nearestAvailableDistance = sqrDistance;
+                nearestAvailableId = instanceId;
             }
-
-            nearestBlockedCandidate = candidate;
-            nearestBlockedSqrDistance = sqrDistance;
-            nearestBlockedInstanceId = instanceId;
-        }
-
-        if (nearestAvailableCandidate != null)
-        {
-            SetCurrentCandidate(nearestAvailableCandidate, true);
-            return;
-        }
-
-        SetCurrentCandidate(nearestBlockedCandidate, false);
-    }
-
-    private void RemoveDestroyedCandidates()
-    {
-        staleCandidates.Clear();
-        staleColliderMappings.Clear();
-
-        foreach (KeyValuePair<Collider2D, MonoBehaviour> pair in colliderOwners)
-        {
-            if (pair.Key == null ||
-                pair.Value == null ||
-                !pair.Key.enabled ||
-                !pair.Key.gameObject.activeInHierarchy)
+            else if (!canInteract &&
+                     IsPreferred(
+                         sqrDistance,
+                         instanceId,
+                         nearestBlockedDistance,
+                         nearestBlockedId))
             {
-                staleColliderMappings.Add(pair);
+                nearestBlocked = interactable;
+                nearestBlockedDistance = sqrDistance;
+                nearestBlockedId = instanceId;
             }
         }
 
-        foreach (KeyValuePair<Collider2D, MonoBehaviour> pair in staleColliderMappings)
+        if (nearestAvailable == null &&
+            carriedProp != null &&
+            carriedProp.isActiveAndEnabled &&
+            carriedProp.CanInteract(interactionContext))
         {
-            colliderOwners.Remove(pair.Key);
-
-            if (pair.Value != null &&
-                candidates.TryGetValue(pair.Value, out Candidate candidate))
-            {
-                candidate.OverlapCount--;
-                if (candidate.OverlapCount <= 0)
-                {
-                    candidates.Remove(pair.Value);
-                }
-            }
+            nearestAvailable = carriedProp;
         }
 
-        foreach (KeyValuePair<MonoBehaviour, Candidate> pair in candidates)
-        {
-            if (pair.Key == null)
-            {
-                staleCandidates.Add(pair.Key);
-            }
-        }
-
-        foreach (MonoBehaviour staleCandidate in staleCandidates)
-        {
-            candidates.Remove(staleCandidate);
-        }
-    }
-
-    private void SetCurrentCandidate(Candidate candidate, bool canInteract)
-    {
-        string prompt = candidate != null
-            ? candidate.Interactable.GetInteractionPrompt(interactionContext) ?? string.Empty
-            : string.Empty;
-
-        bool targetChanged = currentCandidate != candidate;
-        bool promptChanged = !string.Equals(currentPrompt, prompt, StringComparison.Ordinal);
-        bool availabilityChanged = currentTargetCanInteract != canInteract;
-        if (!targetChanged && !promptChanged && !availabilityChanged)
-        {
-            return;
-        }
-
-        currentCandidate = candidate;
-        currentPrompt = prompt;
-        currentTargetCanInteract = canInteract;
-        PromptChanged?.Invoke(currentPrompt, currentTargetCanInteract);
+        SetCurrentTarget(
+            nearestAvailable ?? nearestBlocked,
+            nearestAvailable != null);
     }
 
     private void InteractWithCurrentTarget()
     {
-        Candidate candidate = currentCandidate;
-        if (candidate == null ||
-            candidate.Behaviour == null ||
-            !candidate.Behaviour.isActiveAndEnabled ||
-            !candidate.Interactable.CanInteract(interactionContext))
+        IInteractable target = currentTarget;
+        Component component = target as Component;
+
+        // This is intentionally checked again immediately before dispatch.
+        // Conditions shown in UI may have changed after target selection.
+        if (target == null ||
+            component == null ||
+            !component.gameObject.activeInHierarchy ||
+            !target.CanInteract(interactionContext))
         {
             RefreshCurrentTarget();
             return;
@@ -344,7 +173,7 @@ public sealed class PlayerInteractor : MonoBehaviour
         isInteracting = true;
         try
         {
-            candidate.Interactable.Interact(interactionContext);
+            target.Interact(interactionContext);
         }
         finally
         {
@@ -354,7 +183,28 @@ public sealed class PlayerInteractor : MonoBehaviour
         RefreshCurrentTarget();
     }
 
-    private static bool IsPreferredCandidate(
+    private void SetCurrentTarget(IInteractable target, bool canInteract)
+    {
+        string prompt = target != null
+            ? target.GetInteractionPrompt(interactionContext) ?? string.Empty
+            : string.Empty;
+        bool changed =
+            currentTarget != target ||
+            currentTargetCanInteract != canInteract ||
+            !string.Equals(currentPrompt, prompt, StringComparison.Ordinal);
+
+        if (!changed)
+        {
+            return;
+        }
+
+        currentTarget = target;
+        currentTargetCanInteract = canInteract;
+        currentPrompt = prompt;
+        PromptChanged?.Invoke(currentPrompt, currentTargetCanInteract);
+    }
+
+    private static bool IsPreferred(
         float sqrDistance,
         int instanceId,
         float currentSqrDistance,
@@ -363,62 +213,5 @@ public sealed class PlayerInteractor : MonoBehaviour
         return sqrDistance < currentSqrDistance ||
                (Mathf.Approximately(sqrDistance, currentSqrDistance) &&
                 instanceId < currentInstanceId);
-    }
-
-    private void ReportMissingInteractionPoint(Candidate candidate)
-    {
-        if (candidate.MissingInteractionPointReported)
-        {
-            return;
-        }
-
-        candidate.MissingInteractionPointReported = true;
-        Debug.LogWarning(
-            $"Interactable '{candidate.Behaviour.name}' returned a null InteractionPoint and was ignored.",
-            candidate.Behaviour);
-    }
-
-    private void RegisterCandidate(Collider2D source)
-    {
-        if (source == null || colliderOwners.ContainsKey(source))
-        {
-            return;
-        }
-
-        if (!TryResolveInteractable(source, out MonoBehaviour behaviour, out IInteractable interactable))
-        {
-            return;
-        }
-
-        colliderOwners.Add(source, behaviour);
-
-        if (candidates.TryGetValue(behaviour, out Candidate candidate))
-        {
-            candidate.OverlapCount++;
-            return;
-        }
-
-        candidates.Add(behaviour, new Candidate(behaviour, interactable));
-    }
-
-    private static bool TryResolveInteractable(
-        Collider2D source,
-        out MonoBehaviour behaviour,
-        out IInteractable interactable)
-    {
-        MonoBehaviour[] behaviours = source.GetComponentsInParent<MonoBehaviour>(true);
-        foreach (MonoBehaviour candidate in behaviours)
-        {
-            if (candidate is IInteractable resolvedInteractable)
-            {
-                behaviour = candidate;
-                interactable = resolvedInteractable;
-                return true;
-            }
-        }
-
-        behaviour = null;
-        interactable = null;
-        return false;
     }
 }

@@ -1,61 +1,32 @@
 using System;
+using UnityEngine;
 
 public sealed class TurnManager
 {
     public event Action<int, int> OnTurnsChanged;
-    public event Action OnTurnsExhausted;
 
     public int RemainingTurns { get; private set; }
-    public int MaxTurns { get; private set; }
+    public int InitialTurns { get; private set; }
 
-    public TurnManager(int maxTurns)
+    public TurnManager(int initialTurns)
     {
-        MaxTurns = maxTurns;
-        RemainingTurns = maxTurns;
+        InitialTurns = Mathf.Max(1, initialTurns);
+        RemainingTurns = InitialTurns;
     }
 
-    public bool CanAct(int cost)
+    /// <summary>
+    /// 增加或减少剩余回合。
+    /// 负数表示消耗，正数表示增加。
+    /// </summary>
+    public void ChangeTurns(int delta)
     {
-        if (cost < 0)
-        {
-            return false;
-        }
-
-        return RemainingTurns >= cost;
+        RemainingTurns = Mathf.Max(0, RemainingTurns + delta);
+        OnTurnsChanged?.Invoke(RemainingTurns, InitialTurns);
     }
 
-    public bool ConsumeTurn(int cost)
+    public void ResetTurns()
     {
-        if (cost < 0)
-        {
-            return false;
-        }
-
-        if (!CanAct(cost))
-        {
-            return false;
-        }
-
-        RemainingTurns -= cost;
-        OnTurnsChanged?.Invoke(RemainingTurns, MaxTurns);
-
-        if (RemainingTurns <= 0)
-        {
-            RemainingTurns = 0;
-            OnTurnsExhausted?.Invoke();
-        }
-
-        return true;
-    }
-
-    public void AddTurns(int amount)
-    {
-        if (amount < 0)
-        {
-            return;
-        }
-
-        RemainingTurns += amount;
-        OnTurnsChanged?.Invoke(RemainingTurns, MaxTurns);
+        RemainingTurns = InitialTurns;
+        OnTurnsChanged?.Invoke(RemainingTurns, InitialTurns);
     }
 }

@@ -158,7 +158,17 @@ public sealed class StoryController : MonoBehaviour
             return false;
         }
 
-        actionContext = new StoryActionContext(player, progress, targetRegistry);
+        AppContext appContext = AppContext.Instance;
+        actionContext = new StoryActionContext(
+            player,
+            progress,
+            targetRegistry,
+            appContext.Inventory,
+            appContext.ActionResolver,
+            appContext.LoopManager,
+            appContext.LoopProgress,
+            appContext.RunState,
+            player.CarrySlot);
         rootScriptId = scriptId;
         CurrentScriptId = scriptId ?? string.Empty;
         CurrentNodeId = startNodeId ?? string.Empty;
@@ -725,8 +735,26 @@ public sealed class StoryController : MonoBehaviour
             progress.MarkScriptCompleted(completion.ScriptId);
         }
 
+        StoryActionContext completedContext = actionContext;
+        string completedScriptId = CurrentScriptId;
+        string completedNodeId = CurrentNodeId;
         State = StoryRunnerState.Completed;
         CleanupSession();
+
+        if (completedContext != null &&
+            !completedContext.TryCommitCompletion(out string commitError))
+        {
+            State = StoryRunnerState.Faulted;
+            StoryError error = new StoryError(
+                completedScriptId,
+                completedNodeId,
+                "StoryCompletion",
+                commitError);
+            Debug.LogError($"Story failed: {error}", this);
+            Failed?.Invoke(error);
+            return;
+        }
+
         Completed?.Invoke(completion);
     }
 

@@ -1,12 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerFloatingSwimState : PlayerState
 {
     private Vector2 movementInput;
-    private bool isMoving;
 
-    public PlayerFloatingSwimState(Player player, PlayerStateMachine stateMachine, PlayerData playerData, string animBoolName)
-        : base(player, stateMachine, playerData, animBoolName)
+    public PlayerFloatingSwimState(Player player, PlayerStateMachine stateMachine, PlayerData playerData)
+        : base(player, stateMachine, playerData)
     {
     }
 
@@ -20,8 +19,6 @@ public sealed class PlayerFloatingSwimState : PlayerState
         player.RB.useGravity = false;
         player.RB.velocity = Vector3.zero;
         player.RB.angularVelocity = Vector3.zero;
-        isMoving = true;
-        SetMovementAnimation(false);
     }
 
     public override void LogicUpdate()
@@ -35,14 +32,6 @@ public sealed class PlayerFloatingSwimState : PlayerState
         }
 
         movementInput = player.InputHandler.RawMovementInput;
-        bool moving = movementInput.sqrMagnitude > 0.01f;
-
-        if (moving)
-        {
-            player.CheckIfShouldFlip(movementInput.x > 0f ? 1 : -1);
-        }
-
-        SetMovementAnimation(moving);
     }
 
     public override void PhysicsUpdate()
@@ -67,22 +56,9 @@ public sealed class PlayerFloatingSwimState : PlayerState
 
     public override void Exit()
     {
-        SetMovementAnimation(false);
         player.RB.velocity = Vector3.zero;
         player.RB.angularVelocity = Vector3.zero;
 
         base.Exit();
-    }
-
-    private void SetMovementAnimation(bool moving)
-    {
-        if (isMoving == moving)
-        {
-            return;
-        }
-
-        isMoving = moving;
-        player.SetAnimationBool("idle", !moving);
-        player.SetAnimationBool("move", moving);
     }
 }

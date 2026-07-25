@@ -1,9 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerGameplayStatus))]
 [RequireComponent(typeof(PlayerInteractionDetector))]
+[RequireComponent(typeof(PlayerCarrySlot))]
+[RequireComponent(typeof(PlayerInteractor))]
 public class Player : MonoBehaviour
 {
     #region State Variables
@@ -19,6 +21,8 @@ public class Player : MonoBehaviour
     public PlayerSinkingState SinkingState { get; private set; }
     public PlayerGameplayStatus GameplayStatus { get; private set; }
     public PlayerInteractionDetector InteractionDetector { get; private set; }
+    public PlayerCarrySlot CarrySlot { get; private set; }
+    public PlayerInteractor Interactor { get; private set; }
 
     [SerializeField]
     private PlayerData playerData;
@@ -32,7 +36,6 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Components
-    public Animator Anim { get; private set; }
     public PlayerInputHandler InputHandler { get; private set; }
     public Rigidbody RB { get; private set; }
     public BoxCollider Collider3D { get; private set; }
@@ -54,22 +57,31 @@ public class Player : MonoBehaviour
     public void Awake()
     {
         stateMachine = new PlayerStateMachine();
-
-        Anim = GetComponentInChildren<Animator>();
         InputHandler = GetComponent<PlayerInputHandler>();
         RB = GetComponent<Rigidbody>();
         Collider3D = GetComponent<BoxCollider>();
         GameplayStatus = GetComponent<PlayerGameplayStatus>();
         InteractionDetector = GetComponent<PlayerInteractionDetector>();
+        CarrySlot = GetComponent<PlayerCarrySlot>();
+        if (CarrySlot == null)
+        {
+            CarrySlot = gameObject.AddComponent<PlayerCarrySlot>();
+        }
 
-        IdleState = new PlayerIdleState(this, stateMachine, playerData, "idle");
-        MoveState = new PlayerMoveState(this, stateMachine, playerData, "move");
-        JumpState = new PlayerJumpState(this, stateMachine, playerData, "inair");
-        InAirState = new PlayerInAirState(this, stateMachine, playerData, "inair");
+        Interactor = GetComponent<PlayerInteractor>();
+        if (Interactor == null)
+        {
+            Interactor = gameObject.AddComponent<PlayerInteractor>();
+        }
+
+        IdleState = new PlayerIdleState(this, stateMachine, playerData);
+        MoveState = new PlayerMoveState(this, stateMachine, playerData);
+        JumpState = new PlayerJumpState(this, stateMachine, playerData);
+        InAirState = new PlayerInAirState(this, stateMachine, playerData);
         RailBoundState = new PlayerRailBoundState(this, stateMachine, playerData);
-        AscendState = new PlayerAscendState(this, stateMachine, playerData, "inair");
-        FloatingSwimState = new PlayerFloatingSwimState(this, stateMachine, playerData, "inair");
-        SinkingState = new PlayerSinkingState(this, stateMachine, playerData, "inair");
+        AscendState = new PlayerAscendState(this, stateMachine, playerData);
+        FloatingSwimState = new PlayerFloatingSwimState(this, stateMachine, playerData);
+        SinkingState = new PlayerSinkingState(this, stateMachine, playerData);
 
         FacingDirection = 1;
         IsControlled = true;
@@ -172,6 +184,40 @@ public class Player : MonoBehaviour
         GameplayStatus.ClearItemSlot();
         return TryStartRiseToUpper();
     }
+
+    public bool TryStartCarryingSlotItem(PlayerSlotItemKind itemKind)
+    {
+        if (itemKind == PlayerSlotItemKind.None || GameplayStatus.HasSlotItem)
+        {
+            return false;
+        }
+
+        GameplayStatus.PutItemInSlot(itemKind);
+        if (GameplayStatus.ShouldSink)
+        {
+            stateMachine.ChangeState(SinkingState);
+        }
+
+        return true;
+    }
+
+    public bool TryDropCarriedSlotItem(PlayerSlotItemKind expectedItemKind)
+    {
+        if (expectedItemKind == PlayerSlotItemKind.None ||
+            GameplayStatus.SlotItemKind != expectedItemKind)
+        {
+            return false;
+        }
+
+        GameplayStatus.ClearItemSlot();
+        if (GameplayStatus.ShouldRise)
+        {
+            stateMachine.ChangeState(AscendState);
+        }
+
+        return true;
+    }
+
     public Vector3 GetCameraRelativeMovement(Vector2 input)
     {
         Camera movementCamera = Camera.main;
@@ -189,20 +235,6 @@ public class Player : MonoBehaviour
 
         return right * input.x + forward * input.y;
     }
-
-    public void SetAnimationBool(string parameterName, bool value)
-    {
-        int parameterHash = Animator.StringToHash(parameterName);
-        foreach (AnimatorControllerParameter parameter in Anim.parameters)
-        {
-            if (parameter.nameHash == parameterHash &&
-                parameter.type == AnimatorControllerParameterType.Bool)
-            {
-                Anim.SetBool(parameterHash, value);
-                return;
-            }
-        }
-    }
     #endregion
 
     #region Check Functions
@@ -210,22 +242,9 @@ public class Player : MonoBehaviour
     {
         return Physics.OverlapSphere(groundcheck.position, playerData.groundCheckRadius, playerData.whatIsGround).Length > 0;
     }
-
-    public void CheckIfShouldFlip(int xInput)
-    {
-        if (xInput != 0 && xInput != FacingDirection)
-        {
-            Flip();
-        }
-    }
     #endregion
 
     #region other Functions
-    private void Flip()
-    {
-        FacingDirection *= -1;
-        transform.Rotate(0.0f, 180.0f, 0.0f);
-    }
 
     public void SetControlled(bool controlled)
     {

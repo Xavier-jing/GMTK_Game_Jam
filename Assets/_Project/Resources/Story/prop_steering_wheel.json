@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_steering_wheel",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】一只从床下升起的方向盘。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "启动方向盘",
+          "TargetScriptId": "prop_steering_wheel",
+          "TargetNodeId": "start",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_steering_wheel",
+              "StringValue": "StartSteeringWheel"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_steering_wheel",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "start",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_steering_wheel",
+            "StringValue": "StartSteeringWheel"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "started"
+    },
+    {
+      "Id": "started",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】方向盘已经启动，还需要为床连接电源。",
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "SteeringWheelStarted"
+    }
+  ]
+}

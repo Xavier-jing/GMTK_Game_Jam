@@ -150,14 +150,29 @@ public interface IStoryConditionHandler
 
 public sealed class StoryActionContext
 {
+    private Action completionAction;
+    private RunEndReason? pendingRunEndReason;
+
     public StoryActionContext(
         Player player,
         StoryProgress progress,
-        StoryTargetRegistry targets)
+        StoryTargetRegistry targets,
+        Inventory inventory,
+        ActionResolver actionResolver,
+        LoopManager loopManager,
+        LoopProgress loopProgress,
+        RunState runState,
+        PlayerCarrySlot carrySlot)
     {
         Player = player;
         Progress = progress ?? throw new ArgumentNullException(nameof(progress));
         Targets = targets ?? throw new ArgumentNullException(nameof(targets));
+        Inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
+        ActionResolver = actionResolver ?? throw new ArgumentNullException(nameof(actionResolver));
+        LoopManager = loopManager ?? throw new ArgumentNullException(nameof(loopManager));
+        LoopProgress = loopProgress ?? throw new ArgumentNullException(nameof(loopProgress));
+        RunState = runState ?? throw new ArgumentNullException(nameof(runState));
+        CarrySlot = carrySlot;
     }
 
     public Player Player { get; }
@@ -165,4 +180,75 @@ public sealed class StoryActionContext
     public StoryProgress Progress { get; }
 
     public StoryTargetRegistry Targets { get; }
+
+    public Inventory Inventory { get; }
+
+    public ActionResolver ActionResolver { get; }
+
+    public LoopManager LoopManager { get; }
+
+    public LoopProgress LoopProgress { get; }
+
+    public RunState RunState { get; }
+
+    public PlayerCarrySlot CarrySlot { get; }
+
+    public bool TryRequestRunEnd(
+        RunEndReason reason,
+        Action onStoryCompleted,
+        out string error)
+    {
+        if (pendingRunEndReason.HasValue)
+        {
+            error =
+                $"A run end is already pending with reason '{pendingRunEndReason.Value}'.";
+            return false;
+        }
+
+        if (!LoopManager.CanEndRun(reason))
+        {
+            error = $"Run end reason '{reason}' is not currently allowed.";
+            return false;
+        }
+
+        pendingRunEndReason = reason;
+        completionAction = onStoryCompleted;
+        error = string.Empty;
+        return true;
+    }
+
+    public bool TryCommitCompletion(out string error)
+    {
+        RunEndReason? endReason = pendingRunEndReason;
+        Action action = completionAction;
+        pendingRunEndReason = null;
+        completionAction = null;
+
+        if (endReason.HasValue && !LoopManager.CanEndRun(endReason.Value))
+        {
+            error =
+                $"Run end reason '{endReason.Value}' became unavailable before story completion.";
+            return false;
+        }
+
+        try
+        {
+            action?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            error = $"Deferred story completion failed: {exception.Message}";
+            return false;
+        }
+
+        if (!endReason.HasValue)
+        {
+            error = string.Empty;
+            return true;
+        }
+
+        LoopManager.EndRun(endReason.Value);
+        error = string.Empty;
+        return true;
+    }
 }

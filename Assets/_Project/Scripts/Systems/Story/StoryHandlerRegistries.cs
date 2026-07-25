@@ -13,6 +13,9 @@ public sealed class StoryActionRegistry
         Register(new AcquireWrenchStoryAction());
         Register(new RemoveRailAndAscendStoryAction());
         Register(new ReleaseFloatingItemAndRiseStoryAction());
+        Register(new WorldPropCommandStoryAction());
+        Register(new SpendTurnsStoryAction());
+        Register(new RequestRunEndStoryAction());
     }
 
     public void Register(IStoryActionHandler handler)
@@ -60,6 +63,9 @@ public sealed class StoryConditionRegistry
         Register(new PlayerRailRemovedCondition());
         Register(new PlayerHasSlotItemCondition());
         Register(new PlayerIsWorldLayerCondition());
+        Register(new WorldPropCommandAvailableCondition());
+        Register(new RunFlagEqualsCondition());
+        Register(new LoopProgressFlagEqualsCondition());
     }
 
     public void Register(IStoryConditionHandler handler)

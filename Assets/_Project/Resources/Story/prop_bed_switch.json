@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_bed_switch",
+  "StartNodeId": "question",
+  "Nodes": [
+    {
+      "Id": "question",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】床下藏着一个开关。是否触发？",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "触发开关",
+          "TargetScriptId": "prop_bed_switch",
+          "TargetNodeId": "trigger",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_bed_switch",
+              "StringValue": "TriggerBedSwitch"
+            }
+          }
+        },
+        {
+          "Dialog": "暂时不触发",
+          "TargetScriptId": "prop_bed_switch",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "trigger",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_bed_switch",
+            "StringValue": "TriggerBedSwitch"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "triggered"
+    },
+    {
+      "Id": "triggered",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】某处传来机械结构升起的声音。",
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "SwitchTriggered"
+    }
+  ]
+}

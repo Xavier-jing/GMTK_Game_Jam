@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_power_connector",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】冰箱断电后，这里空出了一个可用的电源接口。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "连接带数据线的床",
+          "TargetScriptId": "prop_power_connector",
+          "TargetNodeId": "connect",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_power_connector",
+              "StringValue": "ConnectBedPower"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_power_connector",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "connect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_power_connector",
+            "StringValue": "ConnectBedPower"
+          }
+        },
+        {
+          "Id": "RequestRunEnd",
+          "Params": {
+            "StringValue": "EndingTwo"
+          }
+        }
+      ],
+      "Next": "ending"
+    },
+    {
+      "Id": "ending",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】电源接通，床与方向盘同时启动。结局二达成。",
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "EndingTwo"
+    }
+  ]
+}

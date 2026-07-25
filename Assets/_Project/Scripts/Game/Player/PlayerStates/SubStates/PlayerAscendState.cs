@@ -1,11 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerAscendState : PlayerState
 {
     private bool reachedUpperLayer;
 
-    public PlayerAscendState(Player player, PlayerStateMachine stateMachine, PlayerData playerData, string animBoolName)
-        : base(player, stateMachine, playerData, animBoolName)
+    public PlayerAscendState(Player player, PlayerStateMachine stateMachine, PlayerData playerData)
+        : base(player, stateMachine, playerData)
     {
     }
 
@@ -41,7 +41,6 @@ public sealed class PlayerAscendState : PlayerState
                 player.RB.position.z);
             player.RB.velocity = Vector3.zero;
             player.RB.angularVelocity = Vector3.zero;
-            player.SetAnimationBool("idle", true);
 
             if (player.GameplayStatus.CanFloatSwim)
             {
@@ -70,7 +69,6 @@ public sealed class PlayerAscendState : PlayerState
 
     public override void Exit()
     {
-        player.SetAnimationBool("idle", false);
         base.Exit();
     }
 }

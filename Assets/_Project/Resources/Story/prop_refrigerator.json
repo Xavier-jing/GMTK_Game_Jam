@@ -1,0 +1,160 @@
+{
+  "Version": 1,
+  "ScriptId": "prop_refrigerator",
+  "StartNodeId": "intro",
+  "Nodes": [
+    {
+      "Id": "intro",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】冰箱仍在运转，背后连着电源。",
+      "Next": "menu"
+    },
+    {
+      "Id": "menu",
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Dialog": "查看",
+          "TargetScriptId": "prop_refrigerator",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "关闭冰箱电源",
+          "TargetScriptId": "prop_refrigerator",
+          "TargetNodeId": "unplug",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_refrigerator",
+              "StringValue": "UnplugRefrigerator"
+            }
+          }
+        },
+        {
+          "Dialog": "放入携带槽",
+          "TargetScriptId": "prop_refrigerator",
+          "TargetNodeId": "take",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_refrigerator",
+              "StringValue": "TakeIntoCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "放下",
+          "TargetScriptId": "prop_refrigerator",
+          "TargetNodeId": "drop",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Disabled",
+            "Params": {
+              "TargetId": "prop_refrigerator",
+              "StringValue": "DropFromCarrySlot"
+            }
+          }
+        },
+        {
+          "Dialog": "离开",
+          "TargetScriptId": "prop_refrigerator",
+          "TargetNodeId": "leave"
+        }
+      ]
+    },
+    {
+      "Id": "inspect",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_refrigerator",
+            "StringValue": "Inspect"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "unplug",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_refrigerator",
+            "StringValue": "UnplugRefrigerator"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "unplugged"
+    },
+    {
+      "Id": "unplugged",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】冰箱停止运转，电源接口空了出来。",
+      "Next": "complete"
+    },
+    {
+      "Id": "take",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_refrigerator",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "drop",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_refrigerator",
+            "StringValue": "DropFromCarrySlot"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "leave",
+      "Type": "End",
+      "Result": "Left"
+    },
+    {
+      "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    }
+  ]
+}

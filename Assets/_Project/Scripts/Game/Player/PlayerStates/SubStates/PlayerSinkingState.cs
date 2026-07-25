@@ -1,13 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public sealed class PlayerSinkingState : PlayerState
 {
     private Vector2 movementInput;
     private bool isGrounded;
-    private bool isMoving;
 
-    public PlayerSinkingState(Player player, PlayerStateMachine stateMachine, PlayerData playerData, string animBoolName)
-        : base(player, stateMachine, playerData, animBoolName)
+    public PlayerSinkingState(Player player, PlayerStateMachine stateMachine, PlayerData playerData)
+        : base(player, stateMachine, playerData)
     {
     }
 
@@ -21,8 +20,6 @@ public sealed class PlayerSinkingState : PlayerState
         player.RB.isKinematic = false;
         player.RB.useGravity = true;
         player.RB.angularVelocity = Vector3.zero;
-        isMoving = true;
-        SetMovementAnimation(false);
     }
 
     public override void DoChecks()
@@ -37,14 +34,6 @@ public sealed class PlayerSinkingState : PlayerState
         base.LogicUpdate();
 
         movementInput = player.InputHandler.RawMovementInput;
-        bool moving = movementInput.sqrMagnitude > 0.01f;
-
-        if (moving)
-        {
-            player.CheckIfShouldFlip(movementInput.x > 0f ? 1 : -1);
-        }
-
-        SetMovementAnimation(moving);
 
         if (isGrounded && player.CurrentVelocity.y <= 0.01f)
         {
@@ -74,21 +63,8 @@ public sealed class PlayerSinkingState : PlayerState
 
     public override void Exit()
     {
-        SetMovementAnimation(false);
         player.RB.angularVelocity = Vector3.zero;
 
         base.Exit();
-    }
-
-    private void SetMovementAnimation(bool moving)
-    {
-        if (isMoving == moving)
-        {
-            return;
-        }
-
-        isMoving = moving;
-        player.SetAnimationBool("idle", !moving);
-        player.SetAnimationBool("move", moving);
     }
 }
