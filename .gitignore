@@ -14,6 +14,9 @@
 .idea/
 *.sln.docstates
 
+# Local AI/tooling workspace
+.agents/
+
 # Visual Studio
 .vs/
 
@@ -30,6 +33,21 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+
+# Unity crash/debug artifacts
+[Ss]ys[Ii]nfo.txt
+*.stackdump
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+
+# Unity auto-generated project files
+ExportedObj/
+*.apk
+*.aab
+*.unitypackage
 
 # OS generated
 .DS_Store

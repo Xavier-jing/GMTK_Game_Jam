@@ -65,6 +65,7 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerRailBoundState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\ScreenId.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerSinkingState.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraInputController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\Input\PlayerInputHandler.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractionDetector.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\GameplayUIController.cs" />
@@ -94,12 +95,15 @@
     <Compile Include="Assets\_Project\Scripts\Core\Scene\SceneLoader.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerAscendState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\SettingsScreen.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZone.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\ScreenBase.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Audio\AudioService.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Rail\StraightRail.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerIdleState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\InteractionType.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\App\BuildSettingsSceneSync.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneController.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneSettings.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\MainMenuSceneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SuperStates\PlayerAbilityState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerFloatingSwimState.cs" />

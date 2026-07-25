@@ -46,6 +46,12 @@ public sealed class PlayerAscendState : PlayerState
             if (player.GameplayStatus.CanFloatSwim)
             {
                 stateMachine.ChangeState(player.FloatingSwimState);
+                return;
+            }
+
+            if (player.GameplayStatus.ShouldSink)
+            {
+                stateMachine.ChangeState(player.SinkingState);
             }
         }
     }
