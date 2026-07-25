@@ -152,6 +152,7 @@ public class PlayerInputHandler : MonoBehaviour
         if (IsInitialized && gameplayMap != null)
         {
             gameplayMap.Disable();
+            ResetGameplayInputState();
         }
     }
 
@@ -163,6 +164,15 @@ public class PlayerInputHandler : MonoBehaviour
         {
             JumpInput = false;
         }
+    }
+
+    private void ResetGameplayInputState()
+    {
+        RawMovementInput = Vector2.zero;
+        NormInputX = 0;
+        NormInputY = 0;
+        JumpInput = false;
+        jumpInputStartTime = 0f;
     }
 
     private void OnDestroy()

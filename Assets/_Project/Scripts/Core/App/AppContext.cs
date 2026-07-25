@@ -20,6 +20,8 @@ public sealed class AppContext : MonoBehaviour
 
     public Inventory Inventory { get; private set; }
 
+    public StoryProgress StoryProgress { get; private set; }
+
     public bool IsInitialized { get; private set; }
 
     public static AppContext EnsureExists()
@@ -79,6 +81,9 @@ public sealed class AppContext : MonoBehaviour
 
         Inventory = new Inventory();
         Services.Register(Inventory);
+
+        StoryProgress = new StoryProgress();
+        Services.Register(StoryProgress);
 
         Audio = new AudioService();
         Audio.Initialize();

@@ -1,0 +1,131 @@
+using System;
+using System.Collections.Generic;
+
+public enum StoryNodeType
+{
+    Dialogue,
+    Action,
+    Choice,
+    End
+}
+
+public enum StoryUnavailableMode
+{
+    Hidden,
+    Disabled
+}
+
+public enum StoryRunnerState
+{
+    Idle,
+    Loading,
+    ShowingDialogue,
+    WaitingForAdvance,
+    ExecutingAction,
+    WaitingForChoice,
+    Completed,
+    Canceled,
+    Faulted
+}
+
+[Serializable]
+public sealed class StoryDocumentData
+{
+    public int Version;
+    public string ScriptId;
+    public string StartNodeId;
+    public StoryNodeData[] Nodes;
+}
+
+[Serializable]
+public sealed class StoryNodeData
+{
+    public string Id;
+    public string Type;
+    public string ActorId;
+    public string Dialog;
+    public StoryActionData[] BeforeActions;
+    public StoryActionData[] AfterActions;
+    public StoryActionData[] Actions;
+    public StoryChoiceData[] Choices;
+    public string Next;
+    public string Result;
+}
+
+[Serializable]
+public sealed class StoryActionData
+{
+    public string Id;
+    public StoryActionParams Params;
+}
+
+[Serializable]
+public sealed class StoryConditionData
+{
+    public string Id;
+    public StoryActionParams Params;
+    public string UnavailableMode;
+}
+
+[Serializable]
+public sealed class StoryChoiceData
+{
+    public string Dialog;
+    public string TargetScriptId;
+    public string TargetNodeId;
+    public StoryConditionData Condition;
+}
+
+[Serializable]
+public sealed class StoryActionParams
+{
+    public string Key;
+    public string StringValue;
+    public bool BoolValue;
+    public int IntValue;
+    public float FloatValue;
+    public string TargetId;
+}
+
+public sealed class StoryNodeDefinition
+{
+    public StoryNodeDefinition(StoryNodeData data, StoryNodeType type)
+    {
+        Data = data ?? throw new ArgumentNullException(nameof(data));
+        Type = type;
+    }
+
+    public StoryNodeData Data { get; }
+
+    public StoryNodeType Type { get; }
+}
+
+public sealed class StoryGraph
+{
+    private readonly Dictionary<string, StoryNodeDefinition> nodes;
+
+    public StoryGraph(
+        StoryDocumentData document,
+        Dictionary<string, StoryNodeDefinition> nodes)
+    {
+        Document = document ?? throw new ArgumentNullException(nameof(document));
+        this.nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
+    }
+
+    public StoryDocumentData Document { get; }
+
+    public bool TryGetNode(string nodeId, out StoryNodeDefinition node)
+    {
+        return nodes.TryGetValue(nodeId, out node);
+    }
+
+    public bool ContainsNode(string nodeId)
+    {
+        return nodes.ContainsKey(nodeId);
+    }
+
+    public IEnumerable<StoryNodeDefinition> GetNodes()
+    {
+        return nodes.Values;
+    }
+}

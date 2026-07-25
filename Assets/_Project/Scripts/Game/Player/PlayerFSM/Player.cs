@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     public Rigidbody RB { get; private set; }
     public BoxCollider Collider3D { get; private set; }
     public Vector3 CurrentVelocity { get; private set; }
+    public bool IsControlled { get; private set; }
     #endregion
 
     #region check Transforms
@@ -71,6 +72,7 @@ public class Player : MonoBehaviour
         SinkingState = new PlayerSinkingState(this, stateMachine, playerData, "inair");
 
         FacingDirection = 1;
+        IsControlled = true;
     }
 
     private void Start()
@@ -227,6 +229,8 @@ public class Player : MonoBehaviour
 
     public void SetControlled(bool controlled)
     {
+        IsControlled = controlled;
+
         if (controlled)
         {
             InputHandler.EnableGameplayInput();
