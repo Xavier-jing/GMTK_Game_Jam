@@ -80,7 +80,12 @@ public sealed class PauseScreen : ScreenBase
 
     private static void ReturnToMainMenu()
     {
-        AppContext.Instance.GamePause.Resume();
-        AppContext.Instance.SceneLoader.LoadScene(SceneId.MainMenu);
+        AppContext appContext = AppContext.Instance;
+        appContext.GamePause.Resume();
+
+        if (appContext.SceneLoader.LoadScene(SceneId.MainMenu))
+        {
+            appContext.Inventory.Clear();
+        }
     }
 }

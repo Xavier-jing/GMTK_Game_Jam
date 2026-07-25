@@ -10,19 +10,34 @@ public sealed class HudScreen : ScreenBase
     [SerializeField]
     private TMP_Text hintText;
 
+    private string currentHint;
+
     public void SetHint(string value)
     {
-        if (hintText != null)
-        {
-            hintText.text = value;
-        }
+        currentHint = value;
+        RefreshHint();
+    }
+
+    public void ClearHint()
+    {
+        currentHint = null;
+        RefreshHint();
     }
 
     protected override void OnShow()
     {
-        if (!string.IsNullOrWhiteSpace(defaultHint))
+        RefreshHint();
+    }
+
+    private void RefreshHint()
+    {
+        if (hintText == null)
         {
-            SetHint(defaultHint);
+            return;
         }
+
+        hintText.text = !string.IsNullOrWhiteSpace(currentHint)
+            ? currentHint
+            : defaultHint;
     }
 }

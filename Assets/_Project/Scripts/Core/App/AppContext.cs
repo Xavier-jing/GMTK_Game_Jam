@@ -18,6 +18,8 @@ public sealed class AppContext : MonoBehaviour
 
     public InputReader Input { get; private set; }
 
+    public Inventory Inventory { get; private set; }
+
     public bool IsInitialized { get; private set; }
 
     public static AppContext EnsureExists()
@@ -63,10 +65,12 @@ public sealed class AppContext : MonoBehaviour
         Services = new ServiceRegistry();
         SceneLoader = new SceneLoader();
         GamePause = new GamePause();
+        Inventory = new Inventory();
 
         Services.Register(Services);
         Services.Register(SceneLoader);
         Services.Register(GamePause);
+        Services.Register(Inventory);
 
         SettingsService settings = new SettingsService();
         settings.Load();

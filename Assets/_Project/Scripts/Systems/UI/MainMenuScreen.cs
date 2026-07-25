@@ -73,12 +73,21 @@ public sealed class MainMenuScreen : ScreenBase
 
     private void HandleStartGameClicked()
     {
-        AppContext.Instance.SceneLoader.LoadScene(startScene);
+        StartNewRun(startScene);
     }
 
     private void HandleSandboxClicked()
     {
-        AppContext.Instance.SceneLoader.LoadScene(sandboxScene);
+        StartNewRun(sandboxScene);
+    }
+
+    private static void StartNewRun(SceneId sceneId)
+    {
+        AppContext appContext = AppContext.Instance;
+        if (appContext.SceneLoader.LoadScene(sceneId))
+        {
+            appContext.Inventory.Clear();
+        }
     }
 
     private void HandleSettingsClicked()
