@@ -11,7 +11,7 @@ public sealed class SceneLoader : IDisposable
         { SceneId.Boot, "Assets/_Project/Scenes/Boot.unity" },
         { SceneId.MainMenu, "Assets/_Project/Scenes/MainMenu.unity" },
         { SceneId.Gameplay, "Assets/_Project/Scenes/GamePlay.unity" },
-        { SceneId.Sandbox, "Assets/_Project/Scenes/SandBox.unity" },
+        { SceneId.Sandbox, "Assets/_Project/Scenes/MainMenu.unity" },
     };
 
     private ISceneTransition transition;

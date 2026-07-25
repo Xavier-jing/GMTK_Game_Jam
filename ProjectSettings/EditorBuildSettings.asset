@@ -13,9 +13,6 @@ EditorBuildSettings:
     guid: 5a02bb9dc1a75ec40ac6b730b4833ea6
   - enabled: 1
     path: Assets/_Project/Scenes/GamePlay.unity
-    guid: d04e6abd028149546a673d9b1a5e1533
-  - enabled: 1
-    path: Assets/_Project/Scenes/SandBox.unity
     guid: 014f385cb0fb9764cb23028df2c9c065
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: ecec3ae7d3264d3448533d29227befcc, type: 3}

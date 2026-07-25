@@ -46,15 +46,7 @@ public sealed class PlayerSinkingState : PlayerState
     {
         base.PhysicsUpdate();
 
-        float rad = playerData.movementAngle * Mathf.Deg2Rad;
-        float worldX = movementInput.x * Mathf.Cos(rad) - movementInput.y * Mathf.Sin(rad);
-        float worldZ = movementInput.x * Mathf.Sin(rad) + movementInput.y * Mathf.Cos(rad);
-        Vector3 moveDirection = new Vector3(worldX, 0f, worldZ);
-
-        if (moveDirection.sqrMagnitude > 1f)
-        {
-            moveDirection.Normalize();
-        }
+        Vector3 moveDirection = player.GetMappedGroundMovement(movementInput);
 
         player.SetVelocityXZ(
             moveDirection.x * playerData.sinkingMovementVelocity,

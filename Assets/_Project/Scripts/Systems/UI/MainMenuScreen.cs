@@ -4,94 +4,159 @@ using UnityEngine.UI;
 public sealed class MainMenuScreen : ScreenBase
 {
     [SerializeField]
-    private Button sandboxButton;
-
-    [SerializeField]
-    private SceneId sandboxScene = SceneId.Sandbox;
-
-    [SerializeField]
     private Button startButton;
 
     [SerializeField]
-    private SceneId startScene = SceneId.Gameplay;
-
-    [SerializeField]
-    private Button SettingsButton;
+    private Button settingsButton;
 
     [SerializeField]
     private Button exitButton;
 
+    [SerializeField]
+    private SceneId gameplayScene = SceneId.Gameplay;
+
     private void Awake()
     {
-        BindButtons();
-    }
-
-    private void OnEnable()
-    {
+        AutoBindMissingControls();
         BindButtons();
     }
 
     private void OnDestroy()
     {
-        if (startButton != null)
-        {
-            startButton.onClick.RemoveListener(HandleStartGameClicked);
-        }
-
-        if (sandboxButton != null)
-        {
-            sandboxButton.onClick.RemoveListener(HandleSandboxClicked);
-        }
+        UnbindButtons();
     }
 
-    private void BindButtons()
+    public void StartGame()
     {
-        if (startButton != null)
+        if (!AppContext.HasInstance)
         {
-            startButton.onClick.RemoveListener(HandleStartGameClicked);
-            startButton.onClick.AddListener(HandleStartGameClicked);
+            Debug.LogWarning($"MainMenuScreen on '{name}' cannot start game because AppContext is missing.");
+            return;
         }
 
-        if (sandboxButton != null)
+        if (LoadingScreen.Current == null)
         {
-            sandboxButton.onClick.RemoveListener(HandleSandboxClicked);
-            sandboxButton.onClick.AddListener(HandleSandboxClicked);
+            Debug.LogWarning(
+                $"MainMenuScreen on '{name}' is loading without an active LoadingScreen. Add LoadingRoot to the scene.");
         }
 
-        if (SettingsButton != null)
-        {
-            SettingsButton.onClick.RemoveListener(HandleSettingsClicked);
-            SettingsButton.onClick.AddListener(HandleSettingsClicked);
-        }
-
-        if (exitButton != null)
-        {
-            exitButton.onClick.RemoveListener(HandleExitClicked);
-            exitButton.onClick.AddListener(HandleExitClicked);
-        }
+        AppContext.Instance.SceneLoader.LoadScene(gameplayScene);
     }
 
-    private void HandleStartGameClicked()
+    public void OpenSettings()
     {
-        AppContext.Instance.SceneLoader.LoadScene(startScene);
+        if (Owner == null)
+        {
+            Debug.LogWarning($"MainMenuScreen on '{name}' cannot open settings because it is not registered.");
+            return;
+        }
+
+        if (Owner.TryGet(ScreenId.Settings, out ScreenBase screen) &&
+            screen is SettingsScreen settingsScreen)
+        {
+            settingsScreen.OpenFromMainMenu();
+            return;
+        }
+
+        Owner.Show(ScreenId.Settings);
     }
 
-    private void HandleSandboxClicked()
-    {
-        AppContext.Instance.SceneLoader.LoadScene(sandboxScene);
-    }
-
-    private void HandleSettingsClicked()
-    {
-        Owner.Get<SettingsScreen>(ScreenId.Settings).OpenFrom(ScreenId.MainMenu);
-    }
-
-    private void HandleExitClicked()
+    public void ExitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
+    }
+
+    private void AutoBindMissingControls()
+    {
+        Button[] buttons = GetComponentsInChildren<Button>(true);
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            Button button = buttons[i];
+            if (button == null)
+            {
+                continue;
+            }
+
+            if (startButton == null && IsStartButtonName(button.name))
+            {
+                startButton = button;
+            }
+            else if (settingsButton == null && IsSettingsButtonName(button.name))
+            {
+                settingsButton = button;
+            }
+            else if (exitButton == null && IsExitButtonName(button.name))
+            {
+                exitButton = button;
+            }
+        }
+    }
+
+    private static bool IsStartButtonName(string buttonName)
+    {
+        return buttonName == "Start"
+            || buttonName == "StartButton"
+            || buttonName == "Play"
+            || buttonName == "PlayButton";
+    }
+
+    private static bool IsSettingsButtonName(string buttonName)
+    {
+        return buttonName == "Settings"
+            || buttonName == "SettingsButton"
+            || buttonName == "Music"
+            || buttonName == "AudioButton";
+    }
+
+    private static bool IsExitButtonName(string buttonName)
+    {
+        return buttonName == "Exit"
+            || buttonName == "ExitButton"
+            || buttonName == "Quit"
+            || buttonName == "QuitButton"
+            || buttonName == "QuitGame";
+    }
+
+    private void BindButtons()
+    {
+        if (startButton != null)
+        {
+            startButton.onClick.RemoveListener(StartGame);
+            startButton.onClick.AddListener(StartGame);
+        }
+
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.RemoveListener(OpenSettings);
+            settingsButton.onClick.AddListener(OpenSettings);
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveListener(ExitGame);
+            exitButton.onClick.AddListener(ExitGame);
+        }
+    }
+
+    private void UnbindButtons()
+    {
+        if (startButton != null)
+        {
+            startButton.onClick.RemoveListener(StartGame);
+        }
+
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.RemoveListener(OpenSettings);
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveListener(ExitGame);
+        }
     }
 }

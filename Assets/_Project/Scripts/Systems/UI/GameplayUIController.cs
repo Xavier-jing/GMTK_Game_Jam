@@ -2,30 +2,46 @@ using UnityEngine;
 
 public sealed class GameplayUIController : MonoBehaviour
 {
-    [SerializeField]
-    private ScreenId gameplayScreen = ScreenId.Hud;
+    private const ScreenId PauseScreenId = ScreenId.Pause;
+
+    private static GameplayUIController activeController;
 
     [SerializeField]
-    private ScreenId pauseScreen = ScreenId.Pause;
+    private ScreenId gameplayScreen = ScreenId.Hud;
 
     [SerializeField]
     private UIService uiService;
 
     private GamePause gamePause;
     private UIInputHandler uiInput;
+    private bool isActiveController;
 
     private void Awake()
     {
-        if (uiService == null)
+        if (activeController != null && activeController != this)
         {
-            uiService = GetComponentInChildren<UIService>(true);
+            enabled = false;
+            return;
         }
 
-        uiInput = GetComponent<UIInputHandler>();
+        activeController = this;
+        isActiveController = true;
+
+        if (uiService == null)
+        {
+            uiService = ResolveUiService();
+        }
+
+        uiInput = ResolveUiInput();
     }
 
     private void Start()
     {
+        if (!isActiveController)
+        {
+            return;
+        }
+
         AppContext appContext = AppContext.Instance;
         gamePause = appContext.GamePause;
 
@@ -42,6 +58,11 @@ public sealed class GameplayUIController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (activeController == this)
+        {
+            activeController = null;
+        }
+
         if (gamePause != null)
         {
             gamePause.PauseStateChanged -= HandlePauseStateChanged;
@@ -74,39 +95,102 @@ public sealed class GameplayUIController : MonoBehaviour
             return;
         }
 
-        uiService.Show(isPaused ? pauseScreen : gameplayScreen);
+        if (isPaused)
+        {
+            ShowPauseRoot();
+        }
+        else
+        {
+            uiService.Show(gameplayScreen);
+        }
     }
 
     private void HandlePausePerformed()
     {
-        if (gamePause != null && !gamePause.IsPaused)
-        {
-            gamePause.SetPaused(true);
-        }
+        OpenPauseScreen();
     }
 
     private void HandleCancelPerformed()
+    {
+        OpenPauseScreen();
+    }
+
+    private UIService ResolveUiService()
+    {
+        UIService found = GetComponent<UIService>();
+        if (found != null)
+        {
+            return found;
+        }
+
+        found = GetComponentInChildren<UIService>(true);
+        if (found != null)
+        {
+            return found;
+        }
+
+        found = GetComponentInParent<UIService>(true);
+        if (found != null)
+        {
+            return found;
+        }
+
+        return FindObjectOfType<UIService>(true);
+    }
+
+    private UIInputHandler ResolveUiInput()
+    {
+        UIInputHandler found = GetComponent<UIInputHandler>();
+        if (found != null)
+        {
+            return found;
+        }
+
+        found = GetComponentInChildren<UIInputHandler>(true);
+        if (found != null)
+        {
+            return found;
+        }
+
+        found = GetComponentInParent<UIInputHandler>(true);
+        if (found != null)
+        {
+            return found;
+        }
+
+        found = FindObjectOfType<UIInputHandler>(true);
+        if (found != null)
+        {
+            return found;
+        }
+
+        return gameObject.AddComponent<UIInputHandler>();
+    }
+
+    private void ShowPauseRoot()
+    {
+        if (uiService.TryGet(PauseScreenId, out _))
+        {
+            uiService.Show(PauseScreenId);
+            return;
+        }
+
+        Debug.LogWarning($"GameplayUIController on '{name}' could not find '{PauseScreenId}' screen.");
+    }
+
+    private void OpenPauseScreen()
     {
         if (gamePause == null || uiService == null)
         {
             return;
         }
 
-        // 未暂停时，Cancel 键（Esc）作为暂停键使用
         if (!gamePause.IsPaused)
         {
             gamePause.SetPaused(true);
             return;
         }
 
-        if (uiService.CurrentScreenId == ScreenId.Settings &&
-            uiService.TryGet(ScreenId.Settings, out ScreenBase screen) &&
-            screen is SettingsScreen settingsScreen)
-        {
-            settingsScreen.GoBack();
-            return;
-        }
-
-        gamePause.Resume();
+        ShowPauseRoot();
     }
 }

@@ -65,7 +65,6 @@
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerRailBoundState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\ScreenId.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerSinkingState.cs" />
-    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraInputController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\Input\PlayerInputHandler.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerAnimationController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerInteractionDetector.cs" />
@@ -115,7 +114,6 @@
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneSettings.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Loop\LoopProgress.cs" />
-    <Compile Include="Assets\_Project\Scripts\Systems\UI\MainMenuSceneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SuperStates\PlayerAbilityState.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerFloatingSwimState.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Turn\TurnManager.cs" />

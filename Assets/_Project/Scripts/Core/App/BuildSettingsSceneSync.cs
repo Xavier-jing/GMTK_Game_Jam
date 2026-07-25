@@ -11,7 +11,6 @@ public static class BuildSettingsSceneSync
         "Assets/_Project/Scenes/Boot.unity",
         "Assets/_Project/Scenes/MainMenu.unity",
         "Assets/_Project/Scenes/GamePlay.unity",
-        "Assets/_Project/Scenes/SandBox.unity",
     };
 
     static BuildSettingsSceneSync()

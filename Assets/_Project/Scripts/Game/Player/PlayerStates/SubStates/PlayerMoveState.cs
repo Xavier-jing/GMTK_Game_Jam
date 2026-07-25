@@ -28,10 +28,8 @@ public class PlayerMoveState : PlayerGroundedState
         base.LogicUpdate();
 
         float speed = playerData.movementVelocity;
-        float rad = playerData.movementAngle * Mathf.Deg2Rad;
-        float worldX = xInput * Mathf.Cos(rad) - yInput * Mathf.Sin(rad);
-        float worldZ = xInput * Mathf.Sin(rad) + yInput * Mathf.Cos(rad);
-        player.SetVelocityXZ(worldX * speed, worldZ * speed);
+        Vector3 moveDirection = player.GetMappedGroundMovement(new Vector2(xInput, yInput));
+        player.SetVelocityXZ(moveDirection.x * speed, moveDirection.z * speed);
 
         if (xInput == 0 && yInput == 0)
         {

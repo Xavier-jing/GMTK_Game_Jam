@@ -14,10 +14,10 @@ public class PlayerJumpState : PlayerAbilityState
 
         int xInput = player.InputHandler.NormInputX;
         int yInput = player.InputHandler.NormInputY;
-        float rad = playerData.movementAngle * Mathf.Deg2Rad;
-        float worldX = xInput * Mathf.Cos(rad) - yInput * Mathf.Sin(rad);
-        float worldZ = xInput * Mathf.Sin(rad) + yInput * Mathf.Cos(rad);
-        player.SetVelocityXZ(worldX * playerData.movementVelocity, worldZ * playerData.movementVelocity);
+        Vector3 moveDirection = player.GetMappedGroundMovement(new Vector2(xInput, yInput));
+        player.SetVelocityXZ(
+            moveDirection.x * playerData.movementVelocity,
+            moveDirection.z * playerData.movementVelocity);
         player.SetVelocityY(playerData.jumpVelocity);
         isAbilityDone = true;
     }

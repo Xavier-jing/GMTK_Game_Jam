@@ -218,6 +218,54 @@ public class Player : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Inverse-projects a screen-space input direction onto the world XZ ground plane.
+    /// This compensates for the camera pitch, so equal screen X/Y input produces a
+    /// visually correct 45-degree diagonal without adding any world Y movement.
+    /// </summary>
+    public Vector3 GetMappedGroundMovement(Vector2 input)
+    {
+        Vector2 screenInput = Vector2.ClampMagnitude(input, 1f);
+        Camera movementCamera = Camera.main;
+        if (movementCamera == null)
+        {
+            return new Vector3(screenInput.x, 0f, screenInput.y);
+        }
+
+        Vector3 groundRight = Vector3.ProjectOnPlane(
+            movementCamera.transform.right,
+            Vector3.up);
+        Vector3 groundForward = Vector3.ProjectOnPlane(
+            movementCamera.transform.forward,
+            Vector3.up);
+
+        if (groundRight.sqrMagnitude <= Mathf.Epsilon ||
+            groundForward.sqrMagnitude <= Mathf.Epsilon)
+        {
+            return new Vector3(screenInput.x, 0f, screenInput.y);
+        }
+
+        groundRight.Normalize();
+        groundForward.Normalize();
+
+        float horizontalProjection = Mathf.Abs(Vector3.Dot(
+            groundRight,
+            movementCamera.transform.right));
+        float verticalProjection = Mathf.Abs(Vector3.Dot(
+            groundForward,
+            movementCamera.transform.up));
+
+        horizontalProjection = Mathf.Max(horizontalProjection, 0.0001f);
+        verticalProjection = Mathf.Max(verticalProjection, 0.0001f);
+
+        Vector3 mappedMovement =
+            groundRight * (screenInput.x / horizontalProjection) +
+            groundForward * (screenInput.y / verticalProjection);
+        mappedMovement.y = 0f;
+
+        return mappedMovement;
+    }
+
     public Vector3 GetCameraRelativeMovement(Vector2 input)
     {
         Camera movementCamera = Camera.main;

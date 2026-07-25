@@ -20,7 +20,7 @@ public sealed class PlayerAnimationController : MonoBehaviour
 
     private Player player;
     private PlayerInputHandler inputHandler;
-    private Vector2 lastMoveDirection = new Vector2(1f, -1f);
+    private Vector2 lastMoveDirection = Vector2.down;
 
     private void Awake()
     {
@@ -49,7 +49,7 @@ public sealed class PlayerAnimationController : MonoBehaviour
 
         if (isMoving)
         {
-            lastMoveDirection = GetIsometricFacingDirection(moveInput);
+            lastMoveDirection = moveInput.normalized;
         }
 
         // Write direction before state bools so transitions enter blend trees with the current facing.
@@ -60,16 +60,6 @@ public sealed class PlayerAnimationController : MonoBehaviour
         SetBoolIfExists(IdleHash, !isMoving && !isInAir);
         SetBoolIfExists(MoveHash, isMoving && !isInAir);
         SetBoolIfExists(InAirHash, isInAir);
-    }
-
-    private static Vector2 GetIsometricFacingDirection(Vector2 input)
-    {
-        float facingX = input.x - input.y;
-        float facingY = input.x + input.y;
-
-        return new Vector2(
-            facingX < 0f ? -1f : 1f,
-            facingY < 0f ? -1f : 1f);
     }
 
     private static bool IsAirState(PlayerState state)
