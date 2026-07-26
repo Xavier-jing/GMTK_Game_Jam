@@ -1,14 +1,14 @@
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class HudScreen : ScreenBase
 {
+    [SerializeField]
+    private Image turnImage;
 
     [SerializeField]
-    private TMP_Text turnText;
-
-    [SerializeField]
-    private string turnDisplayFormat = "00";
+    [Tooltip("Index 0 displays 1 remaining turn, index 1 displays 2, and so on.")]
+    private Sprite[] turnSpritesByValue = new Sprite[5];
 
     private TurnManager turnManager;
 
@@ -50,11 +50,39 @@ public sealed class HudScreen : ScreenBase
 
     private void RefreshTurnDisplay()
     {
-        if (turnText == null || turnManager == null)
+        if (turnImage == null || turnManager == null)
         {
             return;
         }
 
-        turnText.text = string.Format(turnDisplayFormat, turnManager.RemainingTurns);
+        int remainingTurns = turnManager.RemainingTurns;
+        if (remainingTurns <= 0)
+        {
+            turnImage.enabled = false;
+            return;
+        }
+
+        int spriteIndex = remainingTurns - 1;
+        if (turnSpritesByValue == null ||
+            spriteIndex < 0 ||
+            spriteIndex >= turnSpritesByValue.Length)
+        {
+            turnImage.enabled = false;
+            Debug.LogWarning(
+                $"HudScreen on '{name}' has no turn sprite configured for value " +
+                $"{remainingTurns}.");
+            return;
+        }
+
+        Sprite turnSprite = turnSpritesByValue[spriteIndex];
+        turnImage.sprite = turnSprite;
+        turnImage.enabled = turnSprite != null;
+
+        if (turnSprite == null)
+        {
+            Debug.LogWarning(
+                $"HudScreen on '{name}' is missing the turn sprite at index {spriteIndex} " +
+                $"for value {remainingTurns}.");
+        }
     }
 }

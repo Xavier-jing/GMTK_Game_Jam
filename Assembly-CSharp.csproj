@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\_Project\Scripts\Settings\SettingsService.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraInputManager.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Scene\SceneId.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerRailBoundState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\ScreenId.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneController.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraZoneSettings.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Loop\LoopProgress.cs" />
+    <Compile Include="Assets\_Project\Scripts\Systems\Camera\CameraOcclusionFader.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SuperStates\PlayerAbilityState.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Story\StoryController.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerFloatingSwimState.cs" />

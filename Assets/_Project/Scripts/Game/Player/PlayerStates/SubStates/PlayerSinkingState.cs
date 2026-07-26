@@ -34,6 +34,7 @@ public sealed class PlayerSinkingState : PlayerState
 
         if (isGrounded && player.CurrentVelocity.y <= 0.01f)
         {
+            player.TriggerSinkingLandingCameraShake();
             player.GameplayStatus.SetCurrentLayer(PlayerWorldLayer.Lower);
             stateMachine.ChangeState(player.IdleState);
         }

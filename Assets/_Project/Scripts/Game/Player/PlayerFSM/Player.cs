@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerGameplayStatus))]
@@ -29,6 +30,14 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private StraightRail initialRail;
+
+    [Header("Camera Feedback")]
+    [SerializeField]
+    private CinemachineImpulseSource sinkingLandingImpulse;
+
+    [SerializeField]
+    [Min(0f)]
+    private float sinkingLandingImpulseForce = 1f;
 
     public StraightRail CurrentRail { get; private set; }
     public float RailDistance { get; private set; }
@@ -72,6 +81,11 @@ public class Player : MonoBehaviour
         if (Interactor == null)
         {
             Interactor = gameObject.AddComponent<PlayerInteractor>();
+        }
+
+        if (sinkingLandingImpulse == null)
+        {
+            sinkingLandingImpulse = GetComponent<CinemachineImpulseSource>();
         }
 
         IdleState = new PlayerIdleState(this, stateMachine, playerData);
@@ -311,6 +325,19 @@ public class Player : MonoBehaviour
         {
             InputHandler.DisableGameplayInput();
         }
+    }
+
+    public void TriggerSinkingLandingCameraShake()
+    {
+        if (sinkingLandingImpulse == null)
+        {
+            Debug.LogWarning(
+                $"Player '{name}' cannot trigger its sinking landing camera shake " +
+                "because no CinemachineImpulseSource is assigned.");
+            return;
+        }
+
+        sinkingLandingImpulse.GenerateImpulseWithForce(sinkingLandingImpulseForce);
     }
     #endregion
 }

@@ -25,6 +25,8 @@ public sealed class CameraZoneController : MonoBehaviour
     private CameraZoneSettings targetSettings;
     private CinemachineFramingTransposer framingTransposer;
     private float manualOrthographicSizeOffset;
+    private bool hasManualHorizontalFraming;
+    private float manualScreenX;
 
     private struct PendingZoneExit
     {
@@ -65,9 +67,15 @@ public sealed class CameraZoneController : MonoBehaviour
             return;
         }
 
-        framingTransposer.m_ScreenX = Mathf.Lerp(framingTransposer.m_ScreenX, targetSettings.screenX, t);
+        float targetScreenX = hasManualHorizontalFraming ? manualScreenX : targetSettings.screenX;
+        float targetDeadZoneWidth = hasManualHorizontalFraming ? 0f : targetSettings.deadZoneWidth;
+
+        framingTransposer.m_ScreenX = Mathf.Lerp(framingTransposer.m_ScreenX, targetScreenX, t);
         framingTransposer.m_ScreenY = Mathf.Lerp(framingTransposer.m_ScreenY, targetSettings.screenY, t);
-        framingTransposer.m_DeadZoneWidth = Mathf.Lerp(framingTransposer.m_DeadZoneWidth, targetSettings.deadZoneWidth, t);
+        framingTransposer.m_DeadZoneWidth = Mathf.Lerp(
+            framingTransposer.m_DeadZoneWidth,
+            targetDeadZoneWidth,
+            t);
         framingTransposer.m_DeadZoneHeight = Mathf.Lerp(framingTransposer.m_DeadZoneHeight, targetSettings.deadZoneHeight, t);
         framingTransposer.m_SoftZoneWidth = Mathf.Lerp(framingTransposer.m_SoftZoneWidth, targetSettings.softZoneWidth, t);
         framingTransposer.m_SoftZoneHeight = Mathf.Lerp(framingTransposer.m_SoftZoneHeight, targetSettings.softZoneHeight, t);
@@ -81,6 +89,36 @@ public sealed class CameraZoneController : MonoBehaviour
     public void SetManualOrthographicSizeOffset(float offset)
     {
         manualOrthographicSizeOffset = offset;
+    }
+
+    public bool BeginManualHorizontalFraming(float screenX)
+    {
+        ResolveFramingTransposer();
+        if (framingTransposer == null)
+        {
+            Debug.LogError(
+                $"CameraZoneController on '{name}' requires a CinemachineFramingTransposer.");
+            return false;
+        }
+
+        manualScreenX = screenX;
+        hasManualHorizontalFraming = true;
+        return true;
+    }
+
+    public void SetManualHorizontalScreenX(float screenX)
+    {
+        if (!hasManualHorizontalFraming)
+        {
+            return;
+        }
+
+        manualScreenX = screenX;
+    }
+
+    public void EndManualHorizontalFraming()
+    {
+        hasManualHorizontalFraming = false;
     }
 
     public void EnterZone(CameraZone zone)
