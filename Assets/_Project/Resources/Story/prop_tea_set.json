@@ -108,6 +108,12 @@
             "TargetId": "prop_tea_set",
             "StringValue": "TakeIntoCarrySlot"
           }
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_PickUp_Ceramics"
+          }
         }
       ],
       "Next": "complete"

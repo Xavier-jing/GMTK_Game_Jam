@@ -39,6 +39,12 @@
           }
         },
         {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_Electricity"
+          }
+        },
+        {
           "Id": "RequestRunEnd",
           "Params": {
             "StringValue": "EndingTwo"

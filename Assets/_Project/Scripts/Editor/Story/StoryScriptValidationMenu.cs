@@ -30,18 +30,45 @@ public static class StoryScriptValidationMenu
         Dictionary<string, bool> audioResourceResults =
             new Dictionary<string, bool>(StringComparer.Ordinal);
         List<string> allErrors = new List<string>();
+        bool foundEndingSequenceCatalog = false;
 
         string[] assetGuids = AssetDatabase.FindAssets(
             "t:TextAsset",
             new[] { StoryAssetFolder });
+        int jsonAssetCount = 0;
 
         foreach (string assetGuid in assetGuids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(assetGuid);
+            if (!assetPath.EndsWith(
+                    ".json",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            jsonAssetCount++;
             TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
             if (asset == null)
             {
                 allErrors.Add($"{assetPath}: could not load TextAsset.");
+                continue;
+            }
+
+            if (string.Equals(
+                    asset.name,
+                    EndingSequenceCatalog.ResourceName,
+                    StringComparison.Ordinal))
+            {
+                foundEndingSequenceCatalog = true;
+                if (!EndingSequenceCatalog.TryParse(
+                        asset.text,
+                        out EndingSequenceCatalog _,
+                        out string endingError))
+                {
+                    allErrors.Add($"{assetPath}: {endingError}");
+                }
+
                 continue;
             }
 
@@ -93,6 +120,13 @@ public static class StoryScriptValidationMenu
         ValidateCrossScriptTargets(graphs, sourcePaths, allErrors);
         ValidateInitialDialoguePortraits(graphs, sourcePaths, allErrors);
 
+        if (!foundEndingSequenceCatalog)
+        {
+            allErrors.Add(
+                $"{StoryAssetFolder}/{EndingSequenceCatalog.ResourceName}.json: " +
+                "ending sequence configuration was not found.");
+        }
+
         if (allErrors.Count > 0)
         {
             foreach (string error in allErrors)
@@ -102,13 +136,13 @@ public static class StoryScriptValidationMenu
 
             Debug.LogError(
                 $"Story validation failed with {allErrors.Count} error(s) " +
-                $"across {assetGuids.Length} TextAsset(s).");
+                $"across {jsonAssetCount} JSON asset(s).");
             return;
         }
 
         Debug.Log(
-            $"Story validation passed for {graphs.Count} script(s) " +
-            $"in '{StoryAssetFolder}'.");
+            $"Story validation passed for {graphs.Count} story script(s) and " +
+            $"the ending sequence catalog in '{StoryAssetFolder}'.");
     }
 
     private static void ValidateCrossScriptTargets(

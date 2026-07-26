@@ -190,6 +190,7 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
             }
 
             int capturedIndex = index;
+            UISfxFeedback.Ensure(button);
             button.onClick.AddListener(() => choiceSelected?.Invoke(capturedIndex));
             spawnedChoiceButtons.Add(button);
         }

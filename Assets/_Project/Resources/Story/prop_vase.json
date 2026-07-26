@@ -75,6 +75,12 @@
             "TargetId": "prop_vase",
             "StringValue": "TakeIntoCarrySlot"
           }
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_PickUp_Ceramics"
+          }
         }
       ],
       "Next": "complete"

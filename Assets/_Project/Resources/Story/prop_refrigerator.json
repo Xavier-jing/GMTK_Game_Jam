@@ -32,6 +32,12 @@
             "TargetId": "prop_refrigerator",
             "StringValue": "Inspect"
           }
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_Fridge_Open"
+          }
         }
       ],
       "Next": "inspect_followup"
@@ -42,6 +48,14 @@
       "PortraitId": "1",
       "ActorId": "",
       "Dialog": "I've never understood why they're even here...",
+      "AfterActions": [
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_Fridge_Close"
+          }
+        }
+      ],
       "Next": "complete"
     },
     {

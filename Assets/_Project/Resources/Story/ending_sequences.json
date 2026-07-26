@@ -1,0 +1,43 @@
+{
+  "Version": 1,
+  "Sequences": [
+    {
+      "Id": "EVT_TRUTH",
+      "Lines": [
+        "I'm falling...",
+        "Everything that once puzzled me finally makes sense—like those strange symbols inside the refrigerator...",
+        "So I'm a doll...",
+        "Even so... I still want to live!",
+        "Path to other endings now Open."
+      ]
+    },
+    {
+      "Id": "END_01",
+      "Lines": [
+        "It hurts...",
+        "I don't want to die..."
+      ]
+    },
+    {
+      "Id": "END_02",
+      "Lines": [
+        "My room used to be my entire world.",
+        "Whenever something didn't make sense, I never questioned it. I simply accepted it.",
+        "It wasn't until disaster found me that I finally saw the real world.",
+        "Then it's time to set off!",
+        "Ending Unlocked:Fly Away"
+      ]
+    },
+    {
+      "Id": "END_03",
+      "Lines": [
+        "The rope is tied tightly around me, and the wind howls in my ears.",
+        "I glance back at what was once my entire world.",
+        "All this time, I had been living inside an airplane.",
+        "Maybe it could still fly—but I've already made my choice.",
+        "I have no regrets.",
+        "Ending Unlocked:Safe Landing"
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
-using System.Collections;
 using UnityEngine;
 
 public sealed class GameplayUIController : MonoBehaviour
 {
     private const ScreenId PauseScreenId = ScreenId.Pause;
+    private const string CrashSfxId = "IA_Fall_Break";
 
     private static GameplayUIController activeController;
 
@@ -13,27 +13,27 @@ public sealed class GameplayUIController : MonoBehaviour
     [SerializeField]
     private UIService uiService;
 
-    [Header("Ending CG")]
+    [Header("Ending Presentation")]
     [SerializeField]
-    private GameObject endingCgRoot;
-
-    [SerializeField]
-    [Min(0f)]
-    private float endingCgPlaceholderDuration = 2f;
-
-    [SerializeField]
-    private bool autoCompleteEndingCg = true;
+    private EndingSequencePresenter endingPresenter;
 
     private GamePause gamePause;
     private LoopManager loopManager;
+    private AudioService audioService;
     private UIInputHandler uiInput;
-    private Coroutine endingCgCoroutine;
+    private bool isEndingPresentationActive;
+    private int endingPresentationStartedFrame = -1;
     private bool isActiveController;
 
     private void Awake()
     {
         if (activeController != null && activeController != this)
         {
+            Debug.LogError(
+                $"Duplicate GameplayUIController detected on '{name}'. " +
+                $"'{activeController.name}' is already the active controller. " +
+                "Remove the duplicate component from the GamePlay scene.",
+                this);
             enabled = false;
             return;
         }
@@ -47,10 +47,9 @@ public sealed class GameplayUIController : MonoBehaviour
         }
 
         uiInput = ResolveUiInput();
-
-        if (endingCgRoot != null)
+        if (endingPresenter == null)
         {
-            endingCgRoot.SetActive(false);
+            endingPresenter = GetComponent<EndingSequencePresenter>();
         }
     }
 
@@ -64,11 +63,13 @@ public sealed class GameplayUIController : MonoBehaviour
         AppContext appContext = AppContext.Instance;
         gamePause = appContext.GamePause;
         loopManager = appContext.LoopManager;
+        audioService = appContext.Audio;
 
         if (uiInput != null)
         {
             uiInput.OnPause += HandlePausePerformed;
             uiInput.OnCancel += HandleCancelPerformed;
+            uiInput.OnSubmit += HandleSubmitPerformed;
         }
 
         gamePause.Resume();
@@ -98,6 +99,7 @@ public sealed class GameplayUIController : MonoBehaviour
         {
             uiInput.OnPause -= HandlePausePerformed;
             uiInput.OnCancel -= HandleCancelPerformed;
+            uiInput.OnSubmit -= HandleSubmitPerformed;
         }
     }
 
@@ -153,10 +155,18 @@ public sealed class GameplayUIController : MonoBehaviour
 
     private void HandleRunEnded(RunEndReason reason, int run)
     {
-        if (endingCgCoroutine != null)
+        if (isEndingPresentationActive)
         {
+            Debug.LogWarning(
+                $"GameplayUIController on '{name}' ignored duplicate ending " +
+                $"'{reason}' on run {run} because a presentation is active.",
+                this);
             return;
         }
+
+        isEndingPresentationActive = true;
+        endingPresentationStartedFrame = Time.frameCount;
+        PlayCrashSfx(reason);
 
         Player player = FindObjectOfType<Player>();
         if (player != null)
@@ -164,45 +174,72 @@ public sealed class GameplayUIController : MonoBehaviour
             player.SetControlled(false);
         }
 
-        if (uiInput != null)
-        {
-            uiInput.Disable();
-        }
-
         if (gamePause != null && gamePause.IsPaused)
         {
             gamePause.Resume();
         }
 
-        if (endingCgRoot == null)
+        if (endingPresenter == null)
         {
-            Debug.LogWarning(
-                $"GameplayUIController on '{name}' has no Ending CG Root. " +
-                $"Skipping the placeholder for '{reason}' on run {run}.");
+            Debug.LogError(
+                $"GameplayUIController on '{name}' has no " +
+                $"EndingSequencePresenter. Skipping the presentation for " +
+                $"'{reason}' on run {run}.",
+                this);
             CompleteEndingCg();
             return;
         }
 
-        endingCgRoot.SetActive(true);
-        if (autoCompleteEndingCg)
+        if (!endingPresenter.TryPresent(
+                reason,
+                audioService,
+                CompleteEndingCg,
+                out string error))
         {
-            endingCgCoroutine = StartCoroutine(WaitForEndingCgPlaceholder());
+            Debug.LogError(
+                $"GameplayUIController on '{name}' could not start ending " +
+                $"'{reason}' on run {run}: {error}",
+                this);
+            CompleteEndingCg();
         }
     }
 
-    private IEnumerator WaitForEndingCgPlaceholder()
+    private void HandleSubmitPerformed()
     {
-        if (endingCgPlaceholderDuration > 0f)
+        if (loopManager == null ||
+            !loopManager.IsEndingRun ||
+            !isEndingPresentationActive ||
+            Time.frameCount == endingPresentationStartedFrame ||
+            endingPresenter == null)
         {
-            yield return new WaitForSecondsRealtime(endingCgPlaceholderDuration);
-        }
-        else
-        {
-            yield return null;
+            return;
         }
 
-        endingCgCoroutine = null;
-        CompleteEndingCg();
+        endingPresenter.Advance();
+    }
+
+    private void PlayCrashSfx(RunEndReason reason)
+    {
+        if (reason != RunEndReason.EndingOne &&
+            reason != RunEndReason.TruthRevealed)
+        {
+            return;
+        }
+
+        if (audioService == null)
+        {
+            Debug.LogError(
+                $"GameplayUIController on '{name}' cannot play '{CrashSfxId}' " +
+                "because AudioService is unavailable.");
+            return;
+        }
+
+        if (!audioService.TryPlaySfxById(CrashSfxId, 1f, out string error))
+        {
+            Debug.LogError(
+                $"GameplayUIController on '{name}' could not play crash SFX " +
+                $"'{CrashSfxId}' for ending '{reason}': {error}");
+        }
     }
 
     public void CompleteEndingCg()
@@ -212,6 +249,8 @@ public sealed class GameplayUIController : MonoBehaviour
             return;
         }
 
+        isEndingPresentationActive = false;
+        endingPresentationStartedFrame = -1;
         loopManager.CompleteRunEnding();
     }
 

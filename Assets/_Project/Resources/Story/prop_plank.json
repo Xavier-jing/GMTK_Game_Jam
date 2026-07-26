@@ -75,6 +75,12 @@
             "TargetId": "prop_plank",
             "StringValue": "TakeIntoCarrySlot"
           }
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_Plank_Disassembly"
+          }
         }
       ],
       "Next": "complete"

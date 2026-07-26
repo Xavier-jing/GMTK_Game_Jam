@@ -16,6 +16,8 @@ public sealed class LoopManager : IDisposable
 
     public bool IsEndingRun { get; private set; }
 
+    public RunEndReason? ActiveEndReason { get; private set; }
+
     public LoopManager(TurnManager turnManager,Inventory inventory,SceneLoader sceneLoader,
     LoopProgress loopProgress,RunState runState)
     {
@@ -40,6 +42,7 @@ public sealed class LoopManager : IDisposable
         }
 
         IsEndingRun = true;
+        ActiveEndReason = reason;
         ApplyPermanentProgress(reason);
 
         Action<RunEndReason, int> runEnded = RunEnded;
@@ -70,12 +73,7 @@ public sealed class LoopManager : IDisposable
     ///正式开始下一次循环
     public void StartNextRun()
     {
-        loopProgress.StartNextLoop();
-        inventory.Clear();
-        runState.Reset();
-        turnManager.ResetTurns();
-        IsEndingRun = false;
-        RunStarted?.Invoke(CurrentRun);
+        PrepareNextRun();
 
         if (TryGetReloadTarget(out SceneId sceneId))
         {
@@ -85,13 +83,38 @@ public sealed class LoopManager : IDisposable
 
     public bool CompleteRunEnding()
     {
-        if (!IsEndingRun)
+        if (!IsEndingRun || !ActiveEndReason.HasValue)
         {
             return false;
         }
 
+        RunEndReason completedReason = ActiveEndReason.Value;
+        if (IsTerminalEnding(completedReason))
+        {
+            PrepareNextRun();
+            sceneLoader.LoadScene(SceneId.MainMenu, LoadSceneMode.Single);
+            return true;
+        }
+
         StartNextRun();
         return true;
+    }
+
+    public static bool IsTerminalEnding(RunEndReason reason)
+    {
+        return reason == RunEndReason.EndingTwo ||
+            reason == RunEndReason.EndingThree;
+    }
+
+    private void PrepareNextRun()
+    {
+        loopProgress.StartNextLoop();
+        inventory.Clear();
+        runState.Reset();
+        turnManager.ResetTurns();
+        IsEndingRun = false;
+        ActiveEndReason = null;
+        RunStarted?.Invoke(CurrentRun);
     }
 
     //根据结束原因更新跨循环的永久数据

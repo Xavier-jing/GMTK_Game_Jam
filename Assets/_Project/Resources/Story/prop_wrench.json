@@ -8,7 +8,6 @@
       "Type": "Choice",
       "Choices": [
         {
-        {
           "Dialog": "Pick Up",
           "TargetScriptId": "prop_wrench",
           "TargetNodeId": "acquire",
@@ -95,6 +94,12 @@
       "AfterActions": [
         {
           "Id": "RemoveRailAndAscend"
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_TrackDisassembly"
+          }
         },
         {
           "Id": "SpendTurns",

@@ -14,12 +14,13 @@ public static class WorldStoryRulesEditorTest
         RunAssertions();
         Debug.Log(
             "World story rules unit test passed: prop visibility, loop reset, " +
-            "carry mappings, and new story handlers are valid.");
+            "visual states, carry mappings, and new story handlers are valid.");
     }
 
     public static void RunAssertions()
     {
         VerifyProgressRules();
+        VerifyVisualStateRules();
         VerifyCarryMappings();
         VerifyStoryContract();
     }
@@ -145,6 +146,49 @@ public static class WorldStoryRulesEditorTest
         Assert(
             loopProgress.TruthKnown,
             "RunState.Reset must not clear truth knowledge.");
+    }
+
+    private static void VerifyVisualStateRules()
+    {
+        RunState runState = new RunState();
+
+        Assert(
+            WorldPropRules.HasChangedVisual(WorldPropId.Dresser),
+            "The dresser must support closed and open sprites.");
+        Assert(
+            !WorldPropRules.UsesChangedVisual(WorldPropId.Dresser, runState),
+            "The dresser must start with its closed sprite.");
+
+        runState.MarkDresserOpened();
+        Assert(
+            WorldPropRules.UsesChangedVisual(WorldPropId.Dresser, runState),
+            "Opening the dresser must select its open sprite.");
+
+        Assert(
+            WorldPropRules.HasChangedVisual(WorldPropId.CableBed),
+            "The cable bed must support closed and lifted sprites.");
+        Assert(
+            !WorldPropRules.UsesChangedVisual(WorldPropId.CableBed, runState),
+            "The cable bed must start with its closed sprite.");
+
+        runState.MarkBedLifted();
+        Assert(
+            WorldPropRules.UsesChangedVisual(WorldPropId.CableBed, runState),
+            "Lifting the cable bed must select its open sprite.");
+
+        runState.MarkFridgeUnplugged();
+        Assert(
+            !WorldPropRules.HasChangedVisual(WorldPropId.Refrigerator) &&
+            !WorldPropRules.UsesChangedVisual(
+                WorldPropId.Refrigerator,
+                runState),
+            "Unplugging the refrigerator must not be treated as opening its door.");
+
+        runState.Reset();
+        Assert(
+            !WorldPropRules.UsesChangedVisual(WorldPropId.Dresser, runState) &&
+            !WorldPropRules.UsesChangedVisual(WorldPropId.CableBed, runState),
+            "RunState.Reset must restore default prop visuals.");
     }
 
     private static void VerifyCarryMappings()

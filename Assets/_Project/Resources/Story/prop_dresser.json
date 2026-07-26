@@ -44,6 +44,12 @@
           }
         },
         {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_Drawer_Open"
+          }
+        },
+        {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_wrench",

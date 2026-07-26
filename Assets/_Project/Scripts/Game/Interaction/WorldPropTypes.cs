@@ -82,6 +82,20 @@ public static class WorldPropRules
                propId == WorldPropId.Rope;
     }
 
+    public static bool HasChangedVisual(WorldPropId propId)
+    {
+        return TryGetChangedVisualFlag(propId, out RunFlagId _);
+    }
+
+    public static bool UsesChangedVisual(
+        WorldPropId propId,
+        RunState runState)
+    {
+        return runState != null &&
+               TryGetChangedVisualFlag(propId, out RunFlagId flag) &&
+               runState.GetFlag(flag);
+    }
+
     public static PlayerSlotItemKind GetSlotItemKind(WorldPropId propId)
     {
         switch (propId)
@@ -135,6 +149,24 @@ public static class WorldPropRules
                 return runState.RopeTaken;
             default:
                 return true;
+        }
+    }
+
+    private static bool TryGetChangedVisualFlag(
+        WorldPropId propId,
+        out RunFlagId flag)
+    {
+        switch (propId)
+        {
+            case WorldPropId.Dresser:
+                flag = RunFlagId.DresserOpened;
+                return true;
+            case WorldPropId.CableBed:
+                flag = RunFlagId.BedLifted;
+                return true;
+            default:
+                flag = default;
+                return false;
         }
     }
 }

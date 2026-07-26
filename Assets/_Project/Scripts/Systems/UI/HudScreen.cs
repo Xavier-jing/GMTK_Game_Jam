@@ -3,6 +3,10 @@ using UnityEngine.UI;
 
 public sealed class HudScreen : ScreenBase
 {
+    private const string RemainingIncreaseSfxId = "UI_Remaining_Increase";
+    private const string RemainingReduceSfxId = "UI_Remaining_Reduce";
+    private const string RemainingWarningSfxId = "UI_Warning";
+
     [SerializeField]
     private Image turnImage;
 
@@ -11,6 +15,8 @@ public sealed class HudScreen : ScreenBase
     private Sprite[] turnSpritesByValue = new Sprite[5];
 
     private TurnManager turnManager;
+    private int previousRemainingTurns;
+    private bool hasRemainingTurnsSnapshot;
 
     protected override void OnShow()
     {
@@ -18,6 +24,8 @@ public sealed class HudScreen : ScreenBase
         turnManager = AppContext.Instance.TurnManager;
         if (turnManager != null)
         {
+            previousRemainingTurns = turnManager.RemainingTurns;
+            hasRemainingTurnsSnapshot = true;
             turnManager.OnTurnsChanged += HandleTurnsChanged;
         }
 
@@ -41,11 +49,44 @@ public sealed class HudScreen : ScreenBase
             turnManager.OnTurnsChanged -= HandleTurnsChanged;
             turnManager = null;
         }
+
+        hasRemainingTurnsSnapshot = false;
     }
 
     private void HandleTurnsChanged(int remaining, int max)
     {
+        PlayRemainingTurnsFeedback(remaining);
         RefreshTurnDisplay();
+    }
+
+    private void PlayRemainingTurnsFeedback(int remaining)
+    {
+        if (!hasRemainingTurnsSnapshot)
+        {
+            previousRemainingTurns = remaining;
+            hasRemainingTurnsSnapshot = true;
+            return;
+        }
+
+        string audioId = string.Empty;
+        if (remaining > previousRemainingTurns)
+        {
+            audioId = RemainingIncreaseSfxId;
+        }
+        else if (remaining == 1 && previousRemainingTurns > 1)
+        {
+            audioId = RemainingWarningSfxId;
+        }
+        else if (remaining > 1 && remaining < previousRemainingTurns)
+        {
+            audioId = RemainingReduceSfxId;
+        }
+
+        previousRemainingTurns = remaining;
+        if (!string.IsNullOrEmpty(audioId))
+        {
+            UISfxPlayer.Play(audioId, this);
+        }
     }
 
     private void RefreshTurnDisplay()

@@ -44,6 +44,16 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
     [SerializeField]
     private Collider[] interactionColliders = Array.Empty<Collider>();
 
+    [Header("Run-state sprite")]
+    [SerializeField]
+    private SpriteRenderer visualStateRenderer;
+
+    [SerializeField]
+    private Sprite defaultStateSprite;
+
+    [SerializeField]
+    private Sprite changedStateSprite;
+
     private LoopProgress loopProgress;
     private RunState runState;
     private bool completedFirstStory;
@@ -82,6 +92,8 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
         {
             interactionColliders = GetComponentsInChildren<Collider>(true);
         }
+
+        ValidateVisualStateConfiguration();
     }
 
     private void OnEnable()
@@ -609,6 +621,8 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
 
     private void RefreshPresentation()
     {
+        RefreshVisualState();
+
         bool shouldShow = !removedFromWorld &&
                           !isCarried &&
                           IsAvailableInWorld();
@@ -635,6 +649,55 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
             {
                 interactionCollider.enabled = shouldEnableInteraction;
             }
+        }
+    }
+
+    private void RefreshVisualState()
+    {
+        if (visualStateRenderer == null ||
+            defaultStateSprite == null ||
+            changedStateSprite == null)
+        {
+            return;
+        }
+
+        Sprite desiredSprite = WorldPropRules.UsesChangedVisual(propId, runState)
+            ? changedStateSprite
+            : defaultStateSprite;
+        if (visualStateRenderer.sprite != desiredSprite)
+        {
+            visualStateRenderer.sprite = desiredSprite;
+        }
+    }
+
+    private void ValidateVisualStateConfiguration()
+    {
+        bool hasAnyVisualStateReference =
+            visualStateRenderer != null ||
+            defaultStateSprite != null ||
+            changedStateSprite != null;
+        if (!hasAnyVisualStateReference)
+        {
+            return;
+        }
+
+        if (!WorldPropRules.HasChangedVisual(propId))
+        {
+            Debug.LogWarning(
+                $"WorldStoryInteractable on '{name}' has run-state sprites, " +
+                $"but prop '{propId}' has no supported visual-state transition.",
+                this);
+            return;
+        }
+
+        if (visualStateRenderer == null ||
+            defaultStateSprite == null ||
+            changedStateSprite == null)
+        {
+            Debug.LogWarning(
+                $"WorldStoryInteractable on '{name}' requires a renderer, " +
+                "default sprite, and changed sprite for visual-state switching.",
+                this);
         }
     }
 

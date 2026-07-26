@@ -12,6 +12,7 @@ public sealed class AudioService
     public const string BgmResourceFolder = "Audio/BGM";
 
     private const int SfxPoolSize = 8;
+    private const int UiSfxPoolSize = 2;
     private const string MixerResourcePath = "Audio/MasterMixer";
     private const string BgmGroupName = "BGM";
     private const string SfxGroupName = "SFX";
@@ -22,6 +23,8 @@ public sealed class AudioService
     private const float MaxDb = 0f;
 
     private AudioMixer mixer;
+    private AudioMixerGroup bgmMixerGroup;
+    private AudioMixerGroup sfxMixerGroup;
     private GameObject root;
     private AudioSource bgmSourceA;
     private AudioSource bgmSourceB;
@@ -29,6 +32,8 @@ public sealed class AudioService
     private Tween bgmTweenB;
     private AudioSource[] sfxPool;
     private int sfxNextIndex;
+    private AudioSource[] uiSfxPool;
+    private int uiSfxNextIndex;
     private AudioClip currentBgmClip;
     private readonly Dictionary<string, AudioClip> resourceClipCache =
         new Dictionary<string, AudioClip>(StringComparer.Ordinal);
@@ -100,16 +105,24 @@ public sealed class AudioService
         root = new GameObject("[AudioService]");
         Object.DontDestroyOnLoad(root);
 
-        AudioMixerGroup bgmGroup = bgmGroups[0];
-        AudioMixerGroup sfxGroup = sfxGroups[0];
+        bgmMixerGroup = bgmGroups[0];
+        sfxMixerGroup = sfxGroups[0];
 
-        bgmSourceA = CreateAudioSource("BGM-A", bgmGroup, loop: true);
-        bgmSourceB = CreateAudioSource("BGM-B", bgmGroup, loop: true);
+        bgmSourceA = CreateAudioSource("BGM-A", bgmMixerGroup, loop: true);
+        bgmSourceB = CreateAudioSource("BGM-B", bgmMixerGroup, loop: true);
 
         sfxPool = new AudioSource[SfxPoolSize];
         for (int i = 0; i < SfxPoolSize; i++)
         {
-            sfxPool[i] = CreateAudioSource($"SFX-{i}", sfxGroup, loop: false);
+            sfxPool[i] = CreateAudioSource($"SFX-{i}", sfxMixerGroup, loop: false);
+        }
+
+        uiSfxPool = new AudioSource[UiSfxPoolSize];
+        for (int i = 0; i < UiSfxPoolSize; i++)
+        {
+            AudioSource source = CreateAudioSource($"UI-SFX-{i}", sfxMixerGroup, loop: false);
+            source.ignoreListenerPause = true;
+            uiSfxPool[i] = source;
         }
     }
 
@@ -123,6 +136,9 @@ public sealed class AudioService
         {
             Object.Destroy(root);
         }
+
+        bgmMixerGroup = null;
+        sfxMixerGroup = null;
     }
 
     public bool TryPlaySfxById(
@@ -148,6 +164,39 @@ public sealed class AudioService
         }
 
         PlaySfx(clip, volume);
+        error = string.Empty;
+        return true;
+    }
+
+    public bool TryPlayUiSfxById(
+        string audioId,
+        float volume,
+        out string error)
+    {
+        if (!TryValidateAudioId(audioId, out error))
+        {
+            return false;
+        }
+
+        if (uiSfxPool == null)
+        {
+            error = "The UI SFX audio sources are not initialized.";
+            return false;
+        }
+
+        string resourcePath = GetSfxResourcePath(audioId);
+        if (!TryLoadResourceClip(resourcePath, out AudioClip clip, out error))
+        {
+            return false;
+        }
+
+        PlaySfxFromPool(
+            clip,
+            volume,
+            1f,
+            1f,
+            uiSfxPool,
+            ref uiSfxNextIndex);
         error = string.Empty;
         return true;
     }
@@ -213,6 +262,64 @@ public sealed class AudioService
     public static string GetBgmResourcePath(string audioId)
     {
         return $"{BgmResourceFolder}/{audioId}";
+    }
+
+    public bool TryRouteToBgmMixer(AudioSource source, out string error)
+    {
+        if (source == null)
+        {
+            error = "The target AudioSource is null.";
+            return false;
+        }
+
+        if (bgmMixerGroup == null)
+        {
+            error = "The BGM mixer group is not initialized.";
+            return false;
+        }
+
+        source.outputAudioMixerGroup = bgmMixerGroup;
+        error = string.Empty;
+        return true;
+    }
+
+    public bool TryConfigureLoopingSfxById(
+        AudioSource source,
+        string audioId,
+        out string error)
+    {
+        if (source == null)
+        {
+            error = "The target AudioSource is null.";
+            return false;
+        }
+
+        if (!TryValidateAudioId(audioId, out error))
+        {
+            return false;
+        }
+
+        if (sfxMixerGroup == null)
+        {
+            error = "The SFX mixer group is not initialized.";
+            return false;
+        }
+
+        string resourcePath = GetSfxResourcePath(audioId);
+        if (!TryLoadResourceClip(resourcePath, out AudioClip clip, out error))
+        {
+            return false;
+        }
+
+        source.clip = clip;
+        source.outputAudioMixerGroup = sfxMixerGroup;
+        source.loop = true;
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        source.dopplerLevel = 0f;
+        source.ignoreListenerPause = false;
+        error = string.Empty;
+        return true;
     }
 
     public void PlayBgm(AudioClip clip, float fadeDuration = 1f)
@@ -297,13 +404,13 @@ public sealed class AudioService
             return;
         }
 
-        AudioSource source = sfxPool[sfxNextIndex];
-        sfxNextIndex = (sfxNextIndex + 1) % SfxPoolSize;
-
-        source.clip = clip;
-        source.volume = Mathf.Clamp01(volume);
-        source.pitch = Random.Range(pitchMin, pitchMax);
-        source.Play();
+        PlaySfxFromPool(
+            clip,
+            volume,
+            pitchMin,
+            pitchMax,
+            sfxPool,
+            ref sfxNextIndex);
     }
 
     private AudioSource CreateAudioSource(string name, AudioMixerGroup group, bool loop)
@@ -317,6 +424,23 @@ public sealed class AudioService
         source.playOnAwake = false;
         source.spatialBlend = 0f;
         return source;
+    }
+
+    private static void PlaySfxFromPool(
+        AudioClip clip,
+        float volume,
+        float pitchMin,
+        float pitchMax,
+        AudioSource[] pool,
+        ref int nextIndex)
+    {
+        AudioSource source = pool[nextIndex];
+        nextIndex = (nextIndex + 1) % pool.Length;
+
+        source.clip = clip;
+        source.volume = Mathf.Clamp01(volume);
+        source.pitch = Random.Range(pitchMin, pitchMax);
+        source.Play();
     }
 
     private bool TryLoadResourceClip(

@@ -264,6 +264,9 @@ End、取消或故障时仍会再次清理 CG，作为安全兜底。
 
 两个动作都可以放入 Action 节点的 `Actions`，或 Dialogue 节点的 `BeforeActions`、`AfterActions`。Unity 编辑器校验会确认对应 `AudioClip` 已导入。运行时资源缺失或音频服务不可用时会记录包含 Action Id 和 Audio Id 的错误，但不会中止剧情。
 
+当前策划音效表对应的剧情节点、资源路径和人工导入步骤见
+[`StoryAudioSetup.md`](StoryAudioSetup.md)。
+
 剧情不允许直接调用 `PlayerStateMachine.ChangeState()`。玩家状态变化必须经过现有语义接口，以保留轨道、物品和世界层前置条件。
 
 `WorldPropCommand` 的 `StringValue` 支持：

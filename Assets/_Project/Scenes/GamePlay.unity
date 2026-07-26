@@ -426,7 +426,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1654822527}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &62896011
 SpriteRenderer:
@@ -604,6 +604,7 @@ RectTransform:
   - {fileID: 4951800979680411155}
   - {fileID: 465221914}
   - {fileID: 1844260287}
+  - {fileID: 815972542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -700,9 +701,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameplayScreen: 1
   uiService: {fileID: 96428419}
-  endingCgRoot: {fileID: 0}
-  endingCgPlaceholderDuration: 2
-  autoCompleteEndingCg: 1
+  endingPresenter: {fileID: 0}
 --- !u!114 &96428421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -920,6 +919,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   detectionRadius: 1.5
+  detectionHeight: 4
   detectionOffset: {x: 0, y: 0, z: 0}
   interactableLayers:
     serializedVersion: 2
@@ -1631,7 +1631,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1654822527}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &328373765
 BoxCollider:
@@ -2286,6 +2286,7 @@ MonoBehaviour:
   presenter: {fileID: 815972545}
   uiInput: {fileID: 96428421}
   player: {fileID: 126827451}
+  cgBindings: []
 --- !u!4 &415205015
 Transform:
   m_ObjectHideFlags: 0
@@ -3512,6 +3513,7 @@ MonoBehaviour:
   dialogText: {fileID: 815972543}
   choiceContainer: {fileID: 1984216924}
   choiceButtonTemplate: {fileID: 1120783574}
+  cgImage: {fileID: 0}
   portraitImage: {fileID: 0}
   portraitBindings: []
   charactersPerSecond: 40
@@ -5401,8 +5403,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: dd59373fed442864b8a824c2ed77cc68, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -5430,8 +5432,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1691110170}
+  m_Children: []
   m_Father: {fileID: 1984216924}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6758,7 +6759,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1654822527}
   - {fileID: 340803626}
   - {fileID: 447480512}
   - {fileID: 1037400598}
@@ -8948,7 +8948,34 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 24918449}
+  - {fileID: 229098074}
+  - {fileID: 295974254}
+  - {fileID: 383808985}
+  - {fileID: 414090999}
+  - {fileID: 450457495}
+  - {fileID: 830010640}
+  - {fileID: 830546394}
+  - {fileID: 850630870}
+  - {fileID: 851770711}
+  - {fileID: 865525760}
+  - {fileID: 913561151}
+  - {fileID: 933799292}
+  - {fileID: 1147319949}
+  - {fileID: 1288882933}
+  - {fileID: 1299902850}
+  - {fileID: 1371100526}
+  - {fileID: 1614914633}
+  - {fileID: 1618298783}
+  - {fileID: 1621705794}
+  - {fileID: 1735708843}
+  - {fileID: 1894662227}
+  - {fileID: 1929637802}
+  - {fileID: 1934141674}
+  - {fileID: 2095945562}
+  - {fileID: 2097013525}
+  - {fileID: 2102149015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1977997019
@@ -9029,9 +9056,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameplayScreen: 1
   uiService: {fileID: 96428419}
-  endingCgRoot: {fileID: 1844260284}
-  endingCgPlaceholderDuration: 2
-  autoCompleteEndingCg: 1
+  endingPresenter: {fileID: 0}
 --- !u!1 &1984216923
 GameObject:
   m_ObjectHideFlags: 0
@@ -9982,3 +10007,9 @@ SceneRoots:
   - {fileID: 1651101554}
   - {fileID: 382290611}
   - {fileID: 2036403319}
+  - {fileID: 62896010}
+  - {fileID: 328373764}
+  - {fileID: 415205015}
+  - {fileID: 504164287}
+  - {fileID: 516271771}
+  - {fileID: 1522757155}

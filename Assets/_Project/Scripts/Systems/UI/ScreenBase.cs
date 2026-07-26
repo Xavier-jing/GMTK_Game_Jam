@@ -25,6 +25,7 @@ public abstract class ScreenBase : MonoBehaviour
     {
         if (IsVisible)
         {
+            UISfxFeedback.EnsureInChildren(this);
             SelectDefaultControl();
             return;
         }
@@ -32,6 +33,7 @@ public abstract class ScreenBase : MonoBehaviour
         gameObject.SetActive(true);
         IsVisible = true;
         OnShow();
+        UISfxFeedback.EnsureInChildren(this);
         SelectDefaultControl();
     }
 

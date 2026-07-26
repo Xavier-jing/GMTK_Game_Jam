@@ -40,6 +40,12 @@
             "TargetId": "prop_bed_blanket",
             "StringValue": "CutBlanket"
           }
+        },
+        {
+          "Id": "PlaySfx",
+          "Params": {
+            "StringValue": "IA_CuttingFabric"
+          }
         }
       ],
       "Next": "cut_result"
