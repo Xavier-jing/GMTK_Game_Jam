@@ -46,6 +46,24 @@ public sealed class LoadingScreen : MonoBehaviour, ISceneTransition
 
     public static LoadingScreen Current { get; private set; }
 
+    public static LoadingScreen EnsureExists()
+    {
+        if (Current != null)
+        {
+            return Current;
+        }
+
+        GameObject prefab = Resources.Load<GameObject>("LoadingRoot");
+        if (prefab == null)
+        {
+            Debug.LogError("[LoadingScreen] LoadingRoot prefab not found in Resources.");
+            return null;
+        }
+
+        Instantiate(prefab);
+        return Current;
+    }
+
     private void Awake()
     {
         if (Current != null && Current != this)

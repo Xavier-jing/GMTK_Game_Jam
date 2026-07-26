@@ -34,12 +34,6 @@ public sealed class MainMenuScreen : ScreenBase
             return;
         }
 
-        if (LoadingScreen.Current == null)
-        {
-            Debug.LogWarning(
-                $"MainMenuScreen on '{name}' is loading without an active LoadingScreen. Add LoadingRoot to the scene.");
-        }
-
         AppContext.Instance.SceneLoader.LoadScene(gameplayScene);
     }
 
@@ -61,13 +55,15 @@ public sealed class MainMenuScreen : ScreenBase
         Owner.Show(ScreenId.Settings);
     }
 
-    public void ExitGame()
+    public void ContinueGame()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        if (!AppContext.HasInstance)
+        {
+            Debug.LogWarning($"MainMenuScreen on '{name}' cannot continue game because AppContext is missing.");
+            return;
+        }
+
+        AppContext.Instance.SceneLoader.LoadScene(gameplayScene);
     }
 
     private void AutoBindMissingControls()
@@ -114,7 +110,10 @@ public sealed class MainMenuScreen : ScreenBase
 
     private static bool IsExitButtonName(string buttonName)
     {
-        return buttonName == "Exit"
+        return buttonName == "Continue"
+            || buttonName == "ContinueButton"
+            || buttonName == "ContinueGame"
+            || buttonName == "Exit"
             || buttonName == "ExitButton"
             || buttonName == "Quit"
             || buttonName == "QuitButton"
@@ -137,8 +136,8 @@ public sealed class MainMenuScreen : ScreenBase
 
         if (exitButton != null)
         {
-            exitButton.onClick.RemoveListener(ExitGame);
-            exitButton.onClick.AddListener(ExitGame);
+            exitButton.onClick.RemoveListener(ContinueGame);
+            exitButton.onClick.AddListener(ContinueGame);
         }
     }
 
@@ -156,7 +155,7 @@ public sealed class MainMenuScreen : ScreenBase
 
         if (exitButton != null)
         {
-            exitButton.onClick.RemoveListener(ExitGame);
+            exitButton.onClick.RemoveListener(ContinueGame);
         }
     }
 }

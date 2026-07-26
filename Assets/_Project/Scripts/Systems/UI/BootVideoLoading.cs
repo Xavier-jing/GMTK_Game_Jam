@@ -15,6 +15,10 @@ public sealed class BootVideoLoading : MonoBehaviour
         videoPlayer != null &&
         (videoPlayer.clip != null || !string.IsNullOrWhiteSpace(videoPlayer.url));
 
+    public double VideoTime => videoPlayer != null ? videoPlayer.time : 0.0;
+    public double VideoLength => videoPlayer != null ? videoPlayer.length : 0.0;
+    public bool IsPrepared => videoPlayer != null && videoPlayer.isPrepared;
+
     private void Awake()
     {
         if (videoPlayer == null)
@@ -33,13 +37,13 @@ public sealed class BootVideoLoading : MonoBehaviour
         playbackCompletion = null;
     }
 
-    public Task PlayAsync()
+    public Task<bool> PlayAsync()
     {
         if (!CanPlay)
         {
             Debug.LogWarning(
                 $"BootVideoLoading on '{name}' has no VideoClip or URL. Boot will use the normal loading screen.");
-            return Task.CompletedTask;
+            return Task.FromResult(false);
         }
 
         if (playbackCompletion != null)

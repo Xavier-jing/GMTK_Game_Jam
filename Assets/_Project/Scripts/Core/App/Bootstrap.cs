@@ -21,6 +21,7 @@ public static class Bootstrap
         if (!appContext.SceneLoader.TryGetSceneId(scene.path, out SceneId sceneId) ||
             sceneId != SceneId.Boot)
         {
+            LoadingScreen.EnsureExists();
             _ = LoadingScreen.Current?.HideAsync();
             return;
         }
@@ -40,6 +41,7 @@ public static class Bootstrap
         if (useBootVideo)
         {
             LoadingScreen.Current?.HideImmediately();
+            Object.DontDestroyOnLoad(bootVideo.gameObject);
         }
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single);
@@ -61,7 +63,7 @@ public static class Bootstrap
         }
 
         operation.allowSceneActivation = false;
-        Task videoTask = bootVideo.PlayAsync();
+        Task<bool> videoTask = bootVideo.PlayAsync();
 
         while (operation.progress < 0.9f)
         {
@@ -69,11 +71,14 @@ public static class Bootstrap
         }
 
         await videoTask;
+        Debug.Log($"[Bootstrap] Boot video task completed. Result={videoTask.Result}, VideoPlayer.time={bootVideo.VideoTime:0.00}s, VideoPlayer.length={bootVideo.VideoLength:0.00}s, IsPrepared={bootVideo.IsPrepared}");
         operation.allowSceneActivation = true;
 
         while (!operation.isDone)
         {
             await Task.Yield();
         }
+
+        Object.Destroy(bootVideo.gameObject);
     }
 }
