@@ -16,6 +16,34 @@ its original X-axis 45-degree rotation and scale. It is a trigger and therefore
 does not physically block the player. `CameraOcclusionFader` detects these
 triggers through its `Occluder Layers` mask.
 
+## Matching an item interaction collider
+
+1. Put the item visual `SpriteRenderer` under the GameObject containing
+   `WorldStoryInteractable`.
+2. Select the visual `SpriteRenderer`, not the logical root.
+3. Choose an interaction layer in `Collider Layer`.
+4. Set `Item Depth` and `Item Padding`.
+5. Press `Match Item Collider To Selected Sprite`.
+
+The tool creates an `ItemInteractionCollider` child that inherits the visual's
+complete Scene transform, including rotations and scale. It is a 3D trigger and
+is automatically added to the parent's `Interaction Colliders` array. Pressing
+the button again updates the existing collider after the visual changes instead
+of creating a duplicate. The scene is never saved automatically.
+
+For isometric visuals whose apparent Game View position does not match their
+world position, use `Project Item Collider To Ground` instead:
+
+1. Assign the gameplay camera as `Placement Camera`.
+2. Set `Ground World Y`, normally `0`.
+3. Set `Grounded Item Size`, normally `(1, 1, 1)`.
+4. Select the item visual and press `Project Item Collider To Ground`.
+
+The tool projects the sprite center through the gameplay camera onto the ground
+plane, creates an upright `ItemGroundInteractionCollider`, and assigns it as the
+item's `Interaction Point`. This is the recommended mode for player interaction;
+the sprite remains visually unchanged.
+
 ## Before drawing
 
 1. Exit Play Mode.
