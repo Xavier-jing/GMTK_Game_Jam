@@ -8,7 +8,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "裁剪床被",
+          "Dialog": "Cut Blanket",
           "TargetScriptId": "prop_bed_blanket",
           "TargetNodeId": "cut",
           "Condition": {
@@ -21,7 +21,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_bed_blanket",
           "TargetNodeId": "leave"
         }
@@ -32,7 +32,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "（提示框）你居然想剪被套！也许你另有主意，也许你只是今晚不想睡觉了。",
+      "Dialog": "You really want to cut up the duvet cover? Maybe you have a plan—or maybe you just don't intend to sleep tonight.",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -49,7 +49,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "（提示框）这也许是你按部就班的人生中最大胆的事。",
+      "Dialog": "This might be the boldest thing you've ever done in your predictable life.",
       "Next": "cut_followup"
     },
     {
@@ -57,7 +57,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "（提示框）嘿，伙计，往好处想……我是说，也许你还能更大胆呢。",
+      "Dialog": "Hey, look on the bright side... I mean, maybe you could go even bolder.",
       "Next": "complete"
     },
     {

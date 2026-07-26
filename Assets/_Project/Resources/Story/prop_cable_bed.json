@@ -8,12 +8,12 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "掀起床垫",
+          "Dialog": "Lift Mattress",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "lift",
           "Condition": {
@@ -26,7 +26,7 @@
           }
         },
         {
-          "Dialog": "掀起床垫",
+          "Dialog": "Lift Mattress",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "lift_unavailable",
           "Condition": {
@@ -39,7 +39,7 @@
           }
         },
         {
-          "Dialog": "拾取绳子",
+          "Dialog": "Take Rope",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "take_rope",
           "Condition": {
@@ -52,7 +52,7 @@
           }
         },
         {
-          "Dialog": "拾取绳子",
+          "Dialog": "Take Rope",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "rope_unavailable",
           "Condition": {
@@ -65,7 +65,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_cable_bed",
           "TargetNodeId": "leave"
         }
@@ -76,7 +76,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "你对它很熟悉，因为你每天都睡在这里。",
+      "Dialog": "You know it well. You sleep here every night, after all.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -93,7 +93,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "你做出了从没做过的决定——把床垫掀起。",
+      "Dialog": "You make an unprecedented decision—to lift the mattress.",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -110,7 +110,7 @@
       "Type": "Dialogue",
       "PortraitId": "2",
       "ActorId": "",
-      "Dialog": "一个红色按钮？按还是不按呢？",
+      "Dialog": "A red button? Should I press it or not?",
       "Next": "complete"
     },
     {
@@ -118,7 +118,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "平常谁会关心床垫下有什么。",
+      "Dialog": "Who normally cares what's under a mattress?",
       "Next": "complete"
     },
     {
@@ -126,7 +126,7 @@
       "Type": "Dialogue",
       "PortraitId": "3",
       "ActorId": "",
-      "Dialog": "绳子能有什么用？先扯了再说。",
+      "Dialog": "What's this rope for? Only one way to find out—give it a pull.",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -149,7 +149,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "绳子也许真能有用……我需要这样相信着。",
+      "Dialog": "Maybe this rope really will come in handy... I have to believe that.",
       "Next": "complete"
     },
     {
@@ -157,7 +157,7 @@
       "Type": "Dialogue",
       "PortraitId": "1",
       "ActorId": "",
-      "Dialog": "……力量不足以扯断绳子。",
+      "Dialog": "...I'm not strong enough to break the rope.",
       "Next": "complete"
     },
     {

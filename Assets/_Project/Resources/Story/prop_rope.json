@@ -8,7 +8,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "缠绕在自己身上",
+          "Dialog": "Wrap Around Self",
           "TargetScriptId": "prop_rope",
           "TargetNodeId": "wrap",
           "Condition": {
@@ -21,7 +21,7 @@
           }
         },
         {
-          "Dialog": "扔出",
+          "Dialog": "Throw",
           "TargetScriptId": "prop_rope",
           "TargetNodeId": "throw",
           "Condition": {
@@ -34,7 +34,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_rope",
           "TargetNodeId": "leave"
         }
@@ -45,7 +45,7 @@
       "Type": "Dialogue",
       "PortraitId": "2",
       "ActorId": "",
-      "Dialog": "加油，也许离成功只差一步……",
+      "Dialog": "Come on... Maybe I'm just one step away.",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -68,7 +68,7 @@
       "Type": "Dialogue",
       "PortraitId": "2",
       "ActorId": "",
-      "Dialog": "现在我已经做出了决定！",
+      "Dialog": "I've made my decision!",
       "Next": "complete"
     },
     {
@@ -76,7 +76,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "我已尝过死亡的滋味，如今还站在这里，正是因为我想活着啊！",
+      "Dialog": "I've tasted death—and I'm still standing because I want to live!",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -93,7 +93,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "进入结局三演出。",
+      "Dialog": "Entering Ending 3 cinematic.",
       "Next": "ending_complete"
     },
     {

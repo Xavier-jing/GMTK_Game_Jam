@@ -8,12 +8,12 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_vase",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "放入",
+          "Dialog": "Put In",
           "TargetScriptId": "prop_vase",
           "TargetNodeId": "put_in",
           "Condition": {
@@ -26,7 +26,7 @@
           }
         },
         {
-          "Dialog": "取出",
+          "Dialog": "Take Out",
           "TargetScriptId": "prop_vase",
           "TargetNodeId": "take_out",
           "Condition": {
@@ -39,7 +39,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_vase",
           "TargetNodeId": "leave"
         }
@@ -50,7 +50,7 @@
       "Type": "Dialogue",
       "PortraitId": "2",
       "ActorId": "",
-      "Dialog": "它在你的天花板上，你目前浇不了它。\n主角：……",
+      "Dialog": "It's on the ceiling. You can't water it from here.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -67,7 +67,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "你回到了地面。",
+      "Dialog": "You're back on the ground.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -84,7 +84,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "难得一见的神奇体验。",
+      "Dialog": "A rare and magical experience.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",

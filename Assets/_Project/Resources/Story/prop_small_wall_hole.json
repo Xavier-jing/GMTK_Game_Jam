@@ -8,12 +8,12 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_small_wall_hole",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "用扳手击打",
+          "Dialog": "Strike with Wrench",
           "TargetScriptId": "prop_small_wall_hole",
           "TargetNodeId": "strike",
           "Condition": {
@@ -26,7 +26,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_small_wall_hole",
           "TargetNodeId": "leave"
         }
@@ -37,7 +37,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "什么都看不清楚……",
+      "Dialog": "I can't make out a thing...",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -54,7 +54,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "试试就试试，万一有用呢。",
+      "Dialog": "Fine, I'll give it a try. It might just work.",
       "AfterActions": [
         {
           "Id": "WorldPropCommand",
@@ -77,7 +77,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "墙以外是什么呢？",
+      "Dialog": "I wonder what's beyond these walls.",
       "Next": "complete"
     },
     {
