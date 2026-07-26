@@ -114,6 +114,7 @@
     <Compile Include="Assets\_Project\Scripts\Core\App\ServiceRegistry.cs" />
     <Compile Include="Assets\_Project\Scripts\Core\Scene\SceneLoader.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerStates\SubStates\PlayerAscendState.cs" />
+    <Compile Include="Assets\_Project\Scripts\Game\Player\PlayerGroundProjection.cs" />
     <Compile Include="Assets\_Project\Scripts\Game\Interaction\PlayerCarrySlot.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\Story\StoryHandlerRegistries.cs" />
     <Compile Include="Assets\_Project\Scripts\Systems\UI\SettingsScreen.cs" />
