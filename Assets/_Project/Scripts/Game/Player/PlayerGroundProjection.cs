@@ -8,6 +8,10 @@ public sealed class PlayerGroundProjection : MonoBehaviour
     [SerializeField]
     private SpriteRenderer projectionRenderer;
 
+    [SerializeField]
+    [Tooltip("Must render above floor sprites and below the player sprite.")]
+    private int projectionSortingOrder = 5;
+
     [Header("Ground Detection")]
     [SerializeField]
     private LayerMask groundLayers;
@@ -23,6 +27,12 @@ public sealed class PlayerGroundProjection : MonoBehaviour
     [SerializeField]
     [Min(0f)]
     private float surfaceOffset = 0.02f;
+
+    [SerializeField]
+    [Tooltip(
+        "Used when no Ground Layer collider is below the player. " +
+        "List gameplay floor heights from lowest to highest.")]
+    private float[] fallbackGroundHeights = { 0f, 6f };
 
     [SerializeField]
     [Tooltip("Recommended for pre-drawn 2D ellipse shadows in the fixed isometric camera.")]
@@ -81,6 +91,7 @@ public sealed class PlayerGroundProjection : MonoBehaviour
 
         baseProjectionScale = projectionRenderer.transform.localScale;
         baseProjectionColor = projectionRenderer.color;
+        projectionRenderer.sortingOrder = projectionSortingOrder;
         SetProjectionVisible(false);
     }
 
@@ -89,7 +100,7 @@ public sealed class PlayerGroundProjection : MonoBehaviour
         Vector3 origin = playerCollider.bounds.center;
         float rayDistance = maxProjectionDistance + playerCollider.bounds.extents.y;
 
-        if (!Physics.Raycast(
+        if (Physics.Raycast(
                 origin,
                 Vector3.down,
                 out RaycastHit hit,
@@ -97,20 +108,46 @@ public sealed class PlayerGroundProjection : MonoBehaviour
                 groundLayers,
                 QueryTriggerInteraction.Ignore))
         {
+            float airHeight = Mathf.Max(
+                0f,
+                hit.distance - playerCollider.bounds.extents.y);
+            UpdateProjectionVisibility(hit.point, hit.normal, airHeight);
+            return;
+        }
+
+        if (!TryGetFallbackGround(
+                playerCollider.bounds.min.y,
+                out float fallbackGroundY))
+        {
             SetProjectionVisible(false);
             return;
         }
 
-        float airHeight = Mathf.Max(
+        float fallbackAirHeight = Mathf.Max(
             0f,
-            hit.distance - playerCollider.bounds.extents.y);
+            playerCollider.bounds.min.y - fallbackGroundY);
+        Vector3 fallbackPoint = new Vector3(
+            origin.x,
+            fallbackGroundY,
+            origin.z);
+        UpdateProjectionVisibility(
+            fallbackPoint,
+            Vector3.up,
+            fallbackAirHeight);
+    }
+
+    private void UpdateProjectionVisibility(
+        Vector3 surfacePoint,
+        Vector3 surfaceNormal,
+        float airHeight)
+    {
         if (airHeight <= minimumAirHeight)
         {
             SetProjectionVisible(false);
             return;
         }
 
-        UpdateProjection(hit, airHeight);
+        UpdateProjection(surfacePoint, surfaceNormal, airHeight);
     }
 
     private void OnDisable()
@@ -118,23 +155,50 @@ public sealed class PlayerGroundProjection : MonoBehaviour
         SetProjectionVisible(false);
     }
 
-    private void UpdateProjection(RaycastHit hit, float airHeight)
+    private bool TryGetFallbackGround(
+        float playerBottomY,
+        out float groundY)
+    {
+        groundY = float.NegativeInfinity;
+        if (fallbackGroundHeights == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < fallbackGroundHeights.Length; i++)
+        {
+            float candidate = fallbackGroundHeights[i];
+            if (candidate <= playerBottomY + minimumAirHeight &&
+                candidate > groundY)
+            {
+                groundY = candidate;
+            }
+        }
+
+        return !float.IsNegativeInfinity(groundY);
+    }
+
+    private void UpdateProjection(
+        Vector3 surfacePoint,
+        Vector3 surfaceNormal,
+        float airHeight)
     {
         Transform projectionTransform = projectionRenderer.transform;
         if (faceCamera && cameraTransform != null)
         {
             projectionTransform.position =
-                hit.point -
+                surfacePoint -
                 cameraTransform.forward *
                 Mathf.Max(surfaceOffset, cameraFacingDepthOffset);
             projectionTransform.forward = cameraTransform.forward;
         }
         else
         {
-            projectionTransform.position = hit.point + hit.normal * surfaceOffset;
+            projectionTransform.position =
+                surfacePoint + surfaceNormal * surfaceOffset;
             projectionTransform.rotation = Quaternion.FromToRotation(
                 Vector3.forward,
-                hit.normal);
+                surfaceNormal);
         }
 
         float heightRatio = Mathf.InverseLerp(

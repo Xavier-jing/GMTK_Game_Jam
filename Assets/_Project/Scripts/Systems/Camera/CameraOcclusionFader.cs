@@ -100,7 +100,7 @@ public sealed class CameraOcclusionFader : MonoBehaviour
             hits,
             distance,
             occluderLayers,
-            QueryTriggerInteraction.Ignore);
+            QueryTriggerInteraction.Collide);
 
         if (hitCount == MaxHits && !hasWarnedAboutHitLimit)
         {

@@ -61,8 +61,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\_Project\Scripts\Editor\Story\Tests\WorldStoryRulesEditorTest.cs" />
+    <Compile Include="Assets\_Project\Scripts\Editor\IsometricColliderPainterWindow.cs" />
     <Compile Include="Assets\_Project\Scripts\Editor\Story\StoryScriptValidationMenu.cs" />
     <Compile Include="Assets\_Project\Scripts\Editor\Story\Tests\StoryValidatorEditorTest.cs" />
+    <Compile Include="Assets\_Project\Scripts\Editor\IsometricPlacementWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
