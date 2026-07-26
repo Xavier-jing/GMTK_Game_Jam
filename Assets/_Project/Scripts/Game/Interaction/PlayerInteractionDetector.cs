@@ -12,6 +12,10 @@ public sealed class PlayerInteractionDetector : MonoBehaviour
     private float detectionRadius = 1.5f;
 
     [SerializeField]
+    [Min(0f)]
+    private float detectionHeight = 4f;
+
+    [SerializeField]
     private Vector3 detectionOffset;
 
     [SerializeField]
@@ -25,9 +29,11 @@ public sealed class PlayerInteractionDetector : MonoBehaviour
         interactables.Clear();
         uniqueInteractables.Clear();
 
-        Vector3 center = transform.position + detectionOffset;
-        int hitCount = Physics.OverlapSphereNonAlloc(
-            center,
+        Vector3 bottom = transform.position + detectionOffset;
+        Vector3 top = bottom + Vector3.up * detectionHeight;
+        int hitCount = Physics.OverlapCapsuleNonAlloc(
+            bottom,
+            top,
             detectionRadius,
             overlapResults,
             interactableLayers,
@@ -58,6 +64,21 @@ public sealed class PlayerInteractionDetector : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position + detectionOffset, detectionRadius);
+        Vector3 bottom = transform.position + detectionOffset;
+        Vector3 top = bottom + Vector3.up * detectionHeight;
+        Gizmos.DrawWireSphere(bottom, detectionRadius);
+        Gizmos.DrawWireSphere(top, detectionRadius);
+        Gizmos.DrawLine(
+            bottom + Vector3.forward * detectionRadius,
+            top + Vector3.forward * detectionRadius);
+        Gizmos.DrawLine(
+            bottom - Vector3.forward * detectionRadius,
+            top - Vector3.forward * detectionRadius);
+        Gizmos.DrawLine(
+            bottom + Vector3.right * detectionRadius,
+            top + Vector3.right * detectionRadius);
+        Gizmos.DrawLine(
+            bottom - Vector3.right * detectionRadius,
+            top - Vector3.right * detectionRadius);
     }
 }

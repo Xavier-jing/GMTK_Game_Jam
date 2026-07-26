@@ -44,6 +44,13 @@ plane, creates an upright `ItemGroundInteractionCollider`, and assigns it as the
 item's `Interaction Point`. This is the recommended mode for player interaction;
 the sprite remains visually unchanged.
 
+Runtime interaction uses a vertical capsule around the player and ranks targets
+by XZ ground-plane distance. The collider therefore needs to match the item's
+gameplay footprint on the ground, not the tilted sprite in Scene view. `Detection
+Height` controls how far above the player's ground position the capsule searches;
+the default `4` covers ordinary item sprites without making different floor levels
+overlap.
+
 ## Before drawing
 
 1. Exit Play Mode.

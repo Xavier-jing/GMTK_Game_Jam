@@ -112,8 +112,9 @@ public sealed class PlayerInteractor : MonoBehaviour
                 continue;
             }
 
-            float sqrDistance =
-                (point.position - transform.position).sqrMagnitude;
+            Vector3 offset = point.position - transform.position;
+            offset.y = 0f;
+            float sqrDistance = offset.sqrMagnitude;
             int instanceId = component.GetInstanceID();
             bool canInteract = interactable.CanInteract(interactionContext);
 
