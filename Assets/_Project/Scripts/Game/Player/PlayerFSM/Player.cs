@@ -176,13 +176,18 @@ public class Player : MonoBehaviour
     // Called when the lower-layer interaction releases the carried floating item.
     public bool TryReleaseFloatingItemAndRise()
     {
-        if (!GameplayStatus.RailRemoved || !GameplayStatus.IsLowerLayer || !GameplayStatus.HasFloatingSmallItem)
+        if (!GameplayStatus.RailRemoved ||
+            !GameplayStatus.IsLowerLayer ||
+            CarrySlot == null ||
+            CarrySlot.CurrentProp == null)
         {
             return false;
         }
 
-        GameplayStatus.ClearItemSlot();
-        return TryStartRiseToUpper();
+        // PlayerCarrySlot owns the carried world prop and must release it together
+        // with the gameplay slot state. Clearing GameplayStatus directly would
+        // leave an invisible/stale prop in the carry slot.
+        return CarrySlot.TryDrop(CarrySlot.CurrentProp);
     }
 
     public bool TryStartCarryingSlotItem(PlayerSlotItemKind itemKind)

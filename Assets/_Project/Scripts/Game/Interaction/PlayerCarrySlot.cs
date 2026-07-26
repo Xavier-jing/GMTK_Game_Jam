@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -11,6 +12,8 @@ public sealed class PlayerCarrySlot : MonoBehaviour
     public WorldStoryInteractable CurrentProp { get; private set; }
 
     public bool HasProp => CurrentProp != null;
+
+    public event Action<WorldStoryInteractable> Changed;
 
     private void Awake()
     {
@@ -49,6 +52,7 @@ public sealed class PlayerCarrySlot : MonoBehaviour
 
         CurrentProp = prop;
         prop.SetCarried(true);
+        Changed?.Invoke(CurrentProp);
         return true;
     }
 
@@ -87,6 +91,7 @@ public sealed class PlayerCarrySlot : MonoBehaviour
 
         CurrentProp = null;
         prop.ReleaseFromCarrySlot(position, remainsInteractable);
+        Changed?.Invoke(null);
         return true;
     }
 }

@@ -27,6 +27,27 @@ public class PlayerMoveState : PlayerGroundedState
     {
         base.LogicUpdate();
 
+        if (stateMachine.currentState != this)
+        {
+            return;
+        }
+
+        if (!player.GameplayStatus.CanUseWeightedGroundMovement)
+        {
+            player.SetVelocityXZ(0f, 0f);
+
+            if (player.GameplayStatus.ShouldRise)
+            {
+                player.TryStartRiseToUpper();
+            }
+            else
+            {
+                stateMachine.ChangeState(player.IdleState);
+            }
+
+            return;
+        }
+
         float speed = playerData.movementVelocity;
         Vector3 moveDirection = player.GetMappedGroundMovement(new Vector2(xInput, yInput));
         player.SetVelocityXZ(moveDirection.x * speed, moveDirection.z * speed);

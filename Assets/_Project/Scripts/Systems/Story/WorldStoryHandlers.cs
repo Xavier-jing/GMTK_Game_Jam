@@ -129,6 +129,35 @@ public sealed class SpendTurnsStoryAction : IStoryActionHandler
     }
 }
 
+public sealed class ChangeTurnsStoryAction : IStoryActionHandler
+{
+    public string Id => "ChangeTurns";
+
+    public bool Validate(StoryActionParams parameters, out string error)
+    {
+        if (parameters == null || parameters.IntValue == 0)
+        {
+            error = "Params.IntValue must be a non-zero signed turn delta.";
+            return false;
+        }
+
+        error = string.Empty;
+        return true;
+    }
+
+    public Task<StoryActionResult> ExecuteAsync(
+        StoryActionContext context,
+        StoryActionParams parameters,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(
+            context.TryChangeTurns(parameters.IntValue, out string error)
+                ? StoryActionResult.Success()
+                : StoryActionResult.Failure(error));
+    }
+}
+
 public sealed class RequestRunEndStoryAction : IStoryActionHandler
 {
     public string Id => "RequestRunEnd";

@@ -26,6 +26,8 @@ public sealed class RunState
 
     public bool ParachuteAnchored { get; private set; }
 
+    public bool WallStruckOnce { get; private set; }
+
     public void MarkDresserOpened()
     {
         SetFlag(RunFlagId.DresserOpened, true);
@@ -71,6 +73,17 @@ public sealed class RunState
         SetFlag(RunFlagId.ParachuteAnchored, true);
     }
 
+    public void MarkWallStruckOnce()
+    {
+        if (WallStruckOnce)
+        {
+            return;
+        }
+
+        WallStruckOnce = true;
+        Changed?.Invoke();
+    }
+
     public void Reset()
     {
         DresserOpened = false;
@@ -82,6 +95,7 @@ public sealed class RunState
         BedSwitchTriggered = false;
         RopeAttached = false;
         ParachuteAnchored = false;
+        WallStruckOnce = false;
         Changed?.Invoke();
     }
 

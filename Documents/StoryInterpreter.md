@@ -172,6 +172,7 @@
 | `SwitchBgm` | `StringValue`, 可选 `FloatValue` | 交叉切换 BGM；`FloatValue` 为 `0` 时使用 `1` 秒过渡 |
 | `WorldPropCommand` | `TargetId`, `StringValue` | 对目标道具执行经过 C# 前置条件复检的语义命令 |
 | `SpendTurns` | `IntValue > 0` | 扣除指定动作回合；归零时在剧情正常结束后进入结局一 |
+| `ChangeTurns` | `IntValue != 0` | 按有符号数值改变回合；正数增加稳定时间，负数减少，归零进入结局一 |
 | `RequestRunEnd` | `StringValue` | 请求 `EndingTwo` 或 `EndingThree`，在剧情正常结束后切周目 |
 
 ### 剧情音频动作
@@ -230,6 +231,9 @@
 | `UnplugRefrigerator` | 关闭冰箱电源 |
 | `ConnectBedPower` | 把携带槽中的带线床接到电源处 |
 | `InstallPlank` | 把携带槽中的木板安装到墙洞 |
+| `AttachRopeToFabric` | 真相知晓后，把本周目背包中的绳子固定到处理好的布料 |
+| `AnchorParachute` | 真相知晓后，用携带槽中的梳妆台锚定降落伞绳索 |
+| `DeployParachute` | 布料、绳索和锚点全部完成后触发结局三 |
 
 选择菜单中的条件只决定“显示/灰显”。执行 `WorldPropCommand` 时会在修改状态前再次检查同一条件，因此玩家状态在菜单打开后发生变化也不会绕过限制。
 
@@ -277,7 +281,11 @@
 
 `RunFlagEquals.StringValue` 支持 `DresserOpened`、`WallRepaired`、`SteeringWheelRaised`、`FridgeUnplugged`、`BedConnected`、`FabricPrepared`、`BedSwitchTriggered`、`RopeAttached`、`ParachuteAnchored`。
 
-`LoopProgressFlagEquals.StringValue` 支持 `WallStruckOnce`、`TruthKnown`、`EndingTwoReached`、`EndingThreeReached`。
+`LoopProgressFlagEquals.StringValue` 支持 `TruthKnown`、`EndingTwoReached`、`EndingThreeReached`。
+
+墙面第一次击打属于 `RunState`，只在当前周目保留；同一周目第二次击打揭晓真相并结束。
+新周目墙洞物理状态会重置，但 `TruthKnown` 继续保留。所有物品在新周目重新拾取，
+仍按 JSON 中的 `SpendTurns` 扣除回合。
 
 道具选择示例：
 
@@ -315,6 +323,47 @@
   ]
 }
 ```
+
+### 物理物品槽与玩家状态机
+
+影响玩家浮沉的世界道具不要加入普通 `Inventory`。它们必须使用
+`WorldPropCommand` 的 `TakeIntoCarrySlot` 和 `DropFromCarrySlot` 命令：
+
+- 轨道未拆除时，携带槽不会改变玩家的轨道运动。
+- 轨道拆除后，玩家在上层把道具放入槽中会进入 `PlayerSinkingState`。
+- 下坠过程不接收 WASD；接触下层地面后恢复 WASD。
+- 玩家位于下层且槽中仍有道具时，Space 才能触发跳跃。
+- 在下层执行 `DropFromCarrySlot` 会同时释放世界道具、清空槽位并进入
+  `PlayerAscendState`，不能只直接清空 `PlayerGameplayStatus`。
+
+物理槽与普通背包是两套数据：
+
+- `AppContext.Inventory` 保存剪刀、扳手、绳子等剧情背包道具。
+- `PlayerCarrySlot.CurrentProp` 保存当前影响物理状态的唯一世界道具。
+- 物理槽 UI 应订阅 `PlayerCarrySlot.Changed`，并以事件参数更新图标或名称；
+  参数为 `null` 时清空显示。不要从 `Inventory.VisibleItems` 推断物理槽状态。
+
+需要扣回合的进槽、出槽或场景改造命令，应在同一个 Action 节点中先执行
+`WorldPropCommand`，成功后再执行 `SpendTurns`。查看、离开、选择物品和取消菜单
+不添加 `SpendTurns`。
+
+#### Unity 人工挂接
+
+1. 在玩家 Prefab 或场景中的玩家 GameObject 上确认存在 `Player`、
+   `PlayerGameplayStatus`、`PlayerCarrySlot`、`PlayerInteractor` 和
+   `PlayerInteractionDetector`。`Player` 的 `Initial Rail` 必须指向出生轨道。
+2. `PlayerCarrySlot.Drop Anchor` 指向玩家附近用于放回世界道具的 Transform；
+   建议位于玩家脚边、避开玩家 Collider。未配置时会使用玩家当前位置。
+3. 每个可携带道具添加并配置 `WorldStoryInteractable`，其 `Prop Id` 必须是
+   `Dresser`、`CableBed`、`TeaSet`、`Vase`、`Plank` 或 `Refrigerator` 之一；
+   `First Script Id` 指向包含进槽/出槽选项的对应 `prop_*.json`。
+4. 对物品槽 UI，由人类把显示脚本接到玩家的 `PlayerCarrySlot.Changed`：
+   非空时显示 `CurrentProp.PropId` 对应的人类制作图标，空值时隐藏图标。
+5. 进入 Play Mode 后依次验证：轨道移动 → 获得扳手 → 拆轨上升 →
+   上层进槽后下沉 → 下层 WASD/Space → F 菜单出槽后重新上升。
+
+这些组件与脚本已存在，不需要新增 `.meta`。若人类新增物品槽 UI 脚本或美术资源，
+应由 Unity `2022.3.62f3c1` 导入并提交其生成的 `.meta`；AI 不创建或修改该元数据。
 
 ## 7. 运行时 API
 

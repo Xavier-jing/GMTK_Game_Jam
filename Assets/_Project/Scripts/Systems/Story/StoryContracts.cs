@@ -197,6 +197,30 @@ public sealed class StoryActionContext
 
     public PlayerCarrySlot CarrySlot { get; }
 
+    public bool TryChangeTurns(int turnDelta, out string error)
+    {
+        if (!ActionResolver.ResolveStoryTurnDelta(
+                turnDelta,
+                out bool turnsExhausted))
+        {
+            error =
+                "The turn change could not be applied because it was zero or the run is ending.";
+            return false;
+        }
+
+        if (turnsExhausted &&
+            !TryRequestRunEnd(
+                RunEndReason.EndingOne,
+                null,
+                out error))
+        {
+            return false;
+        }
+
+        error = string.Empty;
+        return true;
+    }
+
     public bool TryRequestRunEnd(
         RunEndReason reason,
         Action onStoryCompleted,

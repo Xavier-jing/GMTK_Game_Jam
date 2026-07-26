@@ -28,6 +28,23 @@ public class PlayerIdleState : PlayerGroundedState
     {
         base.LogicUpdate();
 
+        if (stateMachine.currentState != this)
+        {
+            return;
+        }
+
+        if (!player.GameplayStatus.CanUseWeightedGroundMovement)
+        {
+            player.SetVelocityXZ(0f, 0f);
+
+            if (player.GameplayStatus.ShouldRise)
+            {
+                player.TryStartRiseToUpper();
+            }
+
+            return;
+        }
+
         if (xInput != 0 || yInput != 0)
         {
             stateMachine.ChangeState(player.MoveState);

@@ -6,8 +6,6 @@ public sealed class LoopProgress
 
     public int CurrentLoop { get; private set; } = 1;
 
-    public bool WallStruckOnce { get; private set; }
-
     public bool TruthKnown { get; private set; }
 
     public bool EndingTwoReached { get; private set; }
@@ -17,17 +15,6 @@ public sealed class LoopProgress
     public void StartNextLoop()
     {
         CurrentLoop++;
-        Changed?.Invoke();
-    }
-
-    public void MarkWallStruckOnce()
-    {
-        if (WallStruckOnce)
-        {
-            return;
-        }
-
-        WallStruckOnce = true;
         Changed?.Invoke();
     }
 
@@ -68,8 +55,6 @@ public sealed class LoopProgress
     {
         switch (flag)
         {
-            case LoopProgressFlag.WallStruckOnce:
-                return WallStruckOnce;
             case LoopProgressFlag.TruthKnown:
                 return TruthKnown;
             case LoopProgressFlag.EndingTwoReached:

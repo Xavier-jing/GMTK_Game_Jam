@@ -33,6 +33,19 @@
           "TargetNodeId": "inspect"
         },
         {
+          "Dialog": "用木板修补墙洞",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "install_plank",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_large_wall_hole",
+              "StringValue": "InstallPlank"
+            }
+          }
+        },
+        {
           "Dialog": "离开",
           "TargetScriptId": "prop_large_wall_hole",
           "TargetNodeId": "leave"
@@ -72,6 +85,33 @@
           }
         }
       ],
+      "Next": "complete"
+    },
+    {
+      "Id": "install_plank",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_large_wall_hole",
+            "StringValue": "InstallPlank"
+          }
+        },
+        {
+          "Id": "ChangeTurns",
+          "Params": {
+            "IntValue": 2
+          }
+        }
+      ],
+      "Next": "plank_installed"
+    },
+    {
+      "Id": "plank_installed",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】木板稳住了破洞，房屋结构暂时稳定下来。",
       "Next": "complete"
     },
     {

@@ -52,6 +52,8 @@ public sealed class PlayerGameplayStatus : MonoBehaviour
     public bool CanFloatSwim => hasWrench && railRemoved && IsUpperLayer && !HasSlotItem;
     public bool ShouldSink => hasWrench && railRemoved && IsUpperLayer && HasSlotItem;
     public bool ShouldRise => hasWrench && railRemoved && IsLowerLayer && !HasSlotItem;
+    public bool CanUseWeightedGroundMovement =>
+        hasWrench && railRemoved && IsLowerLayer && HasSlotItem;
     public bool CanUseWeightedGroundJump => hasWrench && railRemoved && IsLowerLayer && HasSlotItem;
 
     public void AcquireWrench()

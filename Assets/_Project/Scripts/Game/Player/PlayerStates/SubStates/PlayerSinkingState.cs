@@ -2,7 +2,6 @@
 
 public sealed class PlayerSinkingState : PlayerState
 {
-    private Vector2 movementInput;
     private bool isGrounded;
 
     public PlayerSinkingState(Player player, PlayerStateMachine stateMachine, PlayerData playerData)
@@ -14,11 +13,11 @@ public sealed class PlayerSinkingState : PlayerState
     {
         base.Enter();
 
-        movementInput = Vector2.zero;
         isGrounded = false;
         player.ReleaseRail();
         player.RB.isKinematic = false;
         player.RB.useGravity = true;
+        player.SetVelocityXZ(0f, 0f);
         player.RB.angularVelocity = Vector3.zero;
     }
 
@@ -33,8 +32,6 @@ public sealed class PlayerSinkingState : PlayerState
     {
         base.LogicUpdate();
 
-        movementInput = player.InputHandler.RawMovementInput;
-
         if (isGrounded && player.CurrentVelocity.y <= 0.01f)
         {
             player.GameplayStatus.SetCurrentLayer(PlayerWorldLayer.Lower);
@@ -46,11 +43,9 @@ public sealed class PlayerSinkingState : PlayerState
     {
         base.PhysicsUpdate();
 
-        Vector3 moveDirection = player.GetMappedGroundMovement(movementInput);
-
-        player.SetVelocityXZ(
-            moveDirection.x * playerData.sinkingMovementVelocity,
-            moveDirection.z * playerData.sinkingMovementVelocity);
+        // Sinking is an automatic transition. Ground movement becomes available
+        // only after the player reaches the lower layer while still carrying.
+        player.SetVelocityXZ(0f, 0f);
     }
 
     public override void Exit()

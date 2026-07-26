@@ -17,6 +17,7 @@ public sealed class StoryActionRegistry
         Register(new SwitchBgmStoryAction());
         Register(new WorldPropCommandStoryAction());
         Register(new SpendTurnsStoryAction());
+        Register(new ChangeTurnsStoryAction());
         Register(new RequestRunEndStoryAction());
     }
 

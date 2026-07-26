@@ -162,13 +162,18 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
             return false;
         }
 
-        if (removedFromWorld)
+        bool canOperateOwnedInventoryItem =
+            command == WorldPropCommand.AttachRopeToFabric;
+
+        if (removedFromWorld && !canOperateOwnedInventoryItem)
         {
             reason = $"World prop '{propId}' has already left the current run.";
             return false;
         }
 
-        if (!isCarried && !IsAvailableInWorld())
+        if (!canOperateOwnedInventoryItem &&
+            !isCarried &&
+            !IsAvailableInWorld())
         {
             reason = $"World prop '{propId}' is not available in the current progress state.";
             return false;
@@ -209,7 +214,7 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return Require(
                     propId == WorldPropId.SmallWallHole &&
                     HasWallToolPrerequisites(context) &&
-                    !context.LoopProgress.WallStruckOnce,
+                    !context.RunState.WallStruckOnce,
                     "The first wall strike prerequisites are no longer satisfied.",
                     out reason);
 
@@ -217,7 +222,7 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return Require(
                     propId == WorldPropId.LargeWallHole &&
                     HasWallToolPrerequisites(context) &&
-                    context.LoopProgress.WallStruckOnce &&
+                    context.RunState.WallStruckOnce &&
                     !context.LoopProgress.TruthKnown,
                     "The second wall strike prerequisites are no longer satisfied.",
                     out reason);
@@ -271,12 +276,45 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
 
             case WorldPropCommand.InstallPlank:
                 return Require(
-                    propId == WorldPropId.SmallWallHole &&
+                    propId == WorldPropId.LargeWallHole &&
                     context.LoopProgress.TruthKnown &&
-                    context.LoopProgress.WallStruckOnce &&
+                    context.RunState.WallStruckOnce &&
                     !context.RunState.WallRepaired &&
                     IsCarrying(context, WorldPropId.Plank),
                     "Installing the plank requires the revealed wall and the plank in the carry slot.",
+                    out reason);
+
+            case WorldPropCommand.AttachRopeToFabric:
+                return Require(
+                    propId == WorldPropId.Rope &&
+                    context.LoopProgress.TruthKnown &&
+                    context.RunState.FabricPrepared &&
+                    !context.RunState.RopeAttached &&
+                    inventoryItem != null &&
+                    (context.Inventory.Contains(inventoryItem) ||
+                     context.Inventory.GetAddResult(inventoryItem) ==
+                     InventoryAddResult.Added),
+                    "Attaching the rope requires the prepared fabric and the rope in this run's inventory.",
+                    out reason);
+
+            case WorldPropCommand.AnchorParachute:
+                return Require(
+                    propId == WorldPropId.Dresser &&
+                    context.LoopProgress.TruthKnown &&
+                    context.RunState.RopeAttached &&
+                    !context.RunState.ParachuteAnchored &&
+                    IsCarrying(context, WorldPropId.Dresser),
+                    "Anchoring the parachute requires the prepared rope and the dresser in the carry slot.",
+                    out reason);
+
+            case WorldPropCommand.DeployParachute:
+                return Require(
+                    propId == WorldPropId.SmallWallHole &&
+                    context.LoopProgress.TruthKnown &&
+                    context.RunState.FabricPrepared &&
+                    context.RunState.RopeAttached &&
+                    context.RunState.ParachuteAnchored,
+                    "Deploying the parachute requires prepared fabric, attached rope, and an anchored heavy prop.",
                     out reason);
 
             default:
@@ -327,10 +365,8 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return true;
 
             case WorldPropCommand.FirstWallStrike:
-                return context.TryRequestRunEnd(
-                    RunEndReason.TurnsExhausted,
-                    context.LoopProgress.MarkWallStruckOnce,
-                    out reason);
+                context.RunState.MarkWallStruckOnce();
+                return true;
 
             case WorldPropCommand.SecondWallStrike:
                 return context.TryRequestRunEnd(
@@ -373,6 +409,26 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
 
                 context.RunState.MarkWallRepaired();
                 return true;
+
+            case WorldPropCommand.AttachRopeToFabric:
+                context.RunState.MarkRopeAttached();
+                return true;
+
+            case WorldPropCommand.AnchorParachute:
+                if (!TryPlaceCarriedProp(context, WorldPropId.Dresser))
+                {
+                    reason = "The dresser left the carry slot before it could anchor the parachute.";
+                    return false;
+                }
+
+                context.RunState.MarkParachuteAnchored();
+                return true;
+
+            case WorldPropCommand.DeployParachute:
+                return context.TryRequestRunEnd(
+                    RunEndReason.EndingThree,
+                    null,
+                    out reason);
 
             default:
                 reason = $"World prop command '{command}' is not supported.";

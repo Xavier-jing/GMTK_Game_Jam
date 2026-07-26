@@ -33,15 +33,15 @@
           }
         },
         {
-          "Dialog": "用木板修补墙洞",
+          "Dialog": "放出降落伞",
           "TargetScriptId": "prop_small_wall_hole",
-          "TargetNodeId": "install_plank",
+          "TargetNodeId": "deploy_parachute",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_small_wall_hole",
-              "StringValue": "InstallPlank"
+              "StringValue": "DeployParachute"
             }
           }
         },
@@ -76,27 +76,6 @@
             "TargetId": "prop_small_wall_hole",
             "StringValue": "FirstWallStrike"
           }
-        }
-      ],
-      "Next": "first_strike_text"
-    },
-    {
-      "Id": "first_strike_text",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】墙面被砸开了一部分。随着一阵失重感，本周目结束了。",
-      "Next": "complete"
-    },
-    {
-      "Id": "install_plank",
-      "Type": "Action",
-      "Actions": [
-        {
-          "Id": "WorldPropCommand",
-          "Params": {
-            "TargetId": "prop_small_wall_hole",
-            "StringValue": "InstallPlank"
-          }
         },
         {
           "Id": "SpendTurns",
@@ -105,13 +84,34 @@
           }
         }
       ],
-      "Next": "plank_installed"
+      "Next": "first_strike_text"
     },
     {
-      "Id": "plank_installed",
+      "Id": "first_strike_text",
       "Type": "Dialogue",
       "ActorId": "",
-      "Dialog": "【占位】木板被固定在墙洞上。",
+      "Dialog": "【占位】墙面被砸开了一个小洞，后面似乎还有空间。",
+      "Next": "complete"
+    },
+    {
+      "Id": "deploy_parachute",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_small_wall_hole",
+            "StringValue": "DeployParachute"
+          }
+        }
+      ],
+      "Next": "parachute_deployed"
+    },
+    {
+      "Id": "parachute_deployed",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】布料和绳子从洞口展开，房屋开始平稳下降。",
       "Next": "complete"
     },
     {

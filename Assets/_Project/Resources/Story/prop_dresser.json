@@ -59,6 +59,19 @@
           }
         },
         {
+          "Dialog": "用梳妆台固定降落伞绳索",
+          "TargetScriptId": "prop_dresser",
+          "TargetNodeId": "anchor_parachute",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_dresser",
+              "StringValue": "AnchorParachute"
+            }
+          }
+        },
+        {
           "Dialog": "离开",
           "TargetScriptId": "prop_dresser",
           "TargetNodeId": "leave"
@@ -144,6 +157,33 @@
           }
         }
       ],
+      "Next": "complete"
+    },
+    {
+      "Id": "anchor_parachute",
+      "Type": "Action",
+      "Actions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_dresser",
+            "StringValue": "AnchorParachute"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "anchored"
+    },
+    {
+      "Id": "anchored",
+      "Type": "Dialogue",
+      "ActorId": "",
+      "Dialog": "【占位】绳索已经缠紧在梳妆台上。",
       "Next": "complete"
     },
     {

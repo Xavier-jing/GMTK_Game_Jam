@@ -32,7 +32,10 @@ public enum WorldPropCommand
     StartSteeringWheel,
     UnplugRefrigerator,
     ConnectBedPower,
-    InstallPlank
+    InstallPlank,
+    AttachRopeToFabric,
+    AnchorParachute,
+    DeployParachute
 }
 
 public enum RunFlagId
@@ -50,7 +53,6 @@ public enum RunFlagId
 
 public enum LoopProgressFlag
 {
-    WallStruckOnce,
     TruthKnown,
     EndingTwoReached,
     EndingThreeReached
@@ -112,11 +114,11 @@ public static class WorldPropRules
             case WorldPropId.Wrench:
                 return runState.DresserOpened;
             case WorldPropId.Plank:
-                return loopProgress.WallStruckOnce;
+                return loopProgress.TruthKnown;
             case WorldPropId.SmallWallHole:
-                return !loopProgress.WallStruckOnce || loopProgress.TruthKnown;
+                return !runState.WallStruckOnce;
             case WorldPropId.LargeWallHole:
-                return loopProgress.WallStruckOnce && !loopProgress.TruthKnown;
+                return runState.WallStruckOnce;
             case WorldPropId.BedBlanket:
                 return loopProgress.TruthKnown;
             case WorldPropId.BedSwitch:

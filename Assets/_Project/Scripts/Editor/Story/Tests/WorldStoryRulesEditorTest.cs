@@ -50,7 +50,7 @@ public static class WorldStoryRulesEditorTest
                 runState),
             "Opening the dresser must reveal the scissors.");
 
-        loopProgress.MarkWallStruckOnce();
+        runState.MarkWallStruckOnce();
         Assert(
             WorldPropRules.IsPresent(
                 WorldPropId.LargeWallHole,
@@ -64,19 +64,19 @@ public static class WorldStoryRulesEditorTest
                 runState),
             "The small wall hole must be hidden before the truth is revealed.");
         Assert(
-            WorldPropRules.IsPresent(
+            !WorldPropRules.IsPresent(
                 WorldPropId.Plank,
                 loopProgress,
                 runState),
-            "The plank must appear after the first wall strike.");
+            "The plank must remain locked until the truth is known.");
 
         loopProgress.RevealTruth();
         Assert(
             WorldPropRules.IsPresent(
-                WorldPropId.SmallWallHole,
+                WorldPropId.Plank,
                 loopProgress,
                 runState),
-            "The repairable wall target must return after the truth is revealed.");
+            "The plank must appear after the truth is revealed.");
         Assert(
             WorldPropRules.IsPresent(
                 WorldPropId.BedBlanket,
@@ -86,11 +86,13 @@ public static class WorldStoryRulesEditorTest
 
         runState.Reset();
         Assert(
-            !runState.DresserOpened && !runState.FabricPrepared,
+            !runState.DresserOpened &&
+            !runState.FabricPrepared &&
+            !runState.WallStruckOnce,
             "RunState.Reset must clear per-run prop progress.");
         Assert(
-            loopProgress.WallStruckOnce && loopProgress.TruthKnown,
-            "RunState.Reset must not clear permanent loop progress.");
+            loopProgress.TruthKnown,
+            "RunState.Reset must not clear truth knowledge.");
     }
 
     private static void VerifyCarryMappings()

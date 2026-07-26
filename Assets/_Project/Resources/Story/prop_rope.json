@@ -28,15 +28,15 @@
           }
         },
         {
-          "Dialog": "拾取绳子并执行结局三方案",
+          "Dialog": "拾取绳子并固定到处理好的布料上",
           "TargetScriptId": "prop_rope",
           "TargetNodeId": "ending_three",
           "Condition": {
-            "Id": "LoopProgressFlagEquals",
+            "Id": "WorldPropCommandAvailable",
             "UnavailableMode": "Disabled",
             "Params": {
-              "StringValue": "TruthKnown",
-              "BoolValue": true
+              "TargetId": "prop_rope",
+              "StringValue": "AttachRopeToFabric"
             }
           }
         },
@@ -91,9 +91,16 @@
           }
         },
         {
-          "Id": "RequestRunEnd",
+          "Id": "SpendTurns",
           "Params": {
-            "StringValue": "EndingThree"
+            "IntValue": 1
+          }
+        },
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_rope",
+            "StringValue": "AttachRopeToFabric"
           }
         }
       ],
@@ -103,7 +110,7 @@
       "Id": "ending_text",
       "Type": "Dialogue",
       "ActorId": "",
-      "Dialog": "【占位】绳子被用于最终方案。结局三达成。",
+      "Dialog": "【占位】绳子已经牢固地系在处理好的布料上。",
       "Next": "complete"
     },
     {

@@ -43,13 +43,24 @@ public sealed class ActionResolver
 
     public bool ResolveStoryTurnCost(int turnCost, out bool turnsExhausted)
     {
+        if (turnCost <= 0)
+        {
+            turnsExhausted = false;
+            return false;
+        }
+
+        return ResolveStoryTurnDelta(-turnCost, out turnsExhausted);
+    }
+
+    public bool ResolveStoryTurnDelta(int turnDelta, out bool turnsExhausted)
+    {
         turnsExhausted = false;
-        if (turnCost <= 0 || loopManager.IsEndingRun)
+        if (turnDelta == 0 || loopManager.IsEndingRun)
         {
             return false;
         }
 
-        turnManager.ChangeTurns(-turnCost);
+        turnManager.ChangeTurns(turnDelta);
         turnsExhausted = turnManager.RemainingTurns <= 0;
         return true;
     }
