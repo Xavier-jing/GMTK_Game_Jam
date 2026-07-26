@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public sealed class GameplayUIController : MonoBehaviour
@@ -12,8 +13,21 @@ public sealed class GameplayUIController : MonoBehaviour
     [SerializeField]
     private UIService uiService;
 
+    [Header("Ending CG")]
+    [SerializeField]
+    private GameObject endingCgRoot;
+
+    [SerializeField]
+    [Min(0f)]
+    private float endingCgPlaceholderDuration = 2f;
+
+    [SerializeField]
+    private bool autoCompleteEndingCg = true;
+
     private GamePause gamePause;
+    private LoopManager loopManager;
     private UIInputHandler uiInput;
+    private Coroutine endingCgCoroutine;
     private bool isActiveController;
 
     private void Awake()
@@ -33,6 +47,11 @@ public sealed class GameplayUIController : MonoBehaviour
         }
 
         uiInput = ResolveUiInput();
+
+        if (endingCgRoot != null)
+        {
+            endingCgRoot.SetActive(false);
+        }
     }
 
     private void Start()
@@ -44,6 +63,7 @@ public sealed class GameplayUIController : MonoBehaviour
 
         AppContext appContext = AppContext.Instance;
         gamePause = appContext.GamePause;
+        loopManager = appContext.LoopManager;
 
         if (uiInput != null)
         {
@@ -53,6 +73,7 @@ public sealed class GameplayUIController : MonoBehaviour
 
         gamePause.Resume();
         gamePause.PauseStateChanged += HandlePauseStateChanged;
+        loopManager.RunEnded += HandleRunEnded;
         HandlePauseStateChanged(gamePause.IsPaused);
     }
 
@@ -66,6 +87,11 @@ public sealed class GameplayUIController : MonoBehaviour
         if (gamePause != null)
         {
             gamePause.PauseStateChanged -= HandlePauseStateChanged;
+        }
+
+        if (loopManager != null)
+        {
+            loopManager.RunEnded -= HandleRunEnded;
         }
 
         if (uiInput != null)
@@ -107,12 +133,86 @@ public sealed class GameplayUIController : MonoBehaviour
 
     private void HandlePausePerformed()
     {
+        if (loopManager != null && loopManager.IsEndingRun)
+        {
+            return;
+        }
+
         OpenPauseScreen();
     }
 
     private void HandleCancelPerformed()
     {
+        if (loopManager != null && loopManager.IsEndingRun)
+        {
+            return;
+        }
+
         OpenPauseScreen();
+    }
+
+    private void HandleRunEnded(RunEndReason reason, int run)
+    {
+        if (endingCgCoroutine != null)
+        {
+            return;
+        }
+
+        Player player = FindObjectOfType<Player>();
+        if (player != null)
+        {
+            player.SetControlled(false);
+        }
+
+        if (uiInput != null)
+        {
+            uiInput.Disable();
+        }
+
+        if (gamePause != null && gamePause.IsPaused)
+        {
+            gamePause.Resume();
+        }
+
+        if (endingCgRoot == null)
+        {
+            Debug.LogWarning(
+                $"GameplayUIController on '{name}' has no Ending CG Root. " +
+                $"Skipping the placeholder for '{reason}' on run {run}.");
+            CompleteEndingCg();
+            return;
+        }
+
+        endingCgRoot.SetActive(true);
+        if (autoCompleteEndingCg)
+        {
+            endingCgCoroutine = StartCoroutine(WaitForEndingCgPlaceholder());
+        }
+    }
+
+    private IEnumerator WaitForEndingCgPlaceholder()
+    {
+        if (endingCgPlaceholderDuration > 0f)
+        {
+            yield return new WaitForSecondsRealtime(endingCgPlaceholderDuration);
+        }
+        else
+        {
+            yield return null;
+        }
+
+        endingCgCoroutine = null;
+        CompleteEndingCg();
+    }
+
+    public void CompleteEndingCg()
+    {
+        if (loopManager == null || !loopManager.IsEndingRun)
+        {
+            return;
+        }
+
+        loopManager.CompleteRunEnding();
     }
 
     private UIService ResolveUiService()

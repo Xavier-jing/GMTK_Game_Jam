@@ -31,7 +31,7 @@ public sealed class LoopManager : IDisposable
         
     }
 
-    //½áÊøµ±Ç°ÔËĞĞ
+    //ç»“æŸå½“å‰è¿è¡Œ
     public void EndRun(RunEndReason reason)
     {
         if (!CanEndRun(reason))
@@ -41,11 +41,18 @@ public sealed class LoopManager : IDisposable
 
         IsEndingRun = true;
         ApplyPermanentProgress(reason);
-        RunEnded?.Invoke(reason, CurrentRun);
-        StartNextRun();
+
+        Action<RunEndReason, int> runEnded = RunEnded;
+        if (runEnded == null)
+        {
+            CompleteRunEnding();
+            return;
+        }
+
+        runEnded.Invoke(reason, CurrentRun);
     }
 
-    //ÅĞ¶Ïµ±Ç°ÄÜ·ñÒÔ reason ½áÊøÔËĞĞ
+    //åˆ¤æ–­å½“å‰èƒ½å¦ä»¥ reason ç»“æŸè¿è¡Œ
     public bool CanEndRun(RunEndReason reason)
     {
         if (IsEndingRun)
@@ -60,7 +67,7 @@ public sealed class LoopManager : IDisposable
         return !isTruthEnding || loopProgress.TruthKnown;
     }
 
-    ///ÕıÊ½¿ªÊ¼ÏÂÒ»´ÎÑ­»·
+    ///æ­£å¼å¼€å§‹ä¸‹ä¸€æ¬¡å¾ªç¯
     public void StartNextRun()
     {
         loopProgress.StartNextLoop();
@@ -76,7 +83,18 @@ public sealed class LoopManager : IDisposable
         }
     }
 
-    //¸ù¾İ½áÊøÔ­Òò¸üĞÂ¿çÑ­»·µÄÓÀ¾ÃÊı¾İ
+    public bool CompleteRunEnding()
+    {
+        if (!IsEndingRun)
+        {
+            return false;
+        }
+
+        StartNextRun();
+        return true;
+    }
+
+    //æ ¹æ®ç»“æŸåŸå› æ›´æ–°è·¨å¾ªç¯çš„æ°¸ä¹…æ•°æ®
     private void ApplyPermanentProgress(RunEndReason reason)
     {
         switch (reason)
@@ -95,7 +113,7 @@ public sealed class LoopManager : IDisposable
         }
     }
 
-    //»ñÈ¡ĞèÒªÖØĞÂ¼ÓÔØµÄ³¡¾°ID
+    //è·å–éœ€è¦é‡æ–°åŠ è½½çš„åœºæ™¯ID
     private bool TryGetReloadTarget(out SceneId sceneId)
     {
         if (sceneLoader.IsActiveScene(SceneId.Gameplay))
