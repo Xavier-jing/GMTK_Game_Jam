@@ -42,11 +42,11 @@ public static class WorldStoryRulesEditorTest
                 runState),
             "The scissors must remain hidden before the dresser opens.");
         Assert(
-            WorldPropRules.IsPresent(
+            !WorldPropRules.IsPresent(
                 WorldPropId.Wrench,
                 loopProgress,
                 runState),
-            "The wrench must remain available before the dresser opens.");
+            "The wrench must remain hidden before the dresser opens.");
 
         runState.MarkDresserOpened();
         Assert(
@@ -55,6 +55,12 @@ public static class WorldStoryRulesEditorTest
                 loopProgress,
                 runState),
             "Opening the dresser must reveal the scissors.");
+        Assert(
+            WorldPropRules.IsPresent(
+                WorldPropId.Wrench,
+                loopProgress,
+                runState),
+            "Opening the dresser must reveal the wrench.");
 
         runState.MarkWallStruckOnce();
         Assert(

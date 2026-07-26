@@ -151,6 +151,21 @@ public sealed class LoadingScreen : MonoBehaviour, ISceneTransition
         await FadeToAsync(0f, fadeOutDuration, keepInputBlocked: false);
     }
 
+    public void HideImmediately()
+    {
+        transitionVersion++;
+        CompleteAndKillFade();
+        visibleSinceRealtime = float.NegativeInfinity;
+
+        if (canvasGroup == null)
+        {
+            return;
+        }
+
+        canvasGroup.alpha = 0f;
+        SetInputBlocked(false);
+    }
+
     public void SetProgress(float normalizedProgress)
     {
         targetProgress = Mathf.Clamp01(normalizedProgress);

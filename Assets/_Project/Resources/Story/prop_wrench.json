@@ -8,19 +8,6 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "拾取扳手",
-          "TargetScriptId": "prop_wrench",
-          "TargetNodeId": "acquire",
-          "Condition": {
-            "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Hidden",
-            "Params": {
-              "TargetId": "prop_wrench",
-              "StringValue": "AcquireInventoryItem"
-            }
-          }
-        },
-        {
           "Dialog": "拆卸轨道",
           "TargetScriptId": "prop_wrench",
           "TargetNodeId": "remove_rail",

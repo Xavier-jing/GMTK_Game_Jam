@@ -10,6 +10,7 @@ public sealed class StoryActionRegistry
     {
         Register(new SetSceneObjectActiveStoryAction());
         Register(new SetStoryFlagStoryAction());
+        Register(new HideCgStoryAction());
         Register(new AcquireWrenchStoryAction());
         Register(new RemoveRailAndAscendStoryAction());
         Register(new ReleaseFloatingItemAndRiseStoryAction());

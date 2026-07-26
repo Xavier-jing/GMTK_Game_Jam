@@ -21,12 +21,10 @@ public static class Bootstrap
         if (!appContext.SceneLoader.TryGetSceneId(scene.path, out SceneId sceneId) ||
             sceneId != SceneId.Boot)
         {
-            // 直接运行了非 Boot 场景（如从 MainMenu 启动调试），淡出黑屏
-            LoadingScreen.Current?.HideAsync();
+            _ = LoadingScreen.Current?.HideAsync();
             return;
         }
 
-        // Boot 场景：不走 SceneLoader（不需要进度条），直接异步加载 MainMenu
         appContext.GamePause.Resume();
 
         string mainMenuPath = appContext.SceneLoader.GetScenePath(SceneId.MainMenu);
@@ -37,6 +35,13 @@ public static class Bootstrap
             return;
         }
 
+        BootVideoLoading bootVideo = Object.FindObjectOfType<BootVideoLoading>();
+        bool useBootVideo = bootVideo != null && bootVideo.CanPlay;
+        if (useBootVideo)
+        {
+            LoadingScreen.Current?.HideImmediately();
+        }
+
         AsyncOperation operation = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single);
         if (operation == null)
         {
@@ -44,12 +49,31 @@ public static class Bootstrap
             return;
         }
 
-        while (!operation.isDone)
+        if (!useBootVideo)
+        {
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
+
+            await (LoadingScreen.Current?.HideAsync() ?? Task.CompletedTask);
+            return;
+        }
+
+        operation.allowSceneActivation = false;
+        Task videoTask = bootVideo.PlayAsync();
+
+        while (operation.progress < 0.9f)
         {
             await Task.Yield();
         }
 
-        // MainMenu 加载完毕，黑屏淡出
-        await (LoadingScreen.Current?.HideAsync() ?? Task.CompletedTask);
+        await videoTask;
+        operation.allowSceneActivation = true;
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
     }
 }

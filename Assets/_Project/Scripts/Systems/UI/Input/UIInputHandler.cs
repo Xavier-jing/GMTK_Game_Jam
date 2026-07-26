@@ -71,6 +71,7 @@ public sealed class UIInputHandler : MonoBehaviour
 
         // Button events
         if (submitAction != null) submitAction.performed += _ => OnSubmit?.Invoke();
+        if (clickAction != null) clickAction.performed += _ => OnSubmit?.Invoke();
         if (cancelAction != null) cancelAction.performed += _ => OnCancel?.Invoke();
         if (pauseAction != null) pauseAction.performed += _ => OnPause?.Invoke();
 

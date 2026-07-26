@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 public sealed class StoryNodeInfo
 {
@@ -116,11 +117,19 @@ public interface IStoryPresenter
 {
     bool IsConfigured { get; }
 
+    void Show();
+
     void ShowDialogue(string actorId, string portraitId, string dialog);
+
+    void ShowCg(Sprite cgSprite);
+
+    void HideCg();
 
     void ShowChoices(
         IReadOnlyList<StoryChoiceViewModel> choices,
         Action<int> onSelected);
+
+    void LockChoices();
 
     bool TryCompleteDialogue();
 
@@ -150,6 +159,7 @@ public interface IStoryConditionHandler
 
 public sealed class StoryActionContext
 {
+    private readonly Action hideCgAction;
     private Action completionAction;
     private RunEndReason? pendingRunEndReason;
 
@@ -163,7 +173,8 @@ public sealed class StoryActionContext
         LoopProgress loopProgress,
         RunState runState,
         AudioService audio,
-        PlayerCarrySlot carrySlot)
+        PlayerCarrySlot carrySlot,
+        Action hideCgAction)
     {
         Player = player;
         Progress = progress ?? throw new ArgumentNullException(nameof(progress));
@@ -175,6 +186,8 @@ public sealed class StoryActionContext
         RunState = runState ?? throw new ArgumentNullException(nameof(runState));
         Audio = audio ?? throw new ArgumentNullException(nameof(audio));
         CarrySlot = carrySlot;
+        this.hideCgAction =
+            hideCgAction ?? throw new ArgumentNullException(nameof(hideCgAction));
     }
 
     public Player Player { get; }
@@ -196,6 +209,11 @@ public sealed class StoryActionContext
     public AudioService Audio { get; }
 
     public PlayerCarrySlot CarrySlot { get; }
+
+    public void HideCg()
+    {
+        hideCgAction.Invoke();
+    }
 
     public bool TryChangeTurns(int turnDelta, out string error)
     {

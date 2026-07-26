@@ -37,6 +37,9 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
     private Button choiceButtonTemplate;
 
     [SerializeField]
+    private Image cgImage;
+
+    [SerializeField]
     private Image portraitImage;
 
     [SerializeField]
@@ -66,16 +69,14 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
     private void Awake()
     {
         CaptureDefaultPortrait();
+        HideCg();
 
         if (choiceButtonTemplate != null)
         {
             choiceButtonTemplate.gameObject.SetActive(false);
         }
 
-        if (panelRoot != null)
-        {
-            panelRoot.SetActive(false);
-        }
+        Hide();
     }
 
     private void Update()
@@ -95,6 +96,18 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         {
             isTyping = false;
         }
+    }
+
+    public void Show()
+    {
+        if (!IsConfigured)
+        {
+            throw new InvalidOperationException(
+                $"StoryPresenter on '{name}' is missing required references.");
+        }
+
+        ResetTransientContent();
+        panelRoot.SetActive(true);
     }
 
     public void ShowDialogue(string actorId, string portraitId, string dialog)
@@ -184,6 +197,22 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         SelectFirstInteractableChoice();
     }
 
+    public void LockChoices()
+    {
+        choiceSelected = null;
+
+        foreach (Button button in spawnedChoiceButtons)
+        {
+            if (button == null)
+            {
+                continue;
+            }
+
+            button.interactable = false;
+            button.onClick.RemoveAllListeners();
+        }
+    }
+
     public bool TryCompleteDialogue()
     {
         if (!isTyping)
@@ -195,6 +224,43 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         dialogText.maxVisibleCharacters = int.MaxValue;
         isTyping = false;
         return true;
+    }
+
+    public void ShowCg(Sprite cgSprite)
+    {
+        if (cgSprite == null)
+        {
+            Debug.LogWarning(
+                $"StoryPresenter '{name}' received an empty CG Sprite. " +
+                "The current CG was kept.",
+                this);
+            return;
+        }
+
+        if (cgImage == null)
+        {
+            Debug.LogWarning(
+                $"StoryPresenter '{name}' cannot show CG Sprite '{cgSprite.name}' " +
+                "because Cg Image is not assigned.",
+                this);
+            return;
+        }
+
+        cgImage.sprite = cgSprite;
+        cgImage.gameObject.SetActive(true);
+        cgImage.enabled = true;
+    }
+
+    public void HideCg()
+    {
+        if (cgImage == null)
+        {
+            return;
+        }
+
+        cgImage.sprite = null;
+        cgImage.enabled = false;
+        cgImage.gameObject.SetActive(false);
     }
 
     public void ResetPortrait()
@@ -212,9 +278,7 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
 
     public void Hide()
     {
-        isTyping = false;
-        choiceSelected = null;
-        ClearChoices();
+        ResetTransientContent();
 
         if (panelRoot != null)
         {
@@ -287,6 +351,32 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         defaultPortraitImageEnabled = portraitImage.enabled;
         defaultPortraitObjectActive = portraitImage.gameObject.activeSelf;
         hasCapturedDefaultPortrait = true;
+    }
+
+    private void ResetTransientContent()
+    {
+        isTyping = false;
+        visibleCharacterProgress = 0f;
+        totalVisibleCharacters = 0;
+        ClearChoices();
+
+        if (actorText != null)
+        {
+            actorText.text = string.Empty;
+            actorText.gameObject.SetActive(false);
+        }
+
+        if (dialogText != null)
+        {
+            dialogText.text = string.Empty;
+            dialogText.maxVisibleCharacters = int.MaxValue;
+            dialogText.gameObject.SetActive(false);
+        }
+
+        if (choiceContainer != null)
+        {
+            choiceContainer.gameObject.SetActive(false);
+        }
     }
 
     private void ClearChoices()
