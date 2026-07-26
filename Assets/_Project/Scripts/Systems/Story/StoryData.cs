@@ -51,6 +51,42 @@ public static class StoryPortraitIdMap
     }
 }
 
+public static class StoryCgId
+{
+    public const int Hide = 0;
+
+    public static bool TryParse(string cgId, out int cgNumber)
+    {
+        cgNumber = 0;
+        if (string.IsNullOrEmpty(cgId) ||
+            (cgId.Length > 1 && cgId[0] == '0'))
+        {
+            return false;
+        }
+
+        int parsedNumber = 0;
+        for (int index = 0; index < cgId.Length; index++)
+        {
+            char character = cgId[index];
+            if (character < '0' || character > '9')
+            {
+                return false;
+            }
+
+            int digit = character - '0';
+            if (parsedNumber > (int.MaxValue - digit) / 10)
+            {
+                return false;
+            }
+
+            parsedNumber = parsedNumber * 10 + digit;
+        }
+
+        cgNumber = parsedNumber;
+        return true;
+    }
+}
+
 [Serializable]
 public sealed class StoryDocumentData
 {
@@ -67,6 +103,7 @@ public sealed class StoryNodeData
     public string Type;
     public string ActorId;
     public string PortraitId;
+    public string CgId;
     public string Dialog;
     public string[] DialogOptions;
     public StoryActionData[] BeforeActions;

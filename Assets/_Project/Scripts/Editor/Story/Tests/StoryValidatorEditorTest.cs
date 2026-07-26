@@ -15,7 +15,7 @@ public static class StoryValidatorEditorTest
 
         Debug.Log(
             "StoryValidator unit tests passed: graphs, dialogue options, audio actions, " +
-            "turn changes, and portrait ids were validated successfully.");
+            "turn changes, portrait ids, CG ids, and CG actions were validated successfully.");
     }
 
     public static void RunAssertions()
@@ -24,6 +24,8 @@ public static class StoryValidatorEditorTest
         VerifyRandomDialogueOptions();
         VerifyPortraitIds();
         VerifyPortraitIdMappings();
+        VerifyCgIds();
+        VerifyCgActions();
         VerifyInitialDialoguePortraitPaths();
         VerifyAudioActions();
         VerifyTurnChangeAction();
@@ -335,6 +337,165 @@ public static class StoryValidatorEditorTest
         Assert(
             StoryPortraitIdMap.ResolveBindingId("face03") == "face03",
             "Expected existing face03 ids to remain backward compatible.");
+    }
+
+    private static void VerifyCgIds()
+    {
+        StoryDocumentData validDocument = new StoryDocumentData
+        {
+            Version = StoryValidator.SupportedVersion,
+            ScriptId = "CgStory",
+            StartNodeId = "intro",
+            Nodes = new[]
+            {
+                new StoryNodeData
+                {
+                    Id = "intro",
+                    Type = nameof(StoryNodeType.Dialogue),
+                    CgId = "1",
+                    Dialog = "CG test.",
+                    Next = "finish"
+                },
+                new StoryNodeData
+                {
+                    Id = "finish",
+                    Type = nameof(StoryNodeType.End)
+                }
+            }
+        };
+
+        StoryValidator validator = new StoryValidator(
+            new StoryActionRegistry(),
+            new StoryConditionRegistry());
+        Assert(
+            validator.TryValidate(
+                validDocument,
+                out StoryGraph validGraph,
+                out List<string> validErrors),
+            $"Expected a valid CgId to compile: {string.Join(" | ", validErrors)}");
+        Assert(
+            validGraph != null && validGraph.ContainsNode("intro"),
+            "Expected the graph containing a valid CgId to be returned.");
+        Assert(
+            StoryCgId.TryParse("0", out int hideNumber) &&
+            hideNumber == StoryCgId.Hide,
+            "Expected CgId 0 to resolve to the hide command.");
+        Assert(
+            StoryCgId.TryParse("2147483647", out int maximumNumber) &&
+            maximumNumber == int.MaxValue,
+            "Expected CgId Int32.MaxValue to be valid.");
+
+        validDocument.Nodes[0].CgId = "0";
+        Assert(
+            validator.TryValidate(
+                validDocument,
+                out StoryGraph _,
+                out List<string> hideErrors),
+            $"Expected CgId 0 to compile: {string.Join(" | ", hideErrors)}");
+
+        string[] invalidIds =
+        {
+            "-1",
+            "01",
+            "cg01",
+            "2147483648"
+        };
+        foreach (string invalidId in invalidIds)
+        {
+            validDocument.Nodes[0].CgId = invalidId;
+            Assert(
+                !validator.TryValidate(
+                    validDocument,
+                    out StoryGraph _,
+                    out List<string> invalidErrors),
+                $"Expected invalid CgId '{invalidId}' to fail validation.");
+            Assert(
+                invalidErrors.Exists(error => error.Contains("CgId")),
+                $"Expected the invalid CgId error to identify '{invalidId}'.");
+        }
+
+        StoryDocumentData nonDialogueDocument = new StoryDocumentData
+        {
+            Version = StoryValidator.SupportedVersion,
+            ScriptId = "NonDialogueCgStory",
+            StartNodeId = "finish",
+            Nodes = new[]
+            {
+                new StoryNodeData
+                {
+                    Id = "finish",
+                    Type = nameof(StoryNodeType.End),
+                    CgId = "1"
+                }
+            }
+        };
+        Assert(
+            !validator.TryValidate(
+                nonDialogueDocument,
+                out StoryGraph _,
+                out List<string> nonDialogueErrors),
+            "Expected CgId on a non-Dialogue node to fail validation.");
+        Assert(
+            nonDialogueErrors.Exists(
+                error => error.Contains("CgId") &&
+                         error.Contains("only valid on Dialogue")),
+            "Expected the non-Dialogue CgId error to explain its allowed node type.");
+    }
+
+    private static void VerifyCgActions()
+    {
+        StoryActionRegistry registry = new StoryActionRegistry();
+        Assert(
+            registry.TryGet(
+                HideCgStoryAction.ActionId,
+                out IStoryActionHandler hideCg),
+            "Expected HideCg to be registered.");
+        Assert(
+            hideCg.Validate(null, out string validationError),
+            $"Expected HideCg to require no Params: {validationError}");
+
+        StoryDocumentData document = new StoryDocumentData
+        {
+            Version = StoryValidator.SupportedVersion,
+            ScriptId = "HideCgActionStory",
+            StartNodeId = "line",
+            Nodes = new[]
+            {
+                new StoryNodeData
+                {
+                    Id = "line",
+                    Type = nameof(StoryNodeType.Dialogue),
+                    CgId = "1",
+                    Dialog = "Hide the CG after this line.",
+                    AfterActions = new[]
+                    {
+                        new StoryActionData
+                        {
+                            Id = HideCgStoryAction.ActionId
+                        }
+                    },
+                    Next = "finish"
+                },
+                new StoryNodeData
+                {
+                    Id = "finish",
+                    Type = nameof(StoryNodeType.End)
+                }
+            }
+        };
+
+        StoryValidator validator = new StoryValidator(
+            registry,
+            new StoryConditionRegistry());
+        Assert(
+            validator.TryValidate(
+                document,
+                out StoryGraph graph,
+                out List<string> errors),
+            $"Expected HideCg in AfterActions to compile: {string.Join(" | ", errors)}");
+        Assert(
+            graph != null && graph.ContainsNode("line"),
+            "Expected the graph containing HideCg to be returned.");
     }
 
     private static void VerifyInitialDialoguePortraitPaths()

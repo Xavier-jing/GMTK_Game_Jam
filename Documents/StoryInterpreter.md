@@ -10,6 +10,7 @@
 - 显式结束节点。
 - 场景对象显隐、剧情标记、道具交互、动作回合和已有玩家语义动作。
 - 一次性全局 2D 音效和 BGM 交叉切换。
+- Dialogue 节点按编号展示、保持或隐藏剧情 CG。
 - 取消、错误终止、玩家输入锁定和运行期剧情进度。
 
 首版不支持动作并行、通用表达式、反射调用、跨场景继续、自动播放、历史记录、磁盘存档、剧情停止 BGM 或空间音效。
@@ -19,6 +20,7 @@
 - JSON 文件放入 `Assets/_Project/Resources/Story/`。
 - 文件名必须与文档中的 `ScriptId` 完全一致。例如 `gameplay_intro.json` 对应 `"ScriptId": "gameplay_intro"`。
 - `ScriptId`、节点 `Id`、`ActorId`、`PortraitId`、剧情标记 Key 和场景 `TargetId` 只能包含英文字母、数字、下划线和连字符，并且区分大小写。
+- `CgId` 必须是带双引号的规范十进制字符串：`"0"` 或无前导零的正整数。
 - 当前格式版本固定为 `"Version": 1`。
 - 所有脚本必须使用 Unity 菜单 `Tools/Jam Template/Validate Story Scripts` 校验后再提交。
 
@@ -58,6 +60,7 @@
       "Type": "Dialogue",
       "ActorId": "captain",
       "PortraitId": "face01",
+      "CgId": "1",
       "Dialog": "我们得先把轨道拆掉。",
       "BeforeActions": [],
       "AfterActions": [],
@@ -123,6 +126,10 @@
   分别映射 `face01` 至 `face05`，`"0"` 作为 fail-safe 同样映射
   `face01`；原有的 `face01` 至 `face05` 写法继续兼容。空值或省略时保持
   上一张立绘。
+- `CgId`：当前 Dialogue 的剧情 CG 编号。`"1"` 及以上从
+  `StoryController.Cg Bindings` 解析为人类制作的 `Sprite` 并转发给表现层；
+  `"0"` 隐藏当前 CG；空值或省略时保持当前 CG。只允许规范十进制写法，
+  `"01"`、负数、名称和超出 Int32 范围的数字都会校验失败。
 - `DialogOptions`：非空字符串数组；进入节点时等概率随机选择一条显示。用于同一交互的随机反馈。
 - `BeforeActions`：显示文字前顺序执行。
 - `AfterActions`：玩家完成本句后、进入 `Next` 前顺序执行。
@@ -135,6 +142,35 @@
 每次 `StoryController.TryStart()` 会先把立绘恢复为 `Portrait Image` 在
 `StoryPresenter` 初始化时的 Sprite；合法首句随后立即覆盖。未知 ID、映射项
 Sprite 为空或未配置 `Portrait Image` 时只记录警告并保留当前立绘，不中断剧情。
+
+每次 `StoryController.TryStart()` 也会先隐藏上一段剧情残留的 CG。合法正编号
+会替换并显示 CG；后续省略 `CgId` 时会跨 Dialogue 和 Choice 保持。编号没有
+绑定、绑定重复、Sprite 为空或未配置 `Cg Image` 时只记录警告并保持当前 CG；
+到达 End、取消或故障时会隐藏并清空 CG。`CgId` 不使用结局流程的
+`EndingRoot`。
+
+需要在某句对白完成后立即收回 CG 时，把无参数动作 `HideCg` 放入该
+Dialogue 的 `AfterActions`；也可放入独立 Action 节点，或放入未填写正数
+`CgId` 的 Dialogue `BeforeActions`，在该句显示前收回。若同一 Dialogue
+仍填写正数 `CgId`，它会在 `BeforeActions` 之后重新显示对应 CG。`HideCg`
+会立即隐藏 CG 对象并清空其 Sprite。即使剧本没有显式调用它，Story 到达
+End、取消或故障时仍会再次清理 CG，作为安全兜底。
+
+```json
+{
+  "Id": "last_cg_line",
+  "Type": "Dialogue",
+  "PortraitId": "1",
+  "CgId": "1",
+  "Dialog": "这句话结束后收回 CG。",
+  "AfterActions": [
+    {
+      "Id": "HideCg"
+    }
+  ],
+  "Next": "finish"
+}
+```
 
 第一次 Submit 会立即补全打字效果，第二次 Submit 才进入下一节点。
 
@@ -180,6 +216,7 @@ Sprite 为空或未配置 `Portrait Image` 时只记录警告并保留当前立�
 | --- | --- | --- |
 | `SetSceneObjectActive` | `TargetId`, `BoolValue` | 设置登记场景对象的激活状态 |
 | `SetStoryFlag` | `Key`, `BoolValue` | 修改运行期剧情 Bool 标记 |
+| `HideCg` | 无 | 立即隐藏并清空当前剧情 CG；可用于 Dialogue 的前后动作或独立 Action 节点 |
 | `AcquireWrench` | 无 | 调用 `PlayerGameplayStatus.AcquireWrench()` |
 | `RemoveRailAndAscend` | 无 | 调用 `Player.TryStartRailRemovedAscend()` |
 | `ReleaseFloatingItemAndRise` | 无 | 调用 `Player.TryReleaseFloatingItemAndRise()` |
@@ -420,6 +457,11 @@ event Action<StoryError> Failed;
 
 启动新剧情时，如果已有剧情正在运行，旧剧情会先取消和清理。
 
+`TryStart()` 通过前置检查并建立会话后会立即显示对话面板。面板会在 Dialogue、
+Action、Choice 和节点跳转期间保持激活：Dialogue 后执行 Action 时保留上一句
+正文，选项提交后保留显示但锁定所有按钮。正常 End、主动取消、运行时故障或
+启动失败都会在 `Completed`/`Failed` 回调前隐藏面板并清除临时内容。
+
 ### 靠近交互与选项信息流
 
 `PlayerInteractionDetector` 每帧使用 3D 非分配球形检测收集范围内的
@@ -467,14 +509,19 @@ event Action<StoryError> Failed;
    - `Dialog Text`：Dialog TMP Text。
    - `Choice Container`：选择按钮父节点。
    - `Choice Button Template`：默认不激活的按钮模板。
+   - `Cg Image`：同一 Canvas 下独立的全屏剧情 CG Image；不要使用
+     `EndingRoot`，并确保其 sibling 顺序位于剧情文字面板之前，让剧情文字
+     渲染在 CG 上方。
    - `Portrait Image`：显示角色立绘的 uGUI `Image`。
    - `Portrait Bindings`：逐项填写大小写敏感的 `Portrait Id` 与人类制作
      `Sprite`；例如 `face01` 至 `face05`。不要留空 Sprite。
    - `Characters Per Second`：推荐 `30` 到 `60`。
-5. 给根对象 `UIController` 添加 `StoryController`：
+5. 使用场景根对象 `StoryController` 上现有的同名组件：
    - `Presenter`：刚创建的 `StoryPresenter`。
-   - `UI Input`：同对象现有的 `UIInputHandler`。
+   - `UI Input`：引用 `Canvas` 上现有的 `UIInputHandler`。
    - `Player`：如果 Player 已存在则直接引用；如果运行时生成可留空，首次启动剧情时会查找一次。
+   - `Cg Bindings`：每项填写唯一的正整数 `Cg Number` 与人类制作的
+     `Sprite`；禁止重复编号或空 Sprite。
 
 ### SandBox 场景
 
@@ -564,7 +611,7 @@ JSON 的成功选择项使用 `WorldPropCommandAvailable`，失败反馈分支�
 ScriptId/NodeId/HandlerId: 原因
 ```
 
-未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。`PlaySfx`、`SwitchBgm` 的运行时播放失败，以及未知/未完成配置的 `PortraitId` 是非致命表现错误：它们记录错误或警告后继续剧情，避免表现资源缺失阻断关键流程。
+未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。`PlaySfx`、`SwitchBgm` 的运行时播放失败，以及未知/未完成配置的 `PortraitId` 或 `CgId` 是非致命表现错误：它们记录错误或警告后继续剧情，避免表现资源缺失阻断关键流程。
 
 ## 10. 验证
 
@@ -596,3 +643,13 @@ Play Mode 最小冒烟：
     产生包含 Presenter、原始 PortraitId 与解析后绑定 ID 的警告且剧情继续。
 13. 启动另一段剧情，确认立绘先恢复 `Portrait Image` 的初始 Sprite，再由
     新剧情首句 ID 切换；剧情结束后玩家控制正常恢复。
+14. 使用测试剧情验证 CG `1 → 省略 → 0`：第一句显示编号 1 的 Sprite，
+    第二句和 Choice 保持该图，第三句隐藏。再把 `HideCg` 放入一条 CG 对白的
+    `AfterActions`，确认完成该句后、进入下一节点前 CG 已隐藏且 Sprite 已清空。
+15. 临时请求不存在、重复或 Sprite 为空的正编号，确认 Console 包含
+    ScriptId、NodeId 和 CgId，剧情继续且当前 CG 不变；结束、取消、故障和
+    启动另一段剧情后均无残留 CG。
+16. 使用以 Action 开头的剧情，确认 `TryStart()` 成功后对话面板立即显示，
+    并在 Dialogue → Action → Dialogue 过程中保持显示且保留上一句正文。
+17. 提交 Choice 后确认所有按钮保持可见但不可再次触发；下一节点正常刷新。
+    End、Cancel、故障和失败启动后面板均隐藏，重复启动时没有旧内容或回调。

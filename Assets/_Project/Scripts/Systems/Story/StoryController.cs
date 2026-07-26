@@ -9,6 +9,21 @@ public sealed class StoryController : MonoBehaviour
 {
     private const int MaxAutomaticNodesPerAdvance = 100;
 
+    [Serializable]
+    private sealed class CgBinding
+    {
+        [SerializeField]
+        [Min(1)]
+        private int cgNumber = 1;
+
+        [SerializeField]
+        private Sprite sprite;
+
+        public int CgNumber => cgNumber;
+
+        public Sprite Sprite => sprite;
+    }
+
     private sealed class RuntimeChoice
     {
         public RuntimeChoice(StoryChoiceData data, bool isInteractable)
@@ -30,6 +45,9 @@ public sealed class StoryController : MonoBehaviour
 
     [SerializeField]
     private Player player;
+
+    [SerializeField]
+    private CgBinding[] cgBindings = Array.Empty<CgBinding>();
 
     private readonly Dictionary<string, StoryGraph> graphCache =
         new Dictionary<string, StoryGraph>(StringComparer.Ordinal);
@@ -169,7 +187,8 @@ public sealed class StoryController : MonoBehaviour
             appContext.LoopProgress,
             appContext.RunState,
             appContext.Audio,
-            player.CarrySlot);
+            player.CarrySlot,
+            presenter.HideCg);
         rootScriptId = scriptId;
         CurrentScriptId = scriptId ?? string.Empty;
         CurrentNodeId = startNodeId ?? string.Empty;
@@ -180,11 +199,12 @@ public sealed class StoryController : MonoBehaviour
 
         CaptureAndDisablePlayerControl();
         presenter.ResetPortrait();
-        presenter.Hide();
+        presenter.HideCg();
 
         activeSessionId = ++sessionSequence;
         cancellationSource = new CancellationTokenSource();
         State = StoryRunnerState.Loading;
+        presenter.Show();
 
         _ = StartStoryAsync(
             activeSessionId,
@@ -243,7 +263,7 @@ public sealed class StoryController : MonoBehaviour
         }
 
         State = StoryRunnerState.Loading;
-        presenter.Hide();
+        presenter.LockChoices();
         _ = FollowChoiceAsync(
             sessionId,
             choice.Data,
@@ -392,6 +412,7 @@ public sealed class StoryController : MonoBehaviour
                     }
 
                     State = StoryRunnerState.ShowingDialogue;
+                    ApplyCg(node.Data.CgId);
                     presenter.ShowDialogue(
                         node.Data.ActorId,
                         node.Data.PortraitId,
@@ -447,7 +468,6 @@ public sealed class StoryController : MonoBehaviour
                 return;
             }
 
-            presenter.Hide();
             await EnterNodeAsync(
                 sessionId,
                 currentGraph,
@@ -778,6 +798,12 @@ public sealed class StoryController : MonoBehaviour
 
     private void ReportStartFailure(string scriptId, string message)
     {
+        if (presenter != null)
+        {
+            presenter.Hide();
+            presenter.HideCg();
+        }
+
         CurrentScriptId = scriptId ?? string.Empty;
         CurrentNodeId = string.Empty;
         State = StoryRunnerState.Faulted;
@@ -809,7 +835,12 @@ public sealed class StoryController : MonoBehaviour
             cancellationSource = null;
         }
 
-        presenter?.Hide();
+        if (presenter != null)
+        {
+            presenter.Hide();
+            presenter.HideCg();
+        }
+
         visibleChoices.Clear();
         choiceViewModels.Clear();
         actionContext = null;
@@ -832,6 +863,88 @@ public sealed class StoryController : MonoBehaviour
     private bool IsPaused()
     {
         return AppContext.HasInstance && AppContext.Instance.GamePause.IsPaused;
+    }
+
+    private void ApplyCg(string cgId)
+    {
+        if (string.IsNullOrEmpty(cgId))
+        {
+            return;
+        }
+
+        if (!StoryCgId.TryParse(cgId, out int cgNumber))
+        {
+            WarnCgPresentation(
+                cgId,
+                "The id is not a canonical non-negative integer.");
+            return;
+        }
+
+        if (cgNumber == StoryCgId.Hide)
+        {
+            presenter.HideCg();
+            return;
+        }
+
+        if (!TryResolveCgSprite(cgNumber, out Sprite cgSprite, out string error))
+        {
+            WarnCgPresentation(cgId, error);
+            return;
+        }
+
+        presenter.ShowCg(cgSprite);
+    }
+
+    private bool TryResolveCgSprite(
+        int cgNumber,
+        out Sprite cgSprite,
+        out string error)
+    {
+        cgSprite = null;
+        error = string.Empty;
+        bool found = false;
+        int bindingCount = cgBindings?.Length ?? 0;
+
+        for (int index = 0; index < bindingCount; index++)
+        {
+            CgBinding binding = cgBindings[index];
+            if (binding == null || binding.CgNumber != cgNumber)
+            {
+                continue;
+            }
+
+            if (found)
+            {
+                error = $"CG number {cgNumber} has duplicate bindings.";
+                cgSprite = null;
+                return false;
+            }
+
+            found = true;
+            cgSprite = binding.Sprite;
+        }
+
+        if (!found)
+        {
+            error = $"CG number {cgNumber} has no binding.";
+            return false;
+        }
+
+        if (cgSprite == null)
+        {
+            error = $"CG number {cgNumber} has no Sprite assigned.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private void WarnCgPresentation(string cgId, string error)
+    {
+        Debug.LogWarning(
+            $"StoryController '{name}' could not apply CgId '{cgId}' at " +
+            $"'{CurrentScriptId}/{CurrentNodeId}': {error} The current CG was kept.",
+            this);
     }
 
     public static string ResolveDialogue(StoryNodeData node)

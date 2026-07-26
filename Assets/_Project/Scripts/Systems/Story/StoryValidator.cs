@@ -197,6 +197,13 @@ public sealed class StoryValidator
                 $"{location}: PortraitId is only valid on Dialogue nodes.");
         }
 
+        if (node.Type != StoryNodeType.Dialogue &&
+            !string.IsNullOrEmpty(node.Data.CgId))
+        {
+            errors.Add(
+                $"{location}: CgId is only valid on Dialogue nodes.");
+        }
+
         switch (node.Type)
         {
             case StoryNodeType.Dialogue:
@@ -256,6 +263,13 @@ public sealed class StoryValidator
         {
             errors.Add(
                 $"{location}: PortraitId '{node.PortraitId}' is invalid.");
+        }
+
+        if (!string.IsNullOrEmpty(node.CgId) &&
+            !StoryCgId.TryParse(node.CgId, out int _))
+        {
+            errors.Add(
+                $"{location}: CgId '{node.CgId}' must be '0' or a canonical positive integer.");
         }
 
         ValidateLocalNext(node.Next, location, nodes, errors);

@@ -64,6 +64,29 @@ public sealed class SetStoryFlagStoryAction : IStoryActionHandler
     }
 }
 
+public sealed class HideCgStoryAction : IStoryActionHandler
+{
+    public const string ActionId = "HideCg";
+
+    public string Id => ActionId;
+
+    public bool Validate(StoryActionParams parameters, out string error)
+    {
+        error = string.Empty;
+        return true;
+    }
+
+    public Task<StoryActionResult> ExecuteAsync(
+        StoryActionContext context,
+        StoryActionParams parameters,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        context.HideCg();
+        return Task.FromResult(StoryActionResult.Success());
+    }
+}
+
 public sealed class AcquireWrenchStoryAction : IStoryActionHandler
 {
     public string Id => "AcquireWrench";
