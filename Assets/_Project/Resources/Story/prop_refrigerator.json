@@ -8,12 +8,12 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_refrigerator",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_refrigerator",
           "TargetNodeId": "leave"
         }
@@ -24,7 +24,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "里面有一些特别的符号，可惜你读不懂它们。",
+      "Dialog": "There are some strange symbols inside. Too bad you can't read them.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -41,7 +41,7 @@
       "Type": "Dialogue",
       "PortraitId": "1",
       "ActorId": "",
-      "Dialog": "一直搞不懂它们存在的意义是什么……",
+      "Dialog": "I've never understood why they're even here...",
       "Next": "complete"
     },
     {

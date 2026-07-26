@@ -8,7 +8,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "连接床的电源线",
+          "Dialog": "Connect the Bed's Power Cord",
           "TargetScriptId": "prop_power_connector",
           "TargetNodeId": "connect",
           "Condition": {
@@ -21,7 +21,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_power_connector",
           "TargetNodeId": "leave"
         }
@@ -52,7 +52,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "进入结局二演出。",
+      "Dialog": "Entering Ending 2 cinematic.",
       "Next": "ending_complete"
     },
     {

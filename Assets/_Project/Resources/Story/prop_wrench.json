@@ -8,7 +8,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "拆卸轨道",
+          "Dialog": "Disassemble Rail",
           "TargetScriptId": "prop_wrench",
           "TargetNodeId": "remove_rail",
           "Condition": {
@@ -17,7 +17,7 @@
           }
         },
         {
-          "Dialog": "击打墙面",
+          "Dialog": "Strike Wall",
           "TargetScriptId": "prop_small_wall_hole",
           "TargetNodeId": "strike",
           "Condition": {
@@ -30,7 +30,7 @@
           }
         },
         {
-          "Dialog": "再次击打墙面",
+          "Dialog": "Strike Wall Again",
           "TargetScriptId": "prop_large_wall_hole",
           "TargetNodeId": "strike",
           "Condition": {
@@ -43,7 +43,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_wrench",
           "TargetNodeId": "leave"
         }
@@ -54,7 +54,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "我怎么之前没有这么做呢，我早该这么做了。",
+      "Dialog": "Why didn't I do this sooner? I should've done it ages ago.",
       "AfterActions": [
         {
           "Id": "RemoveRailAndAscend"
@@ -73,7 +73,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "现在我的双脚可以自由走向任何地方。",
+      "Dialog": "Now my feet can take me wherever I want to go.",
       "Next": "complete"
     },
     {

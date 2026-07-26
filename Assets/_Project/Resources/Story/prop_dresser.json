@@ -8,7 +8,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "拾取扳手",
+          "Dialog": "Take Wrench",
           "TargetScriptId": "prop_dresser",
           "TargetNodeId": "take_wrench",
           "Condition": {
@@ -21,12 +21,12 @@
           }
         },
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_dresser",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_dresser",
           "TargetNodeId": "leave"
         }
@@ -64,7 +64,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "拿到扳手能做的事就有很多了。",
+      "Dialog": "Now that I have a wrench, there's so much I can do.",
       "Next": "complete"
     },
     {
@@ -72,7 +72,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "常用的工具放在这里。",
+      "Dialog": "The tools I use most are kept here.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",

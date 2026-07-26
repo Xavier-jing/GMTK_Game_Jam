@@ -1,0 +1,257 @@
+																	
+																	
+																	
+																	
+关联物品ID	关联物品名称	Eg_关联物品名称	F交互选项	Eg_F交互选项	文本	英文文本	face1	触发关联物品	前置触发条件	是否与结局相关	触发结局	确认后文本	Eg_确认后文本	face2	回合变化	备注	
+1	床头柜	Bedside Table	拾取	Pick Up	无			扳手	无	是	①触发真相	拿到扳手能做的事就有很多了	Now that I have a wrench, there's so much I can do.		所有周目初次-1，后续为0		
+											②③结局二，三						
+			查看	Examine	常用的工具放在这里	The tools I use most are kept here.		无	无	否	无	无			消耗0		
+																	
+2	带数据线的床	Bed with a Power Cord	Examine	查看	Examine	你对它很熟悉，因为你每天都睡在这里	You know it well. You sleep here every night, after all.		无	无	无	无	无			无		
+			掀起	Lift	你做出了从没做过的决定——把床垫掀起。	You make an unprecedented decision—to lift the mattress.		开关	任一周目解锁真相	是	结局二（步骤①）	一个红色按钮？按还是不按呢？	A red button? Should I press it or not?		0；再次F交互，【按下】发现方向盘	第二次触发F交互按下/取消	
+					平常谁会关心床垫下有什么	Who normally cares what's under a mattress?											
+								方向盘	按下开关	是	结局二（步骤②）	我的房间竟然隐藏着这么多我不知道的事......	Who knew my room was hiding so many secrets from me...		-1		
+			拾取	Pick Up	绳子能有什么用？先扯了再说	What's this rope for? Only one way to find out—give it a pull.		绳子	①任一周目解锁真相	是	结局三（步骤③）	绳子也许真能有用...我需要这样相信着	Maybe this rope really will come in handy... I have to believe that.		-1		
+									②本周目已拾取剪刀								
+					......力量不足以扯断绳子	...I'm not strong enough to break the rope.			无	否	无	无			无		
+3	茶具		查看	Examine	它为什么会在天上？	Why is it up there?		无	无	无	无	无			无		
+			喝茶	Drink Tea	为生活忙碌的同时，也不要忘记享受呀。	Don't get so busy living that you forget to enjoy it.		无	无	无	无	random(偶尔休息一下也不错/生活本该如此/是不是喝多了呢）	It's nice to take a break once in a while./This is how life should be./Did I have too much to drink?		-1		
+			放入	Put In	你回到了地面	You're back on the ground.		无	无	无	无	无			0		
+			取出	Take Out	难得一见的神奇体验	A rare and magical experience.		无	无	无	无	无			无		
+4	花瓶	Vase	查看	Examine	它在你的天花板上，你目前浇不了它 \n    主角：   ......	It's on the ceiling. You can't water it from here.		无	无	无	无	无			无		
+			放入	Put In	你回到了地面	You're back on the ground.		无	无	无	无	无			无		
+			取出	Take Out	难得一见的神奇体验	A rare and magical experience.		无	无	无	无	无			无		
+																	
+5	木板	Wooden Board	查看	Examine	一块看似平平无奇的木板	A seemingly ordinary wooden board.		无	无	无	无	无			无		
+			取下	Remove	它总会在某处发光的	It'll come in handy somewhere.		无	无	是	结局三（步骤③）						
+			加固	Reinforce	破坏它的时候是真心的，现在想要修好它也是	I meant it when I broke it. And I mean it now that I want to fix it.		墙上小洞	无	无		任何事物都有自己的价值，哪怕只是木板	Everything has its worth—even a simple wooden board.		++1		
+																	
+6	冰箱	Refrigerator	查看	Examine	里面有一些特别的符号，可惜你读不懂它们。	There are some strange symbols inside. Too bad you can't read them.		无	无	无	无	无			无		
+																	
+					一直搞不懂它们存在的意义是什么......	I've never understood why they're even here...											
+7	墙上小洞	Small Hole in the Wall	Examine	查看	Examine	什么都看不清楚......	I can't make out a thing...		无	无	无	无	无			无		
+			修复		Repair	希望现在还来得及修复	Hopefully, it's not too late to fix it		木板->	①上一周目解锁真相	是	①触发真相						
+									或者		② 通向结局三(步骤④)						
+									②本周目用扳手砸一次墙								
+8	剪刀	Scissors	查看	Examine	梳妆台会有剪刀这不是很合理的事吗	Of course there are scissors in the vanity. Why wouldn't there be?		无	无	无	无	无			无		
+			拾取	Pick Up	我要用剪刀做点什么呢	What should I do with these scissors?		无	无	是	结局三	无			无		
+											结局三						
+																	
+9	扳手	Wrench	拆卸	Disassemble	我怎么之前没有这么做呢，我早该这么做了	Why didn't I do this sooner? I should've done it ages ago.		轨道	无	是	①通往真相	现在我的双脚可以自由走向任何地方	Now my feet can take me wherever I want to go.		-1		
+											结局二，三前置条件						
+			击打	Strike	试试就试试，万一有用呢	Fine, I'll give it a try. It might just work.		完整墙面 / 墙上小洞 — 用扳手击打	无	是	①触发真相	击打一次：墙以外是什么呢	I wonder what's beyond these walls.		-1	结局三步骤⑤	
+											②本周目已取得扳手	击打两次：要...掉下去了！！！	I'm... falling!!!				
+10	墙上大洞	Large Hole in the Wall	None	无		无	无		扳手	同一周目扳手击打墙壁两次	是	揭开真相	死亡，进入【真相】演出			剩余回合变为0		
+																	
+																	
+																	
+11	床被（属于床）	Duvet Cover (Part of the Bed)	裁剪	Cut	（提示框）你居然想剪被套！也许你另有主意，也许你只是今晚不想睡觉了。	You really want to cut up the duvet cover? Maybe you have a plan—or maybe you just don't intend to sleep tonight.		剪刀	①任一周目解锁真相	是	结局三（步骤③）	（提示框）这也许是你按部就班的人生中最大胆的事	This might be the boldest thing you've ever done in your predictable life.				
+																	
+									②本周目已拾取剪刀			（提示框）嘿伙计，往好处想...我是说，也许你还能更大胆呢	Hey, look on the bright side... I mean, maybe you could go even bolder.				
+																	
+12	方向盘	Steering Wheel	启动	Activate	都走到这一步了，现在就让我们解开最后的谜底吧！	We've come this far. Now let's solve the final mystery!		掀起床->开关->	①任一周目解锁真相	是	结局二（步骤③）	也许某个举动会对你的一生造成重大影响......至于是好是坏，试试看吧！	A single action could change your entire life... For better or worse? Give it a try and find out!		-1		
+																	
+									②本周目前置流程完成								
+																	
+13	绳子	Rope	扔出	Throw	我已尝过死亡的滋味，如今还站在这里，正是因为我想活着啊！	I've tasted death—and I'm still standing because I want to live!		墙破的小洞->	①任一周目解锁真相	是	结局三（步骤⑥）	进入结局三演出			结局文本详情见sheet2		
+									②本周目前置流程完成								
+			缠绕	Wrap Around	加油，也许离成功只差一步......	Come on... Maybe I'm just one step away.		->自己	①任一周目解锁真相		结局三（步骤⑤）	现在我已经做出了决定！	I've made my decision!		-1		
+									②本周目已拾取剪刀③位于墙边小洞附近								
+14	插座	Power Outlet	连接床的电源线	Connect the Bed's Power Cord	无			床->	①任一周目解锁真相	是	结局二（步骤④）	进入结局二演出			结局文本详情见sheet2		
+									②本周目前置流程完成								
+																	
+说明一：备注①②③建立在 解锁真相的基础上																	
+说明二：解锁真相，备注②③的结局②③建立在使用扳手拆卸轨道的基础上																	
+																	
+备注①：	结局一对应流程：																
+																	
+																	
+备注②：	结局二对应流程：		①掀开床垫														
+			②打开开关														
+			③启动方向盘														
+			④床的数据线与插座相连														
+																	
+备注③	结局三对应流程：        ①拾取剪刀																
+			②对床使用拾取获得绳子														
+			③剪刀裁剪床被														
+			④扳手砸出小洞或是上周目遗留小洞		根据美术结局CG修改剧情												
+			⑤玩家将绳子系在自己身上														
+			⑥进入结局三【平安落地】														
+备注④  ID11床被本身交互在ID2床里，怕逻辑混乱拎出来																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	
+																	

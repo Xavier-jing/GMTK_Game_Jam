@@ -8,17 +8,17 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "查看",
+          "Dialog": "Examine",
           "TargetScriptId": "prop_tea_set",
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "喝茶",
+          "Dialog": "Drink Tea",
           "TargetScriptId": "prop_tea_set",
           "TargetNodeId": "drink"
         },
         {
-          "Dialog": "放入",
+          "Dialog": "Put In",
           "TargetScriptId": "prop_tea_set",
           "TargetNodeId": "put_in",
           "Condition": {
@@ -31,7 +31,7 @@
           }
         },
         {
-          "Dialog": "取出",
+          "Dialog": "Take Out",
           "TargetScriptId": "prop_tea_set",
           "TargetNodeId": "take_out",
           "Condition": {
@@ -44,7 +44,7 @@
           }
         },
         {
-          "Dialog": "离开",
+          "Dialog": "Leave",
           "TargetScriptId": "prop_tea_set",
           "TargetNodeId": "leave"
         }
@@ -55,7 +55,7 @@
       "Type": "Dialogue",
       "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "它为什么会在天上？",
+      "Dialog": "Why is it up there?",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -72,7 +72,7 @@
       "Type": "Dialogue",
       "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "为生活忙碌的同时，也不要忘记享受呀。",
+      "Dialog": "Don't get so busy living that you forget to enjoy it.",
       "AfterActions": [
         {
           "Id": "SpendTurns",
@@ -89,9 +89,9 @@
       "PortraitId": "3",
       "ActorId": "",
       "DialogOptions": [
-        "偶尔休息一下也不错。",
-        "生活本该如此。",
-        "是不是喝多了呢？"
+        "It's nice to take a break once in a while.",
+        "This is how life should be.",
+        "Did I have too much to drink?"
       ],
       "Next": "complete"
     },
@@ -100,7 +100,7 @@
       "Type": "Dialogue",
       "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "你回到了地面。",
+      "Dialog": "You're back on the ground.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
@@ -117,7 +117,7 @@
       "Type": "Dialogue",
       "PortraitId": "3",
       "ActorId": "",
-      "Dialog": "难得一见的神奇体验。",
+      "Dialog": "A rare and magical experience.",
       "BeforeActions": [
         {
           "Id": "WorldPropCommand",
