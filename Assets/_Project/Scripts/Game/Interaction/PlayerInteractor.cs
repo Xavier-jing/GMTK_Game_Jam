@@ -56,11 +56,17 @@ public sealed class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
-        RefreshCurrentTarget();
+        bool approachedStoryTarget = RefreshCurrentTarget();
 
         if (gamePause == null || gamePause.IsPaused || isInteracting)
         {
             interactPressed = false;
+            return;
+        }
+
+        if (approachedStoryTarget)
+        {
+            InteractWithCurrentTarget();
             return;
         }
 
@@ -81,7 +87,7 @@ public sealed class PlayerInteractor : MonoBehaviour
         }
     }
 
-    private void RefreshCurrentTarget()
+    private bool RefreshCurrentTarget()
     {
         interactionDetector.GetNearbyInteractables(nearbyInteractables);
 
@@ -141,17 +147,30 @@ public sealed class PlayerInteractor : MonoBehaviour
             }
         }
 
-        if (nearestAvailable == null &&
+        IInteractable selectedTarget = nearestAvailable ?? nearestBlocked;
+        bool selectedFromProximity = selectedTarget != null;
+        bool selectedCanInteract = nearestAvailable != null;
+
+        if (selectedTarget == null &&
             carriedProp != null &&
             carriedProp.isActiveAndEnabled &&
             carriedProp.CanInteract(interactionContext))
         {
-            nearestAvailable = carriedProp;
+            selectedTarget = carriedProp;
+            selectedCanInteract = true;
         }
 
-        SetCurrentTarget(
-            nearestAvailable ?? nearestBlocked,
-            nearestAvailable != null);
+        bool targetChanged = SetCurrentTarget(
+            selectedTarget,
+            selectedCanInteract);
+
+        // Availability changes on the same target do not count as a new
+        // approach. This prevents a completed Choice story from reopening
+        // immediately while the player is still inside the detection radius.
+        return targetChanged &&
+               selectedFromProximity &&
+               currentTargetCanInteract &&
+               selectedTarget is WorldStoryInteractable;
     }
 
     private void InteractWithCurrentTarget()
@@ -183,7 +202,7 @@ public sealed class PlayerInteractor : MonoBehaviour
         RefreshCurrentTarget();
     }
 
-    private void SetCurrentTarget(IInteractable target, bool canInteract)
+    private bool SetCurrentTarget(IInteractable target, bool canInteract)
     {
         string prompt = target != null
             ? target.GetInteractionPrompt(interactionContext) ?? string.Empty
@@ -195,13 +214,15 @@ public sealed class PlayerInteractor : MonoBehaviour
 
         if (!changed)
         {
-            return;
+            return false;
         }
 
+        bool targetChanged = currentTarget != target;
         currentTarget = target;
         currentTargetCanInteract = canInteract;
         currentPrompt = prompt;
         PromptChanged?.Invoke(currentPrompt, currentTargetCanInteract);
+        return targetChanged;
     }
 
     private static bool IsPreferred(

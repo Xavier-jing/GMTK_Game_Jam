@@ -153,8 +153,10 @@ JSON 中 Dialogue 节点的 `Dialog` 会写入 `Dialog Text`，`PortraitId` 会�
 2. 执行 `Tools > Jam Template > Validate Story Scripts`。每个脚本的所有可能
    首句路径（含跨脚本跳转）必须有 `PortraitId`；JSON 迁移线程完成前出现此类
    缺失错误是预期状态。
-3. 进入 Play Mode，靠近一个已配置的 `WorldStoryInteractable` 并触发剧情。
-4. 确认 `DialoguePanel` 从隐藏变为显示，正文来自对应 JSON，而不是 `New Text`。
+3. 进入 Play Mode，靠近一个已配置的 `WorldStoryInteractable`，确认无需按 F
+   就会启动其剧情；如果目标在靠近后才由不可交互变为可交互，使用 F 作为兜底。
+4. 对当前以 Choice 为起始节点的 `prop_*.json`，确认 `DialoguePanel` 从隐藏
+   变为显示并直接生成选项列表。
 5. 第一次 Submit 应立即补全打字效果，第二次 Submit 应进入下一节点。
 6. 到达 Choice 节点时，确认按钮数量和 JSON 中可见选项一致。
 7. 使用键盘/手柄导航和 Submit，再用鼠标点击验证同一选项。

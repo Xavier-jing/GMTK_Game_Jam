@@ -420,6 +420,32 @@ event Action<StoryError> Failed;
 
 启动新剧情时，如果已有剧情正在运行，旧剧情会先取消和清理。
 
+### 靠近交互与选项信息流
+
+`PlayerInteractionDetector` 每帧使用 3D 非分配球形检测收集范围内的
+`IInteractable`，`PlayerInteractor` 优先选择最近且 `CanInteract` 为真的
+目标。一个 `WorldStoryInteractable` 第一次成为范围内的当前目标时会自动启动
+其配置的剧情；原有 Interact/F 输入继续保留为目标状态变化后的兜底入口。
+
+当前 15 个 `prop_*.json` 的 `StartNodeId` 都指向 `Choice` 节点，因此靠近后
+会直接生成选择列表。选项信息不是从玩家组件或场景 Button 中读取，而是按以下
+链路获得：
+
+1. `StoryLoader` 从 `Resources/Story/{ScriptId}.json` 反序列化
+   `StoryChoiceData[]`。
+2. `StoryController` 使用 `StoryConditionRegistry` 计算每个选项的
+   `Condition`，过滤 `Hidden` 项，并保留 `Disabled` 项及其不可交互状态。
+3. 可见选项同步写入 `visibleChoices` 和 `StoryChoiceViewModel`；两份列表索引
+   一一对应。
+4. `StoryPresenter.ShowChoices()` 按 ViewModel 生成 Button，并把 Button 点击
+   回传为可见列表中的索引。
+5. `StoryController.TrySelectChoice(index)` 用同一索引取得原始
+   `StoryChoiceData`，再依据 `TargetScriptId` 与 `TargetNodeId` 进入对应分支。
+
+剧情运行期间由 `StoryController` 持有唯一的分支状态；UI 只呈现选项并回传
+索引，不复制或修改剧情数据。玩家仍在同一目标范围内时，剧情结束不会立即自动
+重开；离开目标并再次靠近后才会再次自动显示。
+
 ## 8. 人工 Unity 挂接
 
 智能体不得修改场景、Prefab、`.meta`、字体、图像、声音或其他艺术资产。以下步骤必须由人类在 Unity `2022.3.62f3c1` 中完成。
@@ -502,7 +528,8 @@ Player 上的 `PlayerCarrySlot` 和 `PlayerInteractor` 在缺失时会由 `Playe
 - `PlayerInteractionDetector.Detection Radius` 推荐先使用 `1.5`，按人物尺寸人工微调。
 - `PlayerCarrySlot.Drop Anchor` 可指向 Player 脚边的空 Transform；留空时使用 Player 位置。
 - 所有物品使用 3D Collider。原先未接入主循环的 2D `CircleCollider2D` 传感器不再需要。
-- `PlayerInteractor` 会在选择目标时检查一次 `CanInteract`，按下 F 真正调用前再检查一次。
+- `PlayerInteractor` 会在选择目标时检查一次 `CanInteract`，自动启动或按下 F
+  真正调用前再检查一次。
 
 ### 道具剧情文件
 
