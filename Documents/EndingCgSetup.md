@@ -95,7 +95,8 @@
 4. 提交视频及 Unity 自动生成的 `.meta`。
 
 视频开始前当前 BGM 会淡出；视频音轨通过现有 BGM Mixer Group 播放，因此
-遵循 Master 和 BGM 音量设置。若视频或引用缺失，程序会输出
+遵循 Master 和 BGM 音量设置。结局结束并加载下一周目或 MainMenu 后，全局
+`Music` 会恢复。若视频或引用缺失，程序会输出
 `[EndingSequence]` 错误并安全返回主菜单，不会永久卡在结局状态。
 
 ## 4. 验证步骤

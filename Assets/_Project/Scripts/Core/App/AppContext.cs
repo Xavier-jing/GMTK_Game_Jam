@@ -3,8 +3,11 @@ using UnityEngine;
 public sealed class AppContext : MonoBehaviour
 {
     private const int InitialTurns = 5;
+    private const string GlobalBgmAudioId = "Music";
+    private const float GlobalBgmFadeDuration = 1f;
 
     private static AppContext instance;
+    private bool hasLoggedGlobalBgmError;
 
     public static AppContext Instance => instance != null ? instance : EnsureExists();
 
@@ -120,6 +123,7 @@ public sealed class AppContext : MonoBehaviour
         Audio.BgmVolume = settings.BgmVolume;
         Audio.SfxVolume = settings.SfxVolume;
 
+        SceneLoader.SceneLoaded += HandleSceneLoaded;
         IsInitialized = true;
     }
 
@@ -130,11 +134,44 @@ public sealed class AppContext : MonoBehaviour
             return;
         }
 
+        if (SceneLoader != null)
+        {
+            SceneLoader.SceneLoaded -= HandleSceneLoaded;
+        }
+
         SceneLoader?.Dispose();
         GamePause?.Resume();
         LoopManager?.Dispose();
         Audio?.Dispose();
         IsInitialized = false;
         instance = null;
+    }
+
+    private void HandleSceneLoaded(SceneId sceneId)
+    {
+        if (sceneId == SceneId.Boot)
+        {
+            return;
+        }
+
+        if (Audio.TrySwitchBgmById(
+                GlobalBgmAudioId,
+                GlobalBgmFadeDuration,
+                out string error))
+        {
+            hasLoggedGlobalBgmError = false;
+            return;
+        }
+
+        if (hasLoggedGlobalBgmError)
+        {
+            return;
+        }
+
+        hasLoggedGlobalBgmError = true;
+        Debug.LogError(
+            $"[AppContext] Could not start global BGM " +
+            $"'{GlobalBgmAudioId}': {error}",
+            this);
     }
 }

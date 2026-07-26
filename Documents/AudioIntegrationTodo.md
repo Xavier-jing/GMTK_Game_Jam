@@ -1,6 +1,6 @@
 # 音效接入 TODO
 
-更新日期：2026-07-26
+更新日期：2026-07-27
 
 ## 1. 当前结论
 
@@ -19,7 +19,7 @@
 | 代码完成但待场景挂接 | 4 | 壁炉、水流、钟摆和 Gameplay 全局风声 |
 | 有文件但尚无触发逻辑 | 15 | 见第 4.3 至 4.4 节 |
 | 详细音效表中有 ID、但项目中无文件 | 7 | 见第 5 节 |
-| BGM 文件 | 0 | 策划表有 P0 需求，但没有最终文件或 AudioId |
+| BGM 文件 | 1 | `Music.mp3`，全局播放代码已接入 |
 
 现有 33 个 WAV 已位于正确的运行时加载目录，且每个 WAV 都有对应 `.meta`。
 其中 14 个已经具有实际触发点；4 个环境循环音的代码已完成，还需要人类在
@@ -217,21 +217,27 @@
 | `SFX-04` | 结局三安全落地、释然 | 提供独立结局音乐或 Sting |
 | `SFX-07` | 有效普通交互确认 | 确认是否复用 `UI_Click` |
 
-## 6. BGM TODO
+## 6. 全局 BGM（代码已接入、Play Mode 待验证）
 
-策划表明确存在一条 P0 BGM 需求：“温馨的房屋生活氛围，进入游戏界面播放，
-循环”。项目中目前没有 BGM 文件，因此暂时无法接入。
+最终文件为 `Assets/_Project/Resources/Audio/BGM/Music.mp3`，运行时 AudioId
+为 `Music`。
 
-- [ ] 音频负责人提供最终循环文件和 AudioId。建议稳定名称：
-      `BGM_Home`，但必须由团队确认后使用。
-- [ ] 由人类在 Unity Project 窗口把文件放到
-      `Assets/_Project/Resources/Audio/BGM/BGM_Home.*`，保留 `.meta`。
-- [ ] 进入 Gameplay 时调用
-      `AudioService.TrySwitchBgmById("BGM_Home", 1f, ...)`。
-- [ ] 明确返回 MainMenu、进入结局二和结局三时是继续、淡出还是切歌。
-- [ ] 若结局二、三分别提供新音乐，则给出独立 AudioId，并在结局状态确定后
-      调用 `SwitchBgm`，不要与结局 SFX 重叠抢占。
-- [ ] 验证 BGM 循环点无爆音，BGM 音量设置和持久化正常。
+- [x] `AppContext` 在每次非 Boot 场景加载后请求播放 `Music`，使用 1 秒淡入。
+- [x] BGM 由常驻的 `AudioService` 持有，输出到 `BGM` Mixer Group；
+      `MainMenu → GamePlay → SandBox` 等普通切场景不会重新开始或叠播。
+- [x] Boot 视频期间不启动该 BGM，避免与启动视频的直接音轨重叠。
+- [x] 结局 Credits 视频开始前仍会淡出全局 BGM；进入下一周目或返回
+      MainMenu 后，场景加载事件会恢复 `Music`。
+- [ ] 使用 Unity `2022.3.62f3c1` 等待 `Music.mp3` 导入完成，确认识别为
+      `AudioClip`，并提交 `BGM.meta` 与 `Music.mp3.meta`。
+- [ ] 从 Boot 进入 MainMenu，确认启动视频结束后开始播放；连续进入
+      GamePlay、返回 MainMenu 和进入 SandBox，确认音乐不中断、不从头开始、
+      不产生第二路叠音。
+- [ ] 分别把 Master/BGM 音量设为 `0`、`0.5`、`1`，重启游戏后确认设置
+      仍然生效；SFX 音量不应影响 BGM。
+- [ ] 暂停时 BGM 随 `AudioListener.pause` 暂停，恢复后从原位置继续。
+- [ ] 验证 43 秒循环接缝无爆音或明显空白；若存在问题，交由音频成员调整
+      原始文件循环点。
 
 ## 7. 完成标准
 

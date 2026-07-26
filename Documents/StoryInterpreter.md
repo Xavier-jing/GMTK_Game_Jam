@@ -262,6 +262,11 @@ End、取消或故障时仍会再次清理 CG，作为安全兜底。
 
 `SwitchBgm.FloatValue` 必须为非负数。`0` 表示使用默认 `1` 秒交叉淡入淡出。切换不会等待过渡结束；目标与当前 BGM 相同时不会重新播放。BGM 由常驻 `AudioService` 持有，会持续到下一次切换或其他代码显式调用 `AudioService.StopBgm()`。
 
+应用默认的全局 BGM 为 `Resources/Audio/BGM/Music`。`AppContext` 会在每次
+非 Boot 场景加载后确保它正在播放；普通切场景不会重启同一首音乐。剧情
+`SwitchBgm` 可以在当前场景切换为其他曲目，下一次场景加载会恢复默认
+`Music`。
+
 两个动作都可以放入 Action 节点的 `Actions`，或 Dialogue 节点的 `BeforeActions`、`AfterActions`。Unity 编辑器校验会确认对应 `AudioClip` 已导入。运行时资源缺失或音频服务不可用时会记录包含 Action Id 和 Audio Id 的错误，但不会中止剧情。
 
 当前策划音效表对应的剧情节点、资源路径和人工导入步骤见
