@@ -14,11 +14,17 @@ public static class StoryValidatorEditorTest
         RunAssertions();
 
         Debug.Log(
-            "StoryValidator unit test passed: a Dialogue node followed by an End node " +
-            "was validated and compiled successfully.");
+            "StoryValidator unit tests passed: the basic graph and story audio actions " +
+            "were validated and compiled successfully.");
     }
 
     public static void RunAssertions()
+    {
+        VerifyBasicStoryGraph();
+        VerifyAudioActions();
+    }
+
+    private static void VerifyBasicStoryGraph()
     {
         StoryDocumentData document = new StoryDocumentData
         {
@@ -63,6 +69,122 @@ public static class StoryValidatorEditorTest
         Assert(
             graph.ContainsNode("finish"),
             "Expected the compiled graph to contain the end node.");
+    }
+
+    private static void VerifyAudioActions()
+    {
+        StoryActionRegistry registry = new StoryActionRegistry();
+        Assert(
+            registry.TryGet(
+                PlaySfxStoryAction.ActionId,
+                out IStoryActionHandler playSfx),
+            "Expected PlaySfx to be registered.");
+        Assert(
+            registry.TryGet(
+                SwitchBgmStoryAction.ActionId,
+                out IStoryActionHandler switchBgm),
+            "Expected SwitchBgm to be registered.");
+
+        StoryActionParams validSfx = new StoryActionParams
+        {
+            StringValue = "door_open",
+            FloatValue = 0.8f
+        };
+        Assert(
+            playSfx.Validate(validSfx, out string validSfxError),
+            $"Expected valid PlaySfx parameters: {validSfxError}");
+
+        StoryActionParams defaultSfxVolume = new StoryActionParams
+        {
+            StringValue = "door_open",
+            FloatValue = 0f
+        };
+        Assert(
+            playSfx.Validate(defaultSfxVolume, out string defaultSfxError),
+            $"Expected zero to select the default SFX volume: {defaultSfxError}");
+
+        StoryActionParams invalidSfxId = new StoryActionParams
+        {
+            StringValue = "door/open",
+            FloatValue = 1f
+        };
+        Assert(
+            !playSfx.Validate(invalidSfxId, out string _),
+            "Expected PlaySfx to reject an audio id containing a path separator.");
+
+        StoryActionParams invalidSfxVolume = new StoryActionParams
+        {
+            StringValue = "door_open",
+            FloatValue = 1.1f
+        };
+        Assert(
+            !playSfx.Validate(invalidSfxVolume, out string _),
+            "Expected PlaySfx to reject volume values above 1.");
+
+        StoryActionParams validBgm = new StoryActionParams
+        {
+            StringValue = "gameplay",
+            FloatValue = 1.5f
+        };
+        Assert(
+            switchBgm.Validate(validBgm, out string validBgmError),
+            $"Expected valid SwitchBgm parameters: {validBgmError}");
+
+        StoryActionParams invalidBgmFade = new StoryActionParams
+        {
+            StringValue = "gameplay",
+            FloatValue = -0.1f
+        };
+        Assert(
+            !switchBgm.Validate(invalidBgmFade, out string _),
+            "Expected SwitchBgm to reject a negative fade duration.");
+
+        StoryDocumentData audioDocument = new StoryDocumentData
+        {
+            Version = StoryValidator.SupportedVersion,
+            ScriptId = "AudioActionStory",
+            StartNodeId = "audio",
+            Nodes = new[]
+            {
+                new StoryNodeData
+                {
+                    Id = "audio",
+                    Type = nameof(StoryNodeType.Action),
+                    Actions = new[]
+                    {
+                        new StoryActionData
+                        {
+                            Id = PlaySfxStoryAction.ActionId,
+                            Params = validSfx
+                        },
+                        new StoryActionData
+                        {
+                            Id = SwitchBgmStoryAction.ActionId,
+                            Params = validBgm
+                        }
+                    },
+                    Next = "finish"
+                },
+                new StoryNodeData
+                {
+                    Id = "finish",
+                    Type = nameof(StoryNodeType.End),
+                    Result = "Passed"
+                }
+            }
+        };
+        StoryValidator validator = new StoryValidator(
+            registry,
+            new StoryConditionRegistry());
+        Assert(
+            validator.TryValidate(
+                audioDocument,
+                out StoryGraph audioGraph,
+                out List<string> audioErrors),
+            $"Expected audio actions to compile: {string.Join(" | ", audioErrors)}");
+        Assert(
+            audioGraph != null && audioGraph.ContainsNode("audio"),
+            "Expected the compiled audio story to contain its action node.");
     }
 
     private static void Assert(bool condition, string message)

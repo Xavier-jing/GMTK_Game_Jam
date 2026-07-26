@@ -27,6 +27,8 @@ public static class StoryScriptValidationMenu
             new Dictionary<string, StoryGraph>(StringComparer.Ordinal);
         Dictionary<string, string> sourcePaths =
             new Dictionary<string, string>(StringComparer.Ordinal);
+        Dictionary<string, bool> audioResourceResults =
+            new Dictionary<string, bool>(StringComparer.Ordinal);
         List<string> allErrors = new List<string>();
 
         string[] assetGuids = AssetDatabase.FindAssets(
@@ -81,6 +83,11 @@ public static class StoryScriptValidationMenu
 
             graphs.Add(document.ScriptId, graph);
             sourcePaths.Add(document.ScriptId, assetPath);
+            ValidateAudioResources(
+                graph,
+                assetPath,
+                audioResourceResults,
+                allErrors);
         }
 
         ValidateCrossScriptTargets(graphs, sourcePaths, allErrors);
@@ -149,5 +156,103 @@ public static class StoryScriptValidationMenu
                 }
             }
         }
+    }
+
+    private static void ValidateAudioResources(
+        StoryGraph graph,
+        string sourcePath,
+        IDictionary<string, bool> resourceResults,
+        ICollection<string> errors)
+    {
+        foreach (StoryNodeDefinition node in graph.GetNodes())
+        {
+            string nodeLocation =
+                $"{sourcePath}: {graph.Document.ScriptId}/{node.Data.Id}";
+            ValidateAudioActions(
+                node.Data.BeforeActions,
+                $"{nodeLocation}/BeforeActions",
+                resourceResults,
+                errors);
+            ValidateAudioActions(
+                node.Data.AfterActions,
+                $"{nodeLocation}/AfterActions",
+                resourceResults,
+                errors);
+            ValidateAudioActions(
+                node.Data.Actions,
+                $"{nodeLocation}/Actions",
+                resourceResults,
+                errors);
+        }
+    }
+
+    private static void ValidateAudioActions(
+        StoryActionData[] actions,
+        string location,
+        IDictionary<string, bool> resourceResults,
+        ICollection<string> errors)
+    {
+        if (actions == null)
+        {
+            return;
+        }
+
+        for (int index = 0; index < actions.Length; index++)
+        {
+            StoryActionData action = actions[index];
+            if (!TryGetAudioResourcePath(action, out string resourcePath))
+            {
+                continue;
+            }
+
+            if (!resourceResults.TryGetValue(
+                    resourcePath,
+                    out bool resourceExists))
+            {
+                resourceExists =
+                    Resources.Load<AudioClip>(resourcePath) != null;
+                resourceResults.Add(resourcePath, resourceExists);
+            }
+
+            if (!resourceExists)
+            {
+                errors.Add(
+                    $"{location}[{index}]/{action.Id}: AudioClip resource " +
+                    $"'Resources/{resourcePath}' was not found or is not an AudioClip.");
+            }
+        }
+    }
+
+    private static bool TryGetAudioResourcePath(
+        StoryActionData action,
+        out string resourcePath)
+    {
+        resourcePath = string.Empty;
+        if (action == null || action.Params == null)
+        {
+            return false;
+        }
+
+        if (string.Equals(
+                action.Id,
+                PlaySfxStoryAction.ActionId,
+                StringComparison.Ordinal))
+        {
+            resourcePath =
+                AudioService.GetSfxResourcePath(action.Params.StringValue);
+            return true;
+        }
+
+        if (string.Equals(
+                action.Id,
+                SwitchBgmStoryAction.ActionId,
+                StringComparison.Ordinal))
+        {
+            resourcePath =
+                AudioService.GetBgmResourcePath(action.Params.StringValue);
+            return true;
+        }
+
+        return false;
     }
 }

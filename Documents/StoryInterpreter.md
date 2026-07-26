@@ -9,9 +9,10 @@
 - 条件选择与跨脚本跳转。
 - 显式结束节点。
 - 场景对象显隐、剧情标记、道具交互、动作回合和已有玩家语义动作。
+- 一次性全局 2D 音效和 BGM 交叉切换。
 - 取消、错误终止、玩家输入锁定和运行期剧情进度。
 
-首版不支持动作并行、通用表达式、反射调用、跨场景继续、自动播放、历史记录或磁盘存档。
+首版不支持动作并行、通用表达式、反射调用、跨场景继续、自动播放、历史记录、磁盘存档、剧情停止 BGM 或空间音效。
 
 ## 2. 文件与标识规则
 
@@ -153,7 +154,7 @@
 | `StringValue` | String | 枚举或字符串值 |
 | `BoolValue` | Bool | 开关或期望布尔值 |
 | `IntValue` | Int | 正整数动作回合消耗 |
-| `FloatValue` | Float | 预留浮点参数 |
+| `FloatValue` | Float | 音效音量、BGM 淡入淡出秒数或其他浮点参数 |
 | `TargetId` | String | `StoryTarget` 标识 |
 
 未被当前处理器使用的字段会被忽略。
@@ -167,9 +168,48 @@
 | `AcquireWrench` | 无 | 调用 `PlayerGameplayStatus.AcquireWrench()` |
 | `RemoveRailAndAscend` | 无 | 调用 `Player.TryStartRailRemovedAscend()` |
 | `ReleaseFloatingItemAndRise` | 无 | 调用 `Player.TryReleaseFloatingItemAndRise()` |
+| `PlaySfx` | `StringValue`, 可选 `FloatValue` | 播放一次全局 2D 音效；`FloatValue` 为 `0` 时使用音量 `1` |
+| `SwitchBgm` | `StringValue`, 可选 `FloatValue` | 交叉切换 BGM；`FloatValue` 为 `0` 时使用 `1` 秒过渡 |
 | `WorldPropCommand` | `TargetId`, `StringValue` | 对目标道具执行经过 C# 前置条件复检的语义命令 |
 | `SpendTurns` | `IntValue > 0` | 扣除指定动作回合；归零时在剧情正常结束后进入结局一 |
 | `RequestRunEnd` | `StringValue` | 请求 `EndingTwo` 或 `EndingThree`，在剧情正常结束后切周目 |
+
+### 剧情音频动作
+
+音频动作的 `StringValue` 是稳定的 `AudioId`，不含目录和扩展名，只允许英文字母、数字、下划线和连字符。资源由人类放入固定目录：
+
+- SFX：`Assets/_Project/Resources/Audio/SFX/{AudioId}.*`
+- BGM：`Assets/_Project/Resources/Audio/BGM/{AudioId}.*`
+
+播放开门音效：
+
+```json
+{
+  "Id": "PlaySfx",
+  "Params": {
+    "StringValue": "door_open",
+    "FloatValue": 0.8
+  }
+}
+```
+
+`PlaySfx.FloatValue` 必须为 `0` 到 `1`。`0` 表示使用默认音量 `1`。动作使用现有 SFX 池播放，不等待音效结束，也不受后续剧情推进或取消影响。
+
+切换游戏 BGM：
+
+```json
+{
+  "Id": "SwitchBgm",
+  "Params": {
+    "StringValue": "gameplay",
+    "FloatValue": 1.5
+  }
+}
+```
+
+`SwitchBgm.FloatValue` 必须为非负数。`0` 表示使用默认 `1` 秒交叉淡入淡出。切换不会等待过渡结束；目标与当前 BGM 相同时不会重新播放。BGM 由常驻 `AudioService` 持有，会持续到下一次切换或其他代码显式调用 `AudioService.StopBgm()`。
+
+两个动作都可以放入 Action 节点的 `Actions`，或 Dialogue 节点的 `BeforeActions`、`AfterActions`。Unity 编辑器校验会确认对应 `AudioClip` 已导入。运行时资源缺失或音频服务不可用时会记录包含 Action Id 和 Audio Id 的错误，但不会中止剧情。
 
 剧情不允许直接调用 `PlayerStateMachine.ChangeState()`。玩家状态变化必须经过现有语义接口，以保留轨道、物品和世界层前置条件。
 
@@ -394,9 +434,19 @@ Player 上的 `PlayerCarrySlot` 和 `PlayerInteractor` 在缺失时会由 `Playe
 
 JSON 的选择项使用 `WorldPropCommandAvailable`，实际结果节点使用相同 `TargetId` 和命令的 `WorldPropCommand`。所有具体台词、选项措辞、声音和表现资源均由人类提供。
 
+### 剧情音频
+
+1. 由人类制作或取得符合比赛规则的音频。
+2. 在 Unity `2022.3.62f3c1` 中创建 `Assets/_Project/Resources/Audio/SFX/` 和 `Assets/_Project/Resources/Audio/BGM/`。
+3. 把一次性音效导入 `SFX`，把循环音乐导入 `BGM`；文件名必须与剧情中的 `StringValue` 完全一致。
+4. 音频 ID 不写扩展名。例如 `door_open.wav` 在剧情中填写 `door_open`。
+5. 运行 `Tools/Jam Template/Validate Story Scripts`；资源缺失或资源类型不是 `AudioClip` 时，Console 会显示 JSON 文件、节点和动作位置。
+6. 无需修改场景、Prefab 或 Inspector；播放继续使用现有 `MasterMixer` 的 `SFX` 与 `BGM` 分组。
+
 ### 导入与提交
 
 - 让 Unity 为所有新增 `.cs` 和 `.json` 生成 `.meta`。
+- 让 Unity 为人类导入的音频和新音频目录生成 `.meta`。
 - 检查 Console 无编译错误。
 - 提交新增 `.meta`，不要复用其他文件的 GUID。
 - 所有 UI、字体、声音和剧情内容必须由人类制作或提供，遵守比赛的无 AI 艺术资产规则。
@@ -409,7 +459,7 @@ JSON 的选择项使用 `WorldPropCommandAvailable`，实际结果节点使用�
 ScriptId/NodeId/HandlerId: 原因
 ```
 
-未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。
+未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。`PlaySfx` 和 `SwitchBgm` 的运行时播放失败是唯一例外：它们记录错误后继续剧情，避免表现资源缺失阻断关键流程。
 
 ## 10. 验证
 
@@ -429,3 +479,6 @@ Play Mode 最小冒烟：
 6. 没有剪刀时床被选项灰显，有剪刀后可执行；按剧本顺序检查开关、方向盘、冰箱电源和床电源。
 7. 让一次成功动作扣到 0 回合，确认剧情先正常结束，再进入结局一和下一周目。
 8. 取消或故意触发错误，确认玩家输入恢复，且未提交待处理的砸墙/结局请求。
+9. 连续执行多个 `PlaySfx`，确认音效可重叠、遵守 SFX 音量，且剧情不会等待音效结束。
+10. 执行 `SwitchBgm`，确认 BGM 平滑切换；再次切换同一 Audio Id 不会重启，切换场景后仍继续播放。
+11. 临时在测试剧情中填写不存在的 Audio Id，确认编辑器校验失败；若绕过校验进入运行时，确认只记录错误而不中止剧情。

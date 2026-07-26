@@ -162,6 +162,7 @@ public sealed class StoryActionContext
         LoopManager loopManager,
         LoopProgress loopProgress,
         RunState runState,
+        AudioService audio,
         PlayerCarrySlot carrySlot)
     {
         Player = player;
@@ -172,6 +173,7 @@ public sealed class StoryActionContext
         LoopManager = loopManager ?? throw new ArgumentNullException(nameof(loopManager));
         LoopProgress = loopProgress ?? throw new ArgumentNullException(nameof(loopProgress));
         RunState = runState ?? throw new ArgumentNullException(nameof(runState));
+        Audio = audio ?? throw new ArgumentNullException(nameof(audio));
         CarrySlot = carrySlot;
     }
 
@@ -190,6 +192,8 @@ public sealed class StoryActionContext
     public LoopProgress LoopProgress { get; }
 
     public RunState RunState { get; }
+
+    public AudioService Audio { get; }
 
     public PlayerCarrySlot CarrySlot { get; }
 

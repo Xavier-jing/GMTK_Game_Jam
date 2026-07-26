@@ -168,6 +168,7 @@ public sealed class StoryController : MonoBehaviour
             appContext.LoopManager,
             appContext.LoopProgress,
             appContext.RunState,
+            appContext.Audio,
             player.CarrySlot);
         rootScriptId = scriptId;
         CurrentScriptId = scriptId ?? string.Empty;

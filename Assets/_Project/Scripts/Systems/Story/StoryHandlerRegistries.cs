@@ -13,6 +13,8 @@ public sealed class StoryActionRegistry
         Register(new AcquireWrenchStoryAction());
         Register(new RemoveRailAndAscendStoryAction());
         Register(new ReleaseFloatingItemAndRiseStoryAction());
+        Register(new PlaySfxStoryAction());
+        Register(new SwitchBgmStoryAction());
         Register(new WorldPropCommandStoryAction());
         Register(new SpendTurnsStoryAction());
         Register(new RequestRunEndStoryAction());

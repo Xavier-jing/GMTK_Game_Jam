@@ -1,10 +1,16 @@
+using System;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Audio;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 public sealed class AudioService
 {
+    public const string SfxResourceFolder = "Audio/SFX";
+    public const string BgmResourceFolder = "Audio/BGM";
+
     private const int SfxPoolSize = 8;
     private const string MixerResourcePath = "Audio/MasterMixer";
     private const string BgmGroupName = "BGM";
@@ -24,6 +30,8 @@ public sealed class AudioService
     private AudioSource[] sfxPool;
     private int sfxNextIndex;
     private AudioClip currentBgmClip;
+    private readonly Dictionary<string, AudioClip> resourceClipCache =
+        new Dictionary<string, AudioClip>(StringComparer.Ordinal);
 
     private float masterVolume = 1f;
     private float bgmVolume = 1f;
@@ -109,11 +117,102 @@ public sealed class AudioService
     {
         bgmTweenA?.Kill();
         bgmTweenB?.Kill();
+        resourceClipCache.Clear();
 
         if (root != null)
         {
             Object.Destroy(root);
         }
+    }
+
+    public bool TryPlaySfxById(
+        string audioId,
+        float volume,
+        out string error)
+    {
+        if (!TryValidateAudioId(audioId, out error))
+        {
+            return false;
+        }
+
+        if (sfxPool == null)
+        {
+            error = "The SFX audio sources are not initialized.";
+            return false;
+        }
+
+        string resourcePath = GetSfxResourcePath(audioId);
+        if (!TryLoadResourceClip(resourcePath, out AudioClip clip, out error))
+        {
+            return false;
+        }
+
+        PlaySfx(clip, volume);
+        error = string.Empty;
+        return true;
+    }
+
+    public bool TrySwitchBgmById(
+        string audioId,
+        float fadeDuration,
+        out string error)
+    {
+        if (!TryValidateAudioId(audioId, out error))
+        {
+            return false;
+        }
+
+        if (bgmSourceA == null || bgmSourceB == null)
+        {
+            error = "The BGM audio sources are not initialized.";
+            return false;
+        }
+
+        string resourcePath = GetBgmResourcePath(audioId);
+        if (!TryLoadResourceClip(resourcePath, out AudioClip clip, out error))
+        {
+            return false;
+        }
+
+        PlayBgm(clip, fadeDuration);
+        error = string.Empty;
+        return true;
+    }
+
+    public static bool IsValidAudioId(string audioId)
+    {
+        if (string.IsNullOrEmpty(audioId))
+        {
+            return false;
+        }
+
+        for (int index = 0; index < audioId.Length; index++)
+        {
+            char character = audioId[index];
+            bool valid =
+                character >= 'a' && character <= 'z' ||
+                character >= 'A' && character <= 'Z' ||
+                character >= '0' && character <= '9' ||
+                character == '_' ||
+                character == '-';
+
+            if (!valid)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static string GetSfxResourcePath(string audioId)
+    {
+        return $"{SfxResourceFolder}/{audioId}";
+    }
+
+    public static string GetBgmResourcePath(string audioId)
+    {
+        return $"{BgmResourceFolder}/{audioId}";
     }
 
     public void PlayBgm(AudioClip clip, float fadeDuration = 1f)
@@ -216,7 +315,45 @@ public sealed class AudioService
         source.outputAudioMixerGroup = group;
         source.loop = loop;
         source.playOnAwake = false;
+        source.spatialBlend = 0f;
         return source;
+    }
+
+    private bool TryLoadResourceClip(
+        string resourcePath,
+        out AudioClip clip,
+        out string error)
+    {
+        if (resourceClipCache.TryGetValue(resourcePath, out clip) && clip != null)
+        {
+            error = string.Empty;
+            return true;
+        }
+
+        clip = Resources.Load<AudioClip>(resourcePath);
+        if (clip == null)
+        {
+            error =
+                $"AudioClip resource 'Resources/{resourcePath}' was not found.";
+            return false;
+        }
+
+        resourceClipCache[resourcePath] = clip;
+        error = string.Empty;
+        return true;
+    }
+
+    private static bool TryValidateAudioId(string audioId, out string error)
+    {
+        if (IsValidAudioId(audioId))
+        {
+            error = string.Empty;
+            return true;
+        }
+
+        error =
+            $"Audio id '{audioId}' must contain only letters, numbers, underscores, or hyphens.";
+        return false;
     }
 
     private void KillBgmTweens()
