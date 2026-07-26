@@ -116,8 +116,9 @@ public static class WorldPropRules
         switch (propId)
         {
             case WorldPropId.Scissors:
-            case WorldPropId.Wrench:
                 return runState.DresserOpened;
+            case WorldPropId.Wrench:
+                return true;
             case WorldPropId.SmallWallHole:
                 return !runState.WallStruckOnce;
             case WorldPropId.LargeWallHole:

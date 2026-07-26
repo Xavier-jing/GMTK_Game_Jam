@@ -27,6 +27,7 @@ public static class StoryValidatorEditorTest
         VerifyInitialDialoguePortraitPaths();
         VerifyAudioActions();
         VerifyTurnChangeAction();
+        VerifyOptionalChoiceCondition();
     }
 
     private static void VerifyBasicStoryGraph()
@@ -74,6 +75,41 @@ public static class StoryValidatorEditorTest
         Assert(
             graph.ContainsNode("finish"),
             "Expected the compiled graph to contain the end node.");
+    }
+
+    private static void VerifyOptionalChoiceCondition()
+    {
+        const string json =
+            "{\"Version\":1,\"ScriptId\":\"OptionalConditionStory\"," +
+            "\"StartNodeId\":\"menu\",\"Nodes\":[" +
+            "{\"Id\":\"menu\",\"Type\":\"Choice\",\"Choices\":[" +
+            "{\"Dialog\":\"Leave\",\"TargetScriptId\":" +
+            "\"OptionalConditionStory\",\"TargetNodeId\":\"finish\"}]}," +
+            "{\"Id\":\"finish\",\"Type\":\"End\",\"Result\":\"Passed\"}]}";
+
+        StoryLoadResult loadResult =
+            new StoryLoader().Parse(json, "OptionalConditionStory");
+        Assert(
+            loadResult.Succeeded,
+            $"Expected optional-condition JSON to load: {loadResult.Error}");
+
+        StoryChoiceData choice = loadResult.Document.Nodes[0].Choices[0];
+        Assert(
+            !StoryValidator.HasCondition(choice.Condition),
+            "A missing JSON Condition must deserialize as an unconditional choice.");
+
+        StoryValidator validator = new StoryValidator(
+            new StoryActionRegistry(),
+            new StoryConditionRegistry());
+        Assert(
+            validator.TryValidate(
+                loadResult.Document,
+                out StoryGraph graph,
+                out List<string> errors),
+            $"Expected an unconditional choice to validate: {string.Join(" | ", errors)}");
+        Assert(
+            graph != null && graph.ContainsNode("menu"),
+            "Expected the optional-condition story graph to contain its menu.");
     }
 
     private static void VerifyAudioActions()

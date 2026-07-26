@@ -8,6 +8,19 @@
       "Type": "Choice",
       "Choices": [
         {
+          "Dialog": "拾取扳手",
+          "TargetScriptId": "prop_wrench",
+          "TargetNodeId": "acquire",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_wrench",
+              "StringValue": "AcquireInventoryItem"
+            }
+          }
+        },
+        {
           "Dialog": "拆卸轨道",
           "TargetScriptId": "prop_wrench",
           "TargetNodeId": "remove_rail",
@@ -48,6 +61,29 @@
           "TargetNodeId": "leave"
         }
       ]
+    },
+    {
+      "Id": "acquire",
+      "Type": "Dialogue",
+      "PortraitId": "4",
+      "ActorId": "",
+      "Dialog": "有了扳手，我就能拆卸轨道了。",
+      "AfterActions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_wrench",
+            "StringValue": "AcquireInventoryItem"
+          }
+        },
+        {
+          "Id": "SpendTurns",
+          "Params": {
+            "IntValue": 1
+          }
+        }
+      ],
+      "Next": "complete"
     },
     {
       "Id": "remove_rail",

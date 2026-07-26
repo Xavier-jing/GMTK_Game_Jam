@@ -612,7 +612,7 @@ public sealed class StoryController : MonoBehaviour
             bool conditionMet = true;
             StoryUnavailableMode unavailableMode = StoryUnavailableMode.Disabled;
 
-            if (choice.Condition != null)
+            if (StoryValidator.HasCondition(choice.Condition))
             {
                 if (!conditionRegistry.TryGet(
                         choice.Condition.Id,

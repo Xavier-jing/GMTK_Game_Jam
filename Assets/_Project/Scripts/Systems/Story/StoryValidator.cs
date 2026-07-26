@@ -101,6 +101,12 @@ public sealed class StoryValidator
         return Enum.TryParse(value, true, out mode);
     }
 
+    public static bool HasCondition(StoryConditionData condition)
+    {
+        return condition != null &&
+               !string.IsNullOrWhiteSpace(condition.Id);
+    }
+
     private static void ValidateDocumentHeader(
         StoryDocumentData document,
         ICollection<string> errors)
@@ -378,7 +384,7 @@ public sealed class StoryValidator
         string location,
         ICollection<string> errors)
     {
-        if (condition == null)
+        if (!HasCondition(condition))
         {
             return;
         }
