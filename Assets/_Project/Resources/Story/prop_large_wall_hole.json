@@ -1,26 +1,19 @@
 {
   "Version": 1,
   "ScriptId": "prop_large_wall_hole",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】墙上的洞比记忆中更大，后面似乎藏着什么。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "用扳手第二次砸开墙面",
+          "Dialog": "用扳手再次击打",
           "TargetScriptId": "prop_large_wall_hole",
-          "TargetNodeId": "second_strike",
+          "TargetNodeId": "strike",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_large_wall_hole",
               "StringValue": "SecondWallStrike"
@@ -28,14 +21,9 @@
           }
         },
         {
-          "Dialog": "查看",
+          "Dialog": "用木板修复",
           "TargetScriptId": "prop_large_wall_hole",
-          "TargetNodeId": "inspect"
-        },
-        {
-          "Dialog": "用木板修补墙洞",
-          "TargetScriptId": "prop_large_wall_hole",
-          "TargetNodeId": "install_plank",
+          "TargetNodeId": "reinforce",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
             "UnavailableMode": "Hidden",
@@ -53,9 +41,12 @@
       ]
     },
     {
-      "Id": "second_strike",
-      "Type": "Action",
-      "Actions": [
+      "Id": "strike",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "试试就试试，万一有用呢。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -69,28 +60,18 @@
     {
       "Id": "truth",
       "Type": "Dialogue",
+      "PortraitId": "3",
       "ActorId": "",
-      "Dialog": "【占位】墙后的真相显露出来，房屋随之坠毁。",
-      "Next": "complete"
+      "Dialog": "要……掉下去了！！！",
+      "Next": "truth_complete"
     },
     {
-      "Id": "inspect",
-      "Type": "Action",
-      "Actions": [
-        {
-          "Id": "WorldPropCommand",
-          "Params": {
-            "TargetId": "prop_large_wall_hole",
-            "StringValue": "Inspect"
-          }
-        }
-      ],
-      "Next": "complete"
-    },
-    {
-      "Id": "install_plank",
-      "Type": "Action",
-      "Actions": [
+      "Id": "reinforce",
+      "Type": "Dialogue",
+      "PortraitId": "2",
+      "ActorId": "",
+      "Dialog": "破坏它的时候是真心的，现在想要修好它也是。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -101,17 +82,18 @@
         {
           "Id": "ChangeTurns",
           "Params": {
-            "IntValue": 2
+            "IntValue": 1
           }
         }
       ],
-      "Next": "plank_installed"
+      "Next": "reinforced"
     },
     {
-      "Id": "plank_installed",
+      "Id": "reinforced",
       "Type": "Dialogue",
+      "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "【占位】木板稳住了破洞，房屋结构暂时稳定下来。",
+      "Dialog": "任何事物都有自己的价值，哪怕只是木板。",
       "Next": "complete"
     },
     {
@@ -121,6 +103,11 @@
     },
     {
       "Id": "complete",
+      "Type": "End",
+      "Result": "Completed"
+    },
+    {
+      "Id": "truth_complete",
       "Type": "End",
       "Result": "TruthRevealed"
     }

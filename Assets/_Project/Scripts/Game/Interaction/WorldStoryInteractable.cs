@@ -163,7 +163,10 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
         }
 
         bool canOperateOwnedInventoryItem =
-            command == WorldPropCommand.AttachRopeToFabric;
+            command == WorldPropCommand.AttachRopeToFabric ||
+            command == WorldPropCommand.AcquireBedRope ||
+            command == WorldPropCommand.AttachRopeToPlayer ||
+            command == WorldPropCommand.DeployParachute;
 
         if (removedFromWorld && !canOperateOwnedInventoryItem)
         {
@@ -231,17 +234,40 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return Require(
                     propId == WorldPropId.BedBlanket &&
                     context.LoopProgress.TruthKnown &&
+                    IsRailRemoved(context) &&
                     !context.RunState.FabricPrepared &&
                     requiredItem != null &&
                     context.Inventory.Contains(requiredItem),
-                    "Cutting the blanket requires the truth event and the configured scissors item.",
+                    "Cutting the blanket requires removed rails, the truth event, and the configured scissors item.",
+                    out reason);
+
+            case WorldPropCommand.RevealBedSwitch:
+                return Require(
+                    propId == WorldPropId.CableBed &&
+                    context.LoopProgress.TruthKnown &&
+                    IsRailRemoved(context) &&
+                    !context.RunState.BedLifted,
+                    "Lifting the bed requires removed rails, the truth event, and an unrevealed bed switch.",
+                    out reason);
+
+            case WorldPropCommand.AcquireBedRope:
+                return Require(
+                    propId == WorldPropId.Rope &&
+                    context.LoopProgress.TruthKnown &&
+                    IsRailRemoved(context) &&
+                    requiredItem != null &&
+                    context.Inventory.Contains(requiredItem) &&
+                    inventoryItem != null &&
+                    context.Inventory.GetAddResult(inventoryItem) ==
+                    InventoryAddResult.Added,
+                    "Taking the bed rope requires removed rails, the truth event, the configured scissors item, and inventory space.",
                     out reason);
 
             case WorldPropCommand.TriggerBedSwitch:
                 return Require(
                     propId == WorldPropId.BedSwitch &&
                     context.LoopProgress.TruthKnown &&
-                    context.RunState.FabricPrepared &&
+                    context.RunState.BedLifted &&
                     !context.RunState.BedSwitchTriggered,
                     "The bed switch prerequisites are no longer satisfied.",
                     out reason);
@@ -267,17 +293,15 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return Require(
                     propId == WorldPropId.PowerConnector &&
                     context.LoopProgress.TruthKnown &&
-                    context.RunState.FridgeUnplugged &&
+                    IsRailRemoved(context) &&
                     context.RunState.SteeringWheelRaised &&
-                    !context.RunState.BedConnected &&
-                    IsCarrying(context, WorldPropId.CableBed),
-                    "Connecting power requires the active steering wheel, the unplugged refrigerator, and the cable bed in the carry slot.",
+                    !context.RunState.BedConnected,
+                    "Connecting power requires removed rails, the active steering wheel, and a disconnected bed.",
                     out reason);
 
             case WorldPropCommand.InstallPlank:
                 return Require(
                     propId == WorldPropId.LargeWallHole &&
-                    context.LoopProgress.TruthKnown &&
                     context.RunState.WallStruckOnce &&
                     !context.RunState.WallRepaired &&
                     IsCarrying(context, WorldPropId.Plank),
@@ -288,6 +312,7 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return Require(
                     propId == WorldPropId.Rope &&
                     context.LoopProgress.TruthKnown &&
+                    IsRailRemoved(context) &&
                     context.RunState.FabricPrepared &&
                     !context.RunState.RopeAttached &&
                     inventoryItem != null &&
@@ -295,6 +320,18 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                      context.Inventory.GetAddResult(inventoryItem) ==
                      InventoryAddResult.Added),
                     "Attaching the rope requires the prepared fabric and the rope in this run's inventory.",
+                    out reason);
+
+            case WorldPropCommand.AttachRopeToPlayer:
+                return Require(
+                    propId == WorldPropId.Rope &&
+                    context.LoopProgress.TruthKnown &&
+                    IsRailRemoved(context) &&
+                    context.RunState.FabricPrepared &&
+                    !context.RunState.RopeAttached &&
+                    inventoryItem != null &&
+                    context.Inventory.Contains(inventoryItem),
+                    "Wrapping the rope requires removed rails, the prepared blanket, and the rope in this run's inventory.",
                     out reason);
 
             case WorldPropCommand.AnchorParachute:
@@ -309,12 +346,13 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
 
             case WorldPropCommand.DeployParachute:
                 return Require(
-                    propId == WorldPropId.SmallWallHole &&
+                    propId == WorldPropId.Rope &&
                     context.LoopProgress.TruthKnown &&
                     context.RunState.FabricPrepared &&
                     context.RunState.RopeAttached &&
-                    context.RunState.ParachuteAnchored,
-                    "Deploying the parachute requires prepared fabric, attached rope, and an anchored heavy prop.",
+                    inventoryItem != null &&
+                    context.Inventory.Contains(inventoryItem),
+                    "Throwing the parachute requires removed rails, prepared fabric, and the rope wrapped around the player.",
                     out reason);
 
             default:
@@ -360,7 +398,7 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                     context.Player.GameplayStatus.AcquireWrench();
                 }
 
-                removedFromWorld = true;
+                removedFromWorld = propId != WorldPropId.Wrench;
                 RefreshPresentation();
                 return true;
 
@@ -378,6 +416,20 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 context.RunState.MarkFabricPrepared();
                 return true;
 
+            case WorldPropCommand.RevealBedSwitch:
+                context.RunState.MarkBedLifted();
+                return true;
+
+            case WorldPropCommand.AcquireBedRope:
+                if (context.Inventory.TryAdd(inventoryItem) != InventoryAddResult.Added)
+                {
+                    reason = "The inventory changed before the bed rope could be added.";
+                    return false;
+                }
+
+                context.RunState.MarkRopeTaken();
+                return true;
+
             case WorldPropCommand.TriggerBedSwitch:
                 context.RunState.MarkBedSwitchTriggered();
                 return true;
@@ -391,12 +443,6 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return true;
 
             case WorldPropCommand.ConnectBedPower:
-                if (!TryPlaceCarriedProp(context, WorldPropId.CableBed))
-                {
-                    reason = "The cable bed left the carry slot before it could be connected.";
-                    return false;
-                }
-
                 context.RunState.MarkBedConnected();
                 return true;
 
@@ -411,6 +457,10 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
                 return true;
 
             case WorldPropCommand.AttachRopeToFabric:
+                context.RunState.MarkRopeAttached();
+                return true;
+
+            case WorldPropCommand.AttachRopeToPlayer:
                 context.RunState.MarkRopeAttached();
                 return true;
 
@@ -614,6 +664,12 @@ public sealed class WorldStoryInteractable : MonoBehaviour, IInteractable
     {
         return context.Player != null &&
                context.Player.GameplayStatus.HasWrench &&
+               context.Player.GameplayStatus.RailRemoved;
+    }
+
+    private static bool IsRailRemoved(StoryActionContext context)
+    {
+        return context.Player != null &&
                context.Player.GameplayStatus.RailRemoved;
     }
 

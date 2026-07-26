@@ -64,30 +64,70 @@ public static class WorldStoryRulesEditorTest
                 runState),
             "The small wall hole must be hidden before the truth is revealed.");
         Assert(
-            !WorldPropRules.IsPresent(
-                WorldPropId.Plank,
-                loopProgress,
-                runState),
-            "The plank must remain locked until the truth is known.");
-
-        loopProgress.RevealTruth();
-        Assert(
             WorldPropRules.IsPresent(
                 WorldPropId.Plank,
                 loopProgress,
                 runState),
-            "The plank must appear after the truth is revealed.");
+            "The plank must be available before the truth event.");
+        Assert(
+            !WorldPropRules.IsPresent(
+                WorldPropId.Rope,
+                loopProgress,
+                runState),
+            "The bed rope must not appear as a standalone world prop.");
+
+        runState.MarkRopeTaken();
+        Assert(
+            WorldPropRules.IsPresent(
+                WorldPropId.Rope,
+                loopProgress,
+                runState),
+            "Taking the bed rope must reveal its interaction target.");
+
+        loopProgress.RevealTruth();
         Assert(
             WorldPropRules.IsPresent(
                 WorldPropId.BedBlanket,
                 loopProgress,
                 runState),
             "The blanket interaction must appear after the truth is revealed.");
+        Assert(
+            !WorldPropRules.IsPresent(
+                WorldPropId.BedSwitch,
+                loopProgress,
+                runState),
+            "The bed switch must stay hidden until the bed is lifted.");
+
+        runState.MarkBedLifted();
+        Assert(
+            WorldPropRules.IsPresent(
+                WorldPropId.BedSwitch,
+                loopProgress,
+                runState),
+            "Lifting the bed must reveal its switch.");
+
+        runState.MarkBedSwitchTriggered();
+        Assert(
+            WorldPropRules.IsPresent(
+                WorldPropId.SteeringWheel,
+                loopProgress,
+                runState),
+            "Pressing the bed switch must reveal the steering wheel.");
+
+        runState.MarkSteeringWheelRaised();
+        Assert(
+            WorldPropRules.IsPresent(
+                WorldPropId.PowerConnector,
+                loopProgress,
+                runState),
+            "Starting the steering wheel must reveal the bed power connector.");
 
         runState.Reset();
         Assert(
             !runState.DresserOpened &&
             !runState.FabricPrepared &&
+            !runState.BedLifted &&
+            !runState.RopeTaken &&
             !runState.WallStruckOnce,
             "RunState.Reset must clear per-run prop progress.");
         Assert(

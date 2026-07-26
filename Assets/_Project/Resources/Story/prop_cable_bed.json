@@ -1,15 +1,8 @@
 {
   "Version": 1,
   "ScriptId": "prop_cable_bed",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】床的一侧拖着一根数据线，不知道通向哪里。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
@@ -20,28 +13,54 @@
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "放入携带槽",
+          "Dialog": "掀起床垫",
           "TargetScriptId": "prop_cable_bed",
-          "TargetNodeId": "take",
+          "TargetNodeId": "lift",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_cable_bed",
-              "StringValue": "TakeIntoCarrySlot"
+              "StringValue": "RevealBedSwitch"
             }
           }
         },
         {
-          "Dialog": "放下",
+          "Dialog": "掀起床垫",
           "TargetScriptId": "prop_cable_bed",
-          "TargetNodeId": "drop",
+          "TargetNodeId": "lift_unavailable",
           "Condition": {
-            "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "Id": "WorldPropCommandUnavailable",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_cable_bed",
-              "StringValue": "DropFromCarrySlot"
+              "StringValue": "RevealBedSwitch"
+            }
+          }
+        },
+        {
+          "Dialog": "拾取绳子",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "take_rope",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_rope",
+              "StringValue": "AcquireBedRope"
+            }
+          }
+        },
+        {
+          "Dialog": "拾取绳子",
+          "TargetScriptId": "prop_cable_bed",
+          "TargetNodeId": "rope_unavailable",
+          "Condition": {
+            "Id": "WorldPropCommandUnavailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_rope",
+              "StringValue": "AcquireBedRope"
             }
           }
         },
@@ -54,8 +73,11 @@
     },
     {
       "Id": "inspect",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "你对它很熟悉，因为你每天都睡在这里。",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -67,34 +89,50 @@
       "Next": "complete"
     },
     {
-      "Id": "take",
-      "Type": "Action",
-      "Actions": [
+      "Id": "lift",
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "你做出了从没做过的决定——把床垫掀起。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_cable_bed",
-            "StringValue": "TakeIntoCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
+            "StringValue": "RevealBedSwitch"
           }
         }
       ],
+      "Next": "lifted"
+    },
+    {
+      "Id": "lifted",
+      "Type": "Dialogue",
+      "PortraitId": "2",
+      "ActorId": "",
+      "Dialog": "一个红色按钮？按还是不按呢？",
       "Next": "complete"
     },
     {
-      "Id": "drop",
-      "Type": "Action",
-      "Actions": [
+      "Id": "lift_unavailable",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "平常谁会关心床垫下有什么。",
+      "Next": "complete"
+    },
+    {
+      "Id": "take_rope",
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "绳子能有什么用？先扯了再说。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
-            "TargetId": "prop_cable_bed",
-            "StringValue": "DropFromCarrySlot"
+            "TargetId": "prop_rope",
+            "StringValue": "AcquireBedRope"
           }
         },
         {
@@ -104,6 +142,22 @@
           }
         }
       ],
+      "Next": "rope_acquired"
+    },
+    {
+      "Id": "rope_acquired",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "绳子也许真能有用……我需要这样相信着。",
+      "Next": "complete"
+    },
+    {
+      "Id": "rope_unavailable",
+      "Type": "Dialogue",
+      "PortraitId": "1",
+      "ActorId": "",
+      "Dialog": "……力量不足以扯断绳子。",
       "Next": "complete"
     },
     {

@@ -116,7 +116,7 @@ public interface IStoryPresenter
 {
     bool IsConfigured { get; }
 
-    void ShowDialogue(string actorId, string dialog);
+    void ShowDialogue(string actorId, string portraitId, string dialog);
 
     void ShowChoices(
         IReadOnlyList<StoryChoiceViewModel> choices,

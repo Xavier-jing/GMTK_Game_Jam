@@ -18,7 +18,7 @@
 
 - JSON 文件放入 `Assets/_Project/Resources/Story/`。
 - 文件名必须与文档中的 `ScriptId` 完全一致。例如 `gameplay_intro.json` 对应 `"ScriptId": "gameplay_intro"`。
-- `ScriptId`、节点 `Id`、`ActorId`、剧情标记 Key 和场景 `TargetId` 只能包含英文字母、数字、下划线和连字符，并且区分大小写。
+- `ScriptId`、节点 `Id`、`ActorId`、`PortraitId`、剧情标记 Key 和场景 `TargetId` 只能包含英文字母、数字、下划线和连字符，并且区分大小写。
 - 当前格式版本固定为 `"Version": 1`。
 - 所有脚本必须使用 Unity 菜单 `Tools/Jam Template/Validate Story Scripts` 校验后再提交。
 
@@ -57,6 +57,7 @@
       "Id": "line_01",
       "Type": "Dialogue",
       "ActorId": "captain",
+      "PortraitId": "face01",
       "Dialog": "我们得先把轨道拆掉。",
       "BeforeActions": [],
       "AfterActions": [],
@@ -112,14 +113,28 @@
 
 - `Id`
 - `Type: "Dialogue"`
-- `Dialog`
 - `Next`
+- `Dialog` 或 `DialogOptions`，两者必须且只能填写一个
 
 可选字段：
 
 - `ActorId`：为空或省略时作为旁白显示。
+- `PortraitId`：当前 Dialogue 使用的立绘 ID。字符串 `"1"` 至 `"5"`
+  分别映射 `face01` 至 `face05`，`"0"` 作为 fail-safe 同样映射
+  `face01`；原有的 `face01` 至 `face05` 写法继续兼容。空值或省略时保持
+  上一张立绘。
+- `DialogOptions`：非空字符串数组；进入节点时等概率随机选择一条显示。用于同一交互的随机反馈。
 - `BeforeActions`：显示文字前顺序执行。
 - `AfterActions`：玩家完成本句后、进入 `Next` 前顺序执行。
+
+每个脚本从 `StartNodeId` 出发的每条 Choice/Action 路径（包括跨脚本跳转）
+第一次遇到的 Dialogue 都必须填写 `PortraitId`。同一剧情的后续 Dialogue
+可以省略，以保持上一张。一个节点的所有 `DialogOptions` 共用该节点的同一个
+`PortraitId`，不支持台词与多张立绘的随机配对。
+
+每次 `StoryController.TryStart()` 会先把立绘恢复为 `Portrait Image` 在
+`StoryPresenter` 初始化时的 Sprite；合法首句随后立即覆盖。未知 ID、映射项
+Sprite 为空或未配置 `Portrait Image` 时只记录警告并保留当前立绘，不中断剧情。
 
 第一次 Submit 会立即补全打字效果，第二次 Submit 才进入下一节点。
 
@@ -153,7 +168,7 @@
 | `Key` | String | 剧情标记 Key |
 | `StringValue` | String | 枚举或字符串值 |
 | `BoolValue` | Bool | 开关或期望布尔值 |
-| `IntValue` | Int | 正整数动作回合消耗 |
+| `IntValue` | Int | 正整数动作回合消耗，或 Int32 范围内的有符号回合变化量 |
 | `FloatValue` | Float | 音效音量、BGM 淡入淡出秒数或其他浮点参数 |
 | `TargetId` | String | `StoryTarget` 标识 |
 
@@ -172,7 +187,7 @@
 | `SwitchBgm` | `StringValue`, 可选 `FloatValue` | 交叉切换 BGM；`FloatValue` 为 `0` 时使用 `1` 秒过渡 |
 | `WorldPropCommand` | `TargetId`, `StringValue` | 对目标道具执行经过 C# 前置条件复检的语义命令 |
 | `SpendTurns` | `IntValue > 0` | 扣除指定动作回合；归零时在剧情正常结束后进入结局一 |
-| `ChangeTurns` | `IntValue != 0` | 按有符号数值改变回合；正数增加稳定时间，负数减少，归零进入结局一 |
+| `ChangeTurns` | `IntValue`（任意 Int32） | 按有符号数值改变回合；`0` 为成功的无操作，负数归零时进入结局一 |
 | `RequestRunEnd` | `StringValue` | 请求 `EndingTwo` 或 `EndingThree`，在剧情正常结束后切周目 |
 
 ### 剧情音频动作
@@ -223,17 +238,20 @@
 | `TakeIntoCarrySlot` | 把负重物放入唯一携带槽 |
 | `DropFromCarrySlot` | 在玩家当前位置放下当前负重物 |
 | `AcquireInventoryItem` | 把剪刀、扳手或绳子加入背包 |
-| `FirstWallStrike` | 第一次砸墙；剧情结束后记录永久进度并结束本周目 |
+| `FirstWallStrike` | 第一次砸墙并记录本周目墙洞状态 |
 | `SecondWallStrike` | 第二次砸墙；剧情结束后揭示真相并结束本周目 |
 | `CutBlanket` | 使用配置的剪刀处理床被 |
-| `TriggerBedSwitch` | 触发床开关 |
+| `RevealBedSwitch` | 真相已知时掀起床垫并显示床开关 |
+| `AcquireBedRope` | 真相已知且持有剪刀时，从床上取得配置的绳子道具 |
+| `TriggerBedSwitch` | 床垫已掀起后触发床开关 |
 | `StartSteeringWheel` | 启动方向盘 |
 | `UnplugRefrigerator` | 关闭冰箱电源 |
-| `ConnectBedPower` | 把携带槽中的带线床接到电源处 |
+| `ConnectBedPower` | 方向盘启动后连接床的电源线 |
 | `InstallPlank` | 把携带槽中的木板安装到墙洞 |
-| `AttachRopeToFabric` | 真相知晓后，把本周目背包中的绳子固定到处理好的布料 |
-| `AnchorParachute` | 真相知晓后，用携带槽中的梳妆台锚定降落伞绳索 |
-| `DeployParachute` | 布料、绳索和锚点全部完成后触发结局三 |
+| `AttachRopeToPlayer` | 床被处理完成后，把本周目背包中的绳子缠到玩家身上 |
+| `DeployParachute` | 床被处理且绳子已缠绕后，扔出绳子并触发结局三 |
+| `AttachRopeToFabric` | 旧版兼容命令；新中文脚本不再使用 |
+| `AnchorParachute` | 旧版兼容命令；新中文脚本不再使用 |
 
 选择菜单中的条件只决定“显示/灰显”。执行 `WorldPropCommand` 时会在修改状态前再次检查同一条件，因此玩家状态在菜单打开后发生变化也不会绕过限制。
 
@@ -264,6 +282,11 @@
 
 如果第一项因为携带槽已满等原因失败，第二项不会执行，因此不会误扣回合。
 
+`ChangeTurns.IntValue` 接受 `-2147483648` 到 `2147483647` 的全部整数。
+`0` 不改变回合且动作成功；结果小于 `0` 时钳制为 `0`，超过 Int32 上限时
+钳制为 `2147483647`。由于 Unity JSON 反序列化会把缺省的 `IntValue`
+设为 `0`，省略该字段也会按成功的无操作处理。
+
 ## 6. 条件白名单
 
 | Condition Id | 必需 Params | 行为 |
@@ -271,15 +294,17 @@
 | `StoryFlagEquals` | `Key`, `BoolValue` | 比较剧情 Bool 标记 |
 | `PlayerHasWrench` | 可选 `BoolValue` | 比较玩家是否有扳手 |
 | `PlayerRailRemoved` | 可选 `BoolValue` | 比较轨道是否已移除 |
+| `PlayerCanRemoveRail` | 无 | 玩家有扳手、轨道未拆且携带槽为空时为真 |
 | `PlayerHasSlotItem` | 可选 `BoolValue` | 比较物品槽是否有物品 |
 | `PlayerIsWorldLayer` | `StringValue` | 比较 `Lower` 或 `Upper` |
 | `WorldPropCommandAvailable` | `TargetId`, `StringValue` | 使用与执行动作相同的道具前置条件检查 |
+| `WorldPropCommandUnavailable` | `TargetId`, `StringValue` | 当前目标存在但动作前置条件未满足时为真，用于失败反馈；一次性动作完成后不再显示 |
 | `RunFlagEquals` | `StringValue`, `BoolValue` | 比较单周目 `RunFlagId` |
 | `LoopProgressFlagEquals` | `StringValue`, `BoolValue` | 比较跨周目 `LoopProgressFlag` |
 
 对三个玩家 Bool 条件，完全省略 `Params` 表示期望为 `true`；提供 `Params` 后使用其中的 `BoolValue`，可用 `false` 表示反向条件。
 
-`RunFlagEquals.StringValue` 支持 `DresserOpened`、`WallRepaired`、`SteeringWheelRaised`、`FridgeUnplugged`、`BedConnected`、`FabricPrepared`、`BedSwitchTriggered`、`RopeAttached`、`ParachuteAnchored`。
+`RunFlagEquals.StringValue` 支持 `DresserOpened`、`WallRepaired`、`SteeringWheelRaised`、`FridgeUnplugged`、`BedConnected`、`FabricPrepared`、`BedSwitchTriggered`、`RopeAttached`、`ParachuteAnchored`、`BedLifted`、`RopeTaken`。
 
 `LoopProgressFlagEquals.StringValue` 支持 `TruthKnown`、`EndingTwoReached`、`EndingThreeReached`。
 
@@ -405,16 +430,20 @@ event Action<StoryError> Failed;
 2. 在 `Canvas/UIRoot/HintPanel` 下创建 `StoryOverlay`。
 3. 使用现有 uGUI 和 TextMeshPro 创建：
    - Panel 根节点。
-   - Actor TMP Text。
+   - 可选 Actor TMP Text；当前单角色 UI 可以不创建。
    - Dialog TMP Text。
+   - 角色立绘 Image。
    - Choice Container。
    - 一个 Button 模板，模板下包含 TMP Text，并默认设为不激活。
 4. 给 `StoryOverlay` 添加 `StoryPresenter`：
    - `Panel Root`：Panel 根节点。
-   - `Actor Text`：Actor TMP Text。
+   - `Actor Text`：可选；当前单角色 UI 可以留空。
    - `Dialog Text`：Dialog TMP Text。
    - `Choice Container`：选择按钮父节点。
    - `Choice Button Template`：默认不激活的按钮模板。
+   - `Portrait Image`：显示角色立绘的 uGUI `Image`。
+   - `Portrait Bindings`：逐项填写大小写敏感的 `Portrait Id` 与人类制作
+     `Sprite`；例如 `face01` 至 `face05`。不要留空 Sprite。
    - `Characters Per Second`：推荐 `30` 到 `60`。
 5. 给根对象 `UIController` 添加 `StoryController`：
    - `Presenter`：刚创建的 `StoryPresenter`。
@@ -452,21 +481,21 @@ event Action<StoryError> Failed;
 
 | 编号 | Prop Id | 建议 Target Id | 主要 JSON 命令 | 特殊挂接 |
 | --- | --- | --- | --- | --- |
-| 1 | `Dresser` | `prop_dresser` | `Inspect`, `OpenDresser`, `TakeIntoCarrySlot`, `DropFromCarrySlot` | 无 |
-| 2 | `CableBed` | `prop_cable_bed` | `Inspect`, `TakeIntoCarrySlot`, `DropFromCarrySlot` | 勾选 `Auto Start First Story`；出生点放在附近 |
+| 1 | `Dresser` | `prop_dresser` | `Inspect`, `OpenDresser` | “拾取扳手”会继续调用 `prop_wrench/AcquireInventoryItem` |
+| 2 | `CableBed` | `prop_cable_bed` | `Inspect`, `RevealBedSwitch` | `AcquireBedRope` 会跨目标调用 `prop_rope` |
 | 3 | `TeaSet` | `prop_tea_set` | `TakeIntoCarrySlot`, `DropFromCarrySlot` | 无 |
 | 4 | `Vase` | `prop_vase` | `TakeIntoCarrySlot`, `DropFromCarrySlot` | 无 |
-| 5 | `Plank` | `prop_plank` | `TakeIntoCarrySlot`, `DropFromCarrySlot` | 第一次砸墙后自动显示 |
-| 6 | `Refrigerator` | `prop_refrigerator` | `Inspect`, `TakeIntoCarrySlot`, `DropFromCarrySlot`, `UnplugRefrigerator` | 无 |
-| 7 | `SmallWallHole` | `prop_small_wall_hole` | `Inspect`, `FirstWallStrike`, `InstallPlank` | 第一次砸墙或真相后显示规则由代码处理 |
+| 5 | `Plank` | `prop_plank` | `Inspect`, `TakeIntoCarrySlot` | 初始即可出现；加固命令在大洞目标执行 |
+| 6 | `Refrigerator` | `prop_refrigerator` | `Inspect` | 无 |
+| 7 | `SmallWallHole` | `prop_small_wall_hole` | `Inspect`, `FirstWallStrike` | 第一次砸墙后切换到大洞 |
 | 8 | `Scissors` | `prop_scissors` | `Inspect`, `AcquireInventoryItem` | `Inventory Item = Scissors` |
-| 9 | `Wrench` | `prop_wrench` | `Inspect`, `AcquireInventoryItem` | `Inventory Item = Wrench` |
-| 10 | `LargeWallHole` | `prop_large_wall_hole` | `SecondWallStrike` | 第一次砸墙后显示，真相后隐藏 |
+| 9 | `Wrench` | `prop_wrench` | `RemoveRailAndAscend`，并跨脚本调用砸墙命令 | `Inventory Item = Wrench` |
+| 10 | `LargeWallHole` | `prop_large_wall_hole` | `SecondWallStrike`, `InstallPlank` | 第一次砸墙后显示 |
 | 11 | `BedBlanket` | `prop_bed_blanket` | `CutBlanket` | `Required Item = Scissors` |
-| 12 | `BedSwitch` | `prop_bed_switch` | `TriggerBedSwitch` | 可以没有可见美术；仍需独立目标对象 |
+| 12 | `BedSwitch` | `prop_bed_switch` | `TriggerBedSwitch` | 床垫掀起后显示 |
 | 13 | `SteeringWheel` | `prop_steering_wheel` | `StartSteeringWheel` | 床开关触发后显示 |
-| 14 | `PowerConnector` | `prop_power_connector` | `ConnectBedPower` | 可以没有可见美术；冰箱断电后显示 |
-| 15 | `Rope` | `prop_rope` | `Inspect`, `AcquireInventoryItem` | `Inventory Item = Rope` |
+| 14 | `PowerConnector` | `prop_power_connector` | `ConnectBedPower` | 方向盘启动后显示 |
+| 15 | `Rope` | `prop_rope` | `AcquireBedRope`, `AttachRopeToPlayer`, `DeployParachute` | `Inventory Item = Rope`，`Required Item = Scissors`；拾取前隐藏，拾取后显示交互目标 |
 
 Player 上的 `PlayerCarrySlot` 和 `PlayerInteractor` 在缺失时会由 `Player.Awake()` 补上，Unity 导入脚本后仍建议由人类在 Inspector 中确认：
 
@@ -477,11 +506,11 @@ Player 上的 `PlayerCarrySlot` 和 `PlayerInteractor` 在缺失时会由 `Playe
 
 ### 道具剧情文件
 
-仓库已经在 `Assets/_Project/Resources/Story/` 提供 15 个 `prop_*.json` 初稿。每个道具的 `First Script Id` 直接填写与 `Target Id` 相同的值，例如梳妆台填写 `prop_dresser`。初稿中的 `【占位】` 文本需要策划替换为正式剧情。
+仓库已经在 `Assets/_Project/Resources/Story/` 提供 15 个中文 `prop_*.json`。每个道具的 `First Script Id` 直接填写与 `Target Id` 相同的值，例如梳妆台填写 `prop_dresser`。英文版后续可只替换 `Dialog`、`DialogOptions` 和选择项 `Dialog`，不需要修改命令或条件。
 
 需要重复文本时再创建 `Repeat Script Id`；不填写重复脚本时会继续使用首次脚本。首次标记只在该脚本正常到达 `End` 后设置，取消或失败不会误记。
 
-JSON 的选择项使用 `WorldPropCommandAvailable`，实际结果节点使用相同 `TargetId` 和命令的 `WorldPropCommand`。所有具体台词、选项措辞、声音和表现资源均由人类提供。
+JSON 的成功选择项使用 `WorldPropCommandAvailable`，失败反馈分支使用 `WorldPropCommandUnavailable`；实际结果节点使用相同 `TargetId` 和命令的 `WorldPropCommand`。声音和表现资源仍由人类提供。
 
 ### 剧情音频
 
@@ -508,7 +537,7 @@ JSON 的选择项使用 `WorldPropCommandAvailable`，实际结果节点使用�
 ScriptId/NodeId/HandlerId: 原因
 ```
 
-未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。`PlaySfx` 和 `SwitchBgm` 的运行时播放失败是唯一例外：它们记录错误后继续剧情，避免表现资源缺失阻断关键流程。
+未知节点、动作、条件、无效参数、缺失跳转目标、重复 ID、无可见选项和动作失败都会进入 `Faulted`，触发 `Failed`，隐藏 UI 并恢复玩家输入。`PlaySfx`、`SwitchBgm` 的运行时播放失败，以及未知/未完成配置的 `PortraitId` 是非致命表现错误：它们记录错误或警告后继续剧情，避免表现资源缺失阻断关键流程。
 
 ## 10. 验证
 
@@ -517,6 +546,10 @@ ScriptId/NodeId/HandlerId: 原因
 - `Tools/Jam Template/Tests/Run Story Validator Unit Test`
 - `Tools/Jam Template/Tests/Run World Story Rules Unit Test`
 - `Tools/Jam Template/Validate Story Scripts`
+
+全量剧情校验会从每个脚本的 `StartNodeId` 沿所有 Choice/Action 及跨脚本路径
+检查首个 Dialogue 的 `PortraitId`。当前 JSON 迁移尚未完成时，缺失首句
+`PortraitId` 是预期的校验错误；迁移完成后必须全量通过。
 
 Play Mode 最小冒烟：
 
@@ -531,3 +564,8 @@ Play Mode 最小冒烟：
 9. 连续执行多个 `PlaySfx`，确认音效可重叠、遵守 SFX 音量，且剧情不会等待音效结束。
 10. 执行 `SwitchBgm`，确认 BGM 平滑切换；再次切换同一 Audio Id 不会重启，切换场景后仍继续播放。
 11. 临时在测试剧情中填写不存在的 Audio Id，确认编辑器校验失败；若绕过校验进入运行时，确认只记录错误而不中止剧情。
+12. 使用测试剧情验证 `0 → 1 → 3 → 省略 → 未知 ID`：前三句依次显示
+    `face01 → face01 → face03`，省略和未知 ID 均保持 `face03`，未知 ID
+    产生包含 Presenter、原始 PortraitId 与解析后绑定 ID 的警告且剧情继续。
+13. 启动另一段剧情，确认立绘先恢复 `Portrait Image` 的初始 Sprite，再由
+    新剧情首句 ID 切换；剧情结束后玩家控制正常恢复。

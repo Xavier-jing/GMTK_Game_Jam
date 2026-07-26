@@ -1,36 +1,46 @@
 {
   "Version": 1,
   "ScriptId": "prop_wrench",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一把沉甸甸的扳手，也许能破坏某些结构。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "拾取",
+          "Dialog": "拆卸轨道",
           "TargetScriptId": "prop_wrench",
-          "TargetNodeId": "acquire",
+          "TargetNodeId": "remove_rail",
+          "Condition": {
+            "Id": "PlayerCanRemoveRail",
+            "UnavailableMode": "Hidden"
+          }
+        },
+        {
+          "Dialog": "击打墙面",
+          "TargetScriptId": "prop_small_wall_hole",
+          "TargetNodeId": "strike",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
-              "TargetId": "prop_wrench",
-              "StringValue": "AcquireInventoryItem"
+              "TargetId": "prop_small_wall_hole",
+              "StringValue": "FirstWallStrike"
             }
           }
         },
         {
-          "Dialog": "查看",
-          "TargetScriptId": "prop_wrench",
-          "TargetNodeId": "inspect"
+          "Dialog": "再次击打墙面",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "strike",
+          "Condition": {
+            "Id": "WorldPropCommandAvailable",
+            "UnavailableMode": "Hidden",
+            "Params": {
+              "TargetId": "prop_large_wall_hole",
+              "StringValue": "SecondWallStrike"
+            }
+          }
         },
         {
           "Dialog": "离开",
@@ -40,15 +50,14 @@
       ]
     },
     {
-      "Id": "acquire",
-      "Type": "Action",
-      "Actions": [
+      "Id": "remove_rail",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "我怎么之前没有这么做呢，我早该这么做了。",
+      "AfterActions": [
         {
-          "Id": "WorldPropCommand",
-          "Params": {
-            "TargetId": "prop_wrench",
-            "StringValue": "AcquireInventoryItem"
-          }
+          "Id": "RemoveRailAndAscend"
         },
         {
           "Id": "SpendTurns",
@@ -57,27 +66,14 @@
           }
         }
       ],
-      "Next": "acquired"
+      "Next": "rail_removed"
     },
     {
-      "Id": "acquired",
+      "Id": "rail_removed",
       "Type": "Dialogue",
+      "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "【占位】获得了扳手。",
-      "Next": "complete"
-    },
-    {
-      "Id": "inspect",
-      "Type": "Action",
-      "Actions": [
-        {
-          "Id": "WorldPropCommand",
-          "Params": {
-            "TargetId": "prop_wrench",
-            "StringValue": "Inspect"
-          }
-        }
-      ],
+      "Dialog": "现在我的双脚可以自由走向任何地方。",
       "Next": "complete"
     },
     {

@@ -1,15 +1,8 @@
 {
   "Version": 1,
   "ScriptId": "prop_scissors",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一把锋利的剪刀。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
@@ -20,7 +13,7 @@
           "TargetNodeId": "acquire",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_scissors",
               "StringValue": "AcquireInventoryItem"
@@ -41,35 +34,28 @@
     },
     {
       "Id": "acquire",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "我要用剪刀做点什么呢？",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_scissors",
             "StringValue": "AcquireInventoryItem"
           }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
-          }
         }
       ],
-      "Next": "acquired"
-    },
-    {
-      "Id": "acquired",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】获得了剪刀。",
       "Next": "complete"
     },
     {
       "Id": "inspect",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "梳妆台会有剪刀，这不是很合理的事吗？",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {

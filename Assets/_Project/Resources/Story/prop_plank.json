@@ -1,26 +1,24 @@
 {
   "Version": 1,
   "ScriptId": "prop_plank",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一块从墙面附近掉落的木板。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "放入携带槽",
+          "Dialog": "查看",
+          "TargetScriptId": "prop_plank",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "取下",
           "TargetScriptId": "prop_plank",
           "TargetNodeId": "take",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_plank",
               "StringValue": "TakeIntoCarrySlot"
@@ -28,15 +26,15 @@
           }
         },
         {
-          "Dialog": "放下",
-          "TargetScriptId": "prop_plank",
-          "TargetNodeId": "drop",
+          "Dialog": "加固墙洞",
+          "TargetScriptId": "prop_large_wall_hole",
+          "TargetNodeId": "reinforce",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
-              "TargetId": "prop_plank",
-              "StringValue": "DropFromCarrySlot"
+              "TargetId": "prop_large_wall_hole",
+              "StringValue": "InstallPlank"
             }
           }
         },
@@ -48,40 +46,34 @@
       ]
     },
     {
-      "Id": "take",
-      "Type": "Action",
-      "Actions": [
+      "Id": "inspect",
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "一块看似平平无奇的木板。",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_plank",
-            "StringValue": "TakeIntoCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
+            "StringValue": "Inspect"
           }
         }
       ],
       "Next": "complete"
     },
     {
-      "Id": "drop",
-      "Type": "Action",
-      "Actions": [
+      "Id": "take",
+      "Type": "Dialogue",
+      "PortraitId": "4",
+      "ActorId": "",
+      "Dialog": "它总会在某处发光的。",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_plank",
-            "StringValue": "DropFromCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
+            "StringValue": "TakeIntoCarrySlot"
           }
         }
       ],

@@ -64,9 +64,11 @@ public sealed class StoryConditionRegistry
         Register(new StoryFlagEqualsCondition());
         Register(new PlayerHasWrenchCondition());
         Register(new PlayerRailRemovedCondition());
+        Register(new PlayerCanRemoveRailCondition());
         Register(new PlayerHasSlotItemCondition());
         Register(new PlayerIsWorldLayerCondition());
         Register(new WorldPropCommandAvailableCondition());
+        Register(new WorldPropCommandUnavailableCondition());
         Register(new RunFlagEqualsCondition());
         Register(new LoopProgressFlagEqualsCondition());
     }

@@ -26,6 +26,10 @@ public sealed class RunState
 
     public bool ParachuteAnchored { get; private set; }
 
+    public bool BedLifted { get; private set; }
+
+    public bool RopeTaken { get; private set; }
+
     public bool WallStruckOnce { get; private set; }
 
     public void MarkDresserOpened()
@@ -35,7 +39,13 @@ public sealed class RunState
 
     public void MarkWallRepaired()
     {
-        SetFlag(RunFlagId.WallRepaired, true);
+        bool changed = !WallRepaired || WallStruckOnce;
+        WallRepaired = true;
+        WallStruckOnce = false;
+        if (changed)
+        {
+            Changed?.Invoke();
+        }
     }
 
     public void MarkSteeringWheelRaised()
@@ -73,6 +83,16 @@ public sealed class RunState
         SetFlag(RunFlagId.ParachuteAnchored, true);
     }
 
+    public void MarkBedLifted()
+    {
+        SetFlag(RunFlagId.BedLifted, true);
+    }
+
+    public void MarkRopeTaken()
+    {
+        SetFlag(RunFlagId.RopeTaken, true);
+    }
+
     public void MarkWallStruckOnce()
     {
         if (WallStruckOnce)
@@ -81,6 +101,7 @@ public sealed class RunState
         }
 
         WallStruckOnce = true;
+        WallRepaired = false;
         Changed?.Invoke();
     }
 
@@ -95,6 +116,8 @@ public sealed class RunState
         BedSwitchTriggered = false;
         RopeAttached = false;
         ParachuteAnchored = false;
+        BedLifted = false;
+        RopeTaken = false;
         WallStruckOnce = false;
         Changed?.Invoke();
     }
@@ -121,6 +144,10 @@ public sealed class RunState
                 return RopeAttached;
             case RunFlagId.ParachuteAnchored:
                 return ParachuteAnchored;
+            case RunFlagId.BedLifted:
+                return BedLifted;
+            case RunFlagId.RopeTaken:
+                return RopeTaken;
             default:
                 return false;
         }
@@ -161,6 +188,12 @@ public sealed class RunState
                 break;
             case RunFlagId.ParachuteAnchored:
                 ParachuteAnchored = value;
+                break;
+            case RunFlagId.BedLifted:
+                BedLifted = value;
+                break;
+            case RunFlagId.RopeTaken:
+                RopeTaken = value;
                 break;
         }
 

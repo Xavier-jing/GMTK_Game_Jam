@@ -28,6 +28,29 @@ public enum StoryRunnerState
     Faulted
 }
 
+public static class StoryPortraitIdMap
+{
+    public static string ResolveBindingId(string portraitId)
+    {
+        switch (portraitId)
+        {
+            case "0":
+            case "1":
+                return "face01";
+            case "2":
+                return "face02";
+            case "3":
+                return "face03";
+            case "4":
+                return "face04";
+            case "5":
+                return "face05";
+            default:
+                return portraitId ?? string.Empty;
+        }
+    }
+}
+
 [Serializable]
 public sealed class StoryDocumentData
 {
@@ -43,7 +66,9 @@ public sealed class StoryNodeData
     public string Id;
     public string Type;
     public string ActorId;
+    public string PortraitId;
     public string Dialog;
+    public string[] DialogOptions;
     public StoryActionData[] BeforeActions;
     public StoryActionData[] AfterActions;
     public StoryActionData[] Actions;

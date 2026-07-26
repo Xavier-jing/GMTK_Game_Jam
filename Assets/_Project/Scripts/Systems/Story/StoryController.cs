@@ -179,6 +179,7 @@ public sealed class StoryController : MonoBehaviour
         choiceViewModels.Clear();
 
         CaptureAndDisablePlayerControl();
+        presenter.ResetPortrait();
         presenter.Hide();
 
         activeSessionId = ++sessionSequence;
@@ -391,7 +392,10 @@ public sealed class StoryController : MonoBehaviour
                     }
 
                     State = StoryRunnerState.ShowingDialogue;
-                    presenter.ShowDialogue(node.Data.ActorId, node.Data.Dialog);
+                    presenter.ShowDialogue(
+                        node.Data.ActorId,
+                        node.Data.PortraitId,
+                        ResolveDialogue(node.Data));
                     State = StoryRunnerState.WaitingForAdvance;
                     return;
 
@@ -828,6 +832,19 @@ public sealed class StoryController : MonoBehaviour
     private bool IsPaused()
     {
         return AppContext.HasInstance && AppContext.Instance.GamePause.IsPaused;
+    }
+
+    public static string ResolveDialogue(StoryNodeData node)
+    {
+        if (node != null &&
+            node.DialogOptions != null &&
+            node.DialogOptions.Length > 0)
+        {
+            int index = UnityEngine.Random.Range(0, node.DialogOptions.Length);
+            return node.DialogOptions[index];
+        }
+
+        return node?.Dialog ?? string.Empty;
     }
 
     private void HandleSubmit()

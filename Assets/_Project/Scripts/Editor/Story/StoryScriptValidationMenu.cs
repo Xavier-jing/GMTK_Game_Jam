@@ -91,6 +91,7 @@ public static class StoryScriptValidationMenu
         }
 
         ValidateCrossScriptTargets(graphs, sourcePaths, allErrors);
+        ValidateInitialDialoguePortraits(graphs, sourcePaths, allErrors);
 
         if (allErrors.Count > 0)
         {
@@ -155,6 +156,100 @@ public static class StoryScriptValidationMenu
                     }
                 }
             }
+        }
+    }
+
+    internal static void ValidateInitialDialoguePortraits(
+        IReadOnlyDictionary<string, StoryGraph> graphs,
+        IReadOnlyDictionary<string, string> sourcePaths,
+        ICollection<string> errors)
+    {
+        foreach (KeyValuePair<string, StoryGraph> graphPair in graphs)
+        {
+            HashSet<string> visitedNodes =
+                new HashSet<string>(StringComparer.Ordinal);
+            ValidateFirstDialogueOnPaths(
+                graphPair.Key,
+                graphPair.Key,
+                graphPair.Value.Document.StartNodeId,
+                graphs,
+                sourcePaths,
+                visitedNodes,
+                errors);
+        }
+    }
+
+    private static void ValidateFirstDialogueOnPaths(
+        string rootScriptId,
+        string scriptId,
+        string nodeId,
+        IReadOnlyDictionary<string, StoryGraph> graphs,
+        IReadOnlyDictionary<string, string> sourcePaths,
+        ISet<string> visitedNodes,
+        ICollection<string> errors)
+    {
+        string visitKey = $"{scriptId}\n{nodeId}";
+        if (!visitedNodes.Add(visitKey) ||
+            !graphs.TryGetValue(scriptId, out StoryGraph graph) ||
+            !graph.TryGetNode(nodeId, out StoryNodeDefinition node))
+        {
+            return;
+        }
+
+        if (node.Type == StoryNodeType.Dialogue)
+        {
+            if (string.IsNullOrWhiteSpace(node.Data.PortraitId))
+            {
+                string sourcePath = sourcePaths.TryGetValue(
+                    scriptId,
+                    out string targetSourcePath)
+                    ? targetSourcePath
+                    : scriptId;
+                errors.Add(
+                    $"{sourcePath}: story '{rootScriptId}' can first reach Dialogue " +
+                    $"'{scriptId}/{nodeId}' without a PortraitId.");
+            }
+
+            return;
+        }
+
+        if (node.Type == StoryNodeType.Action)
+        {
+            if (!string.IsNullOrEmpty(node.Data.Next))
+            {
+                ValidateFirstDialogueOnPaths(
+                    rootScriptId,
+                    scriptId,
+                    node.Data.Next,
+                    graphs,
+                    sourcePaths,
+                    visitedNodes,
+                    errors);
+            }
+
+            return;
+        }
+
+        if (node.Type != StoryNodeType.Choice || node.Data.Choices == null)
+        {
+            return;
+        }
+
+        foreach (StoryChoiceData choice in node.Data.Choices)
+        {
+            if (choice == null)
+            {
+                continue;
+            }
+
+            ValidateFirstDialogueOnPaths(
+                rootScriptId,
+                choice.TargetScriptId,
+                choice.TargetNodeId,
+                graphs,
+                sourcePaths,
+                visitedNodes,
+                errors);
         }
     }
 

@@ -135,9 +135,9 @@ public sealed class ChangeTurnsStoryAction : IStoryActionHandler
 
     public bool Validate(StoryActionParams parameters, out string error)
     {
-        if (parameters == null || parameters.IntValue == 0)
+        if (parameters == null)
         {
-            error = "Params.IntValue must be a non-zero signed turn delta.";
+            error = "Params is required.";
             return false;
         }
 
@@ -151,6 +151,11 @@ public sealed class ChangeTurnsStoryAction : IStoryActionHandler
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (parameters.IntValue == 0)
+        {
+            return Task.FromResult(StoryActionResult.Success());
+        }
+
         return Task.FromResult(
             context.TryChangeTurns(parameters.IntValue, out string error)
                 ? StoryActionResult.Success()
@@ -232,6 +237,53 @@ public sealed class WorldPropCommandAvailableCondition : IStoryConditionHandler
         WorldStoryInteractable prop = target.GetComponent<WorldStoryInteractable>();
         return prop != null &&
                prop.CanExecuteCommand(context, command, out string _);
+    }
+}
+
+public sealed class WorldPropCommandUnavailableCondition : IStoryConditionHandler
+{
+    public string Id => "WorldPropCommandUnavailable";
+
+    public bool Validate(StoryActionParams parameters, out string error)
+    {
+        return WorldPropCommandStoryAction.TryValidateWorldPropParameters(
+            parameters,
+            out WorldPropCommand _,
+            out error);
+    }
+
+    public bool Evaluate(
+        StoryActionContext context,
+        StoryActionParams parameters)
+    {
+        if (!Enum.TryParse(
+                parameters.StringValue,
+                true,
+                out WorldPropCommand command) ||
+            !Enum.IsDefined(typeof(WorldPropCommand), command))
+        {
+            return false;
+        }
+
+        // This condition drives retry/failure dialogue. Once the one-shot
+        // interaction has succeeded, neither its success nor failure choice
+        // should remain visible.
+        if ((command == WorldPropCommand.RevealBedSwitch &&
+             context.RunState.BedLifted) ||
+            (command == WorldPropCommand.AcquireBedRope &&
+             context.RunState.RopeTaken))
+        {
+            return false;
+        }
+
+        if (!context.Targets.TryGet(parameters.TargetId, out StoryTarget target))
+        {
+            return false;
+        }
+
+        WorldStoryInteractable prop = target.GetComponent<WorldStoryInteractable>();
+        return prop != null &&
+               !prop.CanExecuteCommand(context, command, out string _);
     }
 }
 

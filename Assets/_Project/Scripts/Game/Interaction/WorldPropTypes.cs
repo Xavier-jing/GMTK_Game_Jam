@@ -35,7 +35,10 @@ public enum WorldPropCommand
     InstallPlank,
     AttachRopeToFabric,
     AnchorParachute,
-    DeployParachute
+    DeployParachute,
+    RevealBedSwitch,
+    AcquireBedRope,
+    AttachRopeToPlayer
 }
 
 public enum RunFlagId
@@ -48,7 +51,9 @@ public enum RunFlagId
     FabricPrepared,
     BedSwitchTriggered,
     RopeAttached,
-    ParachuteAnchored
+    ParachuteAnchored,
+    BedLifted,
+    RopeTaken
 }
 
 public enum LoopProgressFlag
@@ -113,8 +118,6 @@ public static class WorldPropRules
             case WorldPropId.Scissors:
             case WorldPropId.Wrench:
                 return runState.DresserOpened;
-            case WorldPropId.Plank:
-                return loopProgress.TruthKnown;
             case WorldPropId.SmallWallHole:
                 return !runState.WallStruckOnce;
             case WorldPropId.LargeWallHole:
@@ -122,11 +125,13 @@ public static class WorldPropRules
             case WorldPropId.BedBlanket:
                 return loopProgress.TruthKnown;
             case WorldPropId.BedSwitch:
-                return loopProgress.TruthKnown && runState.FabricPrepared;
+                return loopProgress.TruthKnown && runState.BedLifted;
             case WorldPropId.SteeringWheel:
                 return loopProgress.TruthKnown && runState.BedSwitchTriggered;
             case WorldPropId.PowerConnector:
-                return loopProgress.TruthKnown && runState.FridgeUnplugged;
+                return loopProgress.TruthKnown && runState.SteeringWheelRaised;
+            case WorldPropId.Rope:
+                return runState.RopeTaken;
             default:
                 return true;
         }

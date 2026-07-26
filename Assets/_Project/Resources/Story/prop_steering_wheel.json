@@ -1,26 +1,19 @@
 {
   "Version": 1,
   "ScriptId": "prop_steering_wheel",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一只从床下升起的方向盘。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "启动方向盘",
+          "Dialog": "启动",
           "TargetScriptId": "prop_steering_wheel",
           "TargetNodeId": "start",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_steering_wheel",
               "StringValue": "StartSteeringWheel"
@@ -36,8 +29,11 @@
     },
     {
       "Id": "start",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "都走到这一步了，现在就让我们解开最后的谜底吧！",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -57,8 +53,9 @@
     {
       "Id": "started",
       "Type": "Dialogue",
+      "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "【占位】方向盘已经启动，还需要为床连接电源。",
+      "Dialog": "也许某个举动会对你的一生造成重大影响……至于是好是坏，试试看吧！",
       "Next": "complete"
     },
     {

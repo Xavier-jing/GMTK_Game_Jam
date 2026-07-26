@@ -66,6 +66,25 @@ public sealed class PlayerRailRemovedCondition : IStoryConditionHandler
     }
 }
 
+public sealed class PlayerCanRemoveRailCondition : IStoryConditionHandler
+{
+    public string Id => "PlayerCanRemoveRail";
+
+    public bool Validate(StoryActionParams parameters, out string error)
+    {
+        error = string.Empty;
+        return true;
+    }
+
+    public bool Evaluate(StoryActionContext context, StoryActionParams parameters)
+    {
+        return context.Player != null &&
+               context.Player.GameplayStatus.HasWrench &&
+               !context.Player.GameplayStatus.RailRemoved &&
+               !context.Player.GameplayStatus.HasSlotItem;
+    }
+}
+
 public sealed class PlayerHasSlotItemCondition : IStoryConditionHandler
 {
     public string Id => "PlayerHasSlotItem";

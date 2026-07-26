@@ -20,7 +20,10 @@ public sealed class TurnManager
     /// </summary>
     public void ChangeTurns(int delta)
     {
-        RemainingTurns = Mathf.Max(0, RemainingTurns + delta);
+        long updatedTurns = (long)RemainingTurns + delta;
+        RemainingTurns = (int)Math.Max(
+            0L,
+            Math.Min(int.MaxValue, updatedTurns));
         OnTurnsChanged?.Invoke(RemainingTurns, InitialTurns);
     }
 

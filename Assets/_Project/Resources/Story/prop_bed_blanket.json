@@ -1,26 +1,19 @@
 {
   "Version": 1,
   "ScriptId": "prop_bed_blanket",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】真相揭晓后，床被下面显得格外可疑。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "掀开并用剪刀剪碎",
+          "Dialog": "裁剪床被",
           "TargetScriptId": "prop_bed_blanket",
           "TargetNodeId": "cut",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_bed_blanket",
               "StringValue": "CutBlanket"
@@ -36,29 +29,35 @@
     },
     {
       "Id": "cut",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "（提示框）你居然想剪被套！也许你另有主意，也许你只是今晚不想睡觉了。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_bed_blanket",
             "StringValue": "CutBlanket"
           }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
-          }
         }
       ],
-      "Next": "cut_text"
+      "Next": "cut_result"
     },
     {
-      "Id": "cut_text",
+      "Id": "cut_result",
       "Type": "Dialogue",
+      "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "【占位】床被被剪开，一个隐藏开关露了出来。",
+      "Dialog": "（提示框）这也许是你按部就班的人生中最大胆的事。",
+      "Next": "cut_followup"
+    },
+    {
+      "Id": "cut_followup",
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "（提示框）嘿，伙计，往好处想……我是说，也许你还能更大胆呢。",
       "Next": "complete"
     },
     {

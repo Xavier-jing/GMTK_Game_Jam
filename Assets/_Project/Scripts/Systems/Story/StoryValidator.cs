@@ -190,6 +190,13 @@ public sealed class StoryValidator
             errors.Add($"{location}: ActorId '{node.Data.ActorId}' is invalid.");
         }
 
+        if (node.Type != StoryNodeType.Dialogue &&
+            !string.IsNullOrEmpty(node.Data.PortraitId))
+        {
+            errors.Add(
+                $"{location}: PortraitId is only valid on Dialogue nodes.");
+        }
+
         switch (node.Type)
         {
             case StoryNodeType.Dialogue:
@@ -215,9 +222,40 @@ public sealed class StoryValidator
         IReadOnlyDictionary<string, StoryNodeDefinition> nodes,
         ICollection<string> errors)
     {
-        if (string.IsNullOrWhiteSpace(node.Dialog))
+        bool hasDialog = !string.IsNullOrWhiteSpace(node.Dialog);
+        bool hasDialogOptions =
+            node.DialogOptions != null &&
+            node.DialogOptions.Length > 0;
+
+        if (!hasDialog && !hasDialogOptions)
         {
-            errors.Add($"{location}: Dialogue node requires Dialog.");
+            errors.Add(
+                $"{location}: Dialogue node requires Dialog or DialogOptions.");
+        }
+
+        if (hasDialog && hasDialogOptions)
+        {
+            errors.Add(
+                $"{location}: Dialogue node cannot define both Dialog and DialogOptions.");
+        }
+
+        if (hasDialogOptions)
+        {
+            for (int index = 0; index < node.DialogOptions.Length; index++)
+            {
+                if (string.IsNullOrWhiteSpace(node.DialogOptions[index]))
+                {
+                    errors.Add(
+                        $"{location}: DialogOptions[{index}] cannot be empty.");
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(node.PortraitId) &&
+            !IsValidId(node.PortraitId))
+        {
+            errors.Add(
+                $"{location}: PortraitId '{node.PortraitId}' is invalid.");
         }
 
         ValidateLocalNext(node.Next, location, nodes, errors);

@@ -1,26 +1,19 @@
 {
   "Version": 1,
   "ScriptId": "prop_bed_switch",
-  "StartNodeId": "question",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "question",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】床下藏着一个开关。是否触发？",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "触发开关",
+          "Dialog": "按下",
           "TargetScriptId": "prop_bed_switch",
-          "TargetNodeId": "trigger",
+          "TargetNodeId": "press",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_bed_switch",
               "StringValue": "TriggerBedSwitch"
@@ -28,14 +21,14 @@
           }
         },
         {
-          "Dialog": "暂时不触发",
+          "Dialog": "取消",
           "TargetScriptId": "prop_bed_switch",
           "TargetNodeId": "leave"
         }
       ]
     },
     {
-      "Id": "trigger",
+      "Id": "press",
       "Type": "Action",
       "Actions": [
         {
@@ -52,13 +45,14 @@
           }
         }
       ],
-      "Next": "triggered"
+      "Next": "pressed"
     },
     {
-      "Id": "triggered",
+      "Id": "pressed",
       "Type": "Dialogue",
+      "PortraitId": "5",
       "ActorId": "",
-      "Dialog": "【占位】某处传来机械结构升起的声音。",
+      "Dialog": "我的房间竟然隐藏着这么多我不知道的事……",
       "Next": "complete"
     },
     {

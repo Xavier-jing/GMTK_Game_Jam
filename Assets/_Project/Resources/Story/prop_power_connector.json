@@ -1,26 +1,19 @@
 {
   "Version": 1,
   "ScriptId": "prop_power_connector",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】冰箱断电后，这里空出了一个可用的电源接口。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "连接带数据线的床",
+          "Dialog": "连接床的电源线",
           "TargetScriptId": "prop_power_connector",
           "TargetNodeId": "connect",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_power_connector",
               "StringValue": "ConnectBedPower"
@@ -52,14 +45,15 @@
           }
         }
       ],
-      "Next": "ending"
+      "Next": "ending_two"
     },
     {
-      "Id": "ending",
+      "Id": "ending_two",
       "Type": "Dialogue",
+      "PortraitId": "0",
       "ActorId": "",
-      "Dialog": "【占位】电源接通，床与方向盘同时启动。结局二达成。",
-      "Next": "complete"
+      "Dialog": "进入结局二演出。",
+      "Next": "ending_complete"
     },
     {
       "Id": "leave",
@@ -67,7 +61,7 @@
       "Result": "Left"
     },
     {
-      "Id": "complete",
+      "Id": "ending_complete",
       "Type": "End",
       "Result": "EndingTwo"
     }

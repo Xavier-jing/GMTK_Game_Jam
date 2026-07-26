@@ -7,6 +7,20 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
 {
+    [Serializable]
+    private sealed class PortraitBinding
+    {
+        [SerializeField]
+        private string portraitId;
+
+        [SerializeField]
+        private Sprite sprite;
+
+        public string PortraitId => portraitId;
+
+        public Sprite Sprite => sprite;
+    }
+
     [SerializeField]
     private GameObject panelRoot;
 
@@ -23,6 +37,12 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
     private Button choiceButtonTemplate;
 
     [SerializeField]
+    private Image portraitImage;
+
+    [SerializeField]
+    private PortraitBinding[] portraitBindings = Array.Empty<PortraitBinding>();
+
+    [SerializeField]
     [Min(0f)]
     private float charactersPerSecond = 40f;
 
@@ -32,16 +52,21 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
     private float visibleCharacterProgress;
     private int totalVisibleCharacters;
     private bool isTyping;
+    private Sprite defaultPortraitSprite;
+    private bool defaultPortraitImageEnabled;
+    private bool defaultPortraitObjectActive;
+    private bool hasCapturedDefaultPortrait;
 
     public bool IsConfigured =>
         panelRoot != null &&
-        actorText != null &&
         dialogText != null &&
         choiceContainer != null &&
         choiceButtonTemplate != null;
 
     private void Awake()
     {
+        CaptureDefaultPortrait();
+
         if (choiceButtonTemplate != null)
         {
             choiceButtonTemplate.gameObject.SetActive(false);
@@ -72,7 +97,7 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         }
     }
 
-    public void ShowDialogue(string actorId, string dialog)
+    public void ShowDialogue(string actorId, string portraitId, string dialog)
     {
         if (!IsConfigured)
         {
@@ -84,9 +109,14 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         panelRoot.SetActive(true);
         choiceContainer.gameObject.SetActive(false);
 
-        bool hasActor = !string.IsNullOrWhiteSpace(actorId);
-        actorText.gameObject.SetActive(hasActor);
-        actorText.text = hasActor ? actorId : string.Empty;
+        if (actorText != null)
+        {
+            bool hasActor = !string.IsNullOrWhiteSpace(actorId);
+            actorText.gameObject.SetActive(hasActor);
+            actorText.text = hasActor ? actorId : string.Empty;
+        }
+
+        ApplyPortrait(portraitId);
 
         dialogText.gameObject.SetActive(true);
         dialogText.text = dialog ?? string.Empty;
@@ -118,7 +148,11 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
 
         ClearChoices();
         panelRoot.SetActive(true);
-        actorText.gameObject.SetActive(false);
+        if (actorText != null)
+        {
+            actorText.gameObject.SetActive(false);
+        }
+
         dialogText.gameObject.SetActive(false);
         choiceContainer.gameObject.SetActive(true);
         choiceSelected = onSelected;
@@ -163,6 +197,19 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         return true;
     }
 
+    public void ResetPortrait()
+    {
+        CaptureDefaultPortrait();
+        if (portraitImage == null)
+        {
+            return;
+        }
+
+        portraitImage.sprite = defaultPortraitSprite;
+        portraitImage.enabled = defaultPortraitImageEnabled;
+        portraitImage.gameObject.SetActive(defaultPortraitObjectActive);
+    }
+
     public void Hide()
     {
         isTyping = false;
@@ -173,6 +220,73 @@ public sealed class StoryPresenter : MonoBehaviour, IStoryPresenter
         {
             panelRoot.SetActive(false);
         }
+    }
+
+    private void ApplyPortrait(string portraitId)
+    {
+        if (string.IsNullOrEmpty(portraitId))
+        {
+            return;
+        }
+
+        string bindingId = StoryPortraitIdMap.ResolveBindingId(portraitId);
+        CaptureDefaultPortrait();
+        if (portraitImage == null)
+        {
+            Debug.LogWarning(
+                $"StoryPresenter '{name}' cannot apply PortraitId '{portraitId}' " +
+                "because Portrait Image is not assigned. The current portrait was kept.",
+                this);
+            return;
+        }
+
+        int bindingCount = portraitBindings?.Length ?? 0;
+        for (int index = 0; index < bindingCount; index++)
+        {
+            PortraitBinding binding = portraitBindings[index];
+            if (binding == null ||
+                !string.Equals(
+                    binding.PortraitId,
+                    bindingId,
+                    StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (binding.Sprite == null)
+            {
+                Debug.LogWarning(
+                    $"StoryPresenter '{name}' has no Sprite assigned for PortraitId " +
+                    $"'{portraitId}' (binding '{bindingId}'). " +
+                    "The current portrait was kept.",
+                    this);
+                return;
+            }
+
+            portraitImage.sprite = binding.Sprite;
+            portraitImage.gameObject.SetActive(true);
+            portraitImage.enabled = true;
+            return;
+        }
+
+        Debug.LogWarning(
+            $"StoryPresenter '{name}' has no portrait mapping for PortraitId " +
+            $"'{portraitId}' (binding '{bindingId}'). " +
+            "The current portrait was kept.",
+            this);
+    }
+
+    private void CaptureDefaultPortrait()
+    {
+        if (hasCapturedDefaultPortrait || portraitImage == null)
+        {
+            return;
+        }
+
+        defaultPortraitSprite = portraitImage.sprite;
+        defaultPortraitImageEnabled = portraitImage.enabled;
+        defaultPortraitObjectActive = portraitImage.gameObject.activeSelf;
+        hasCapturedDefaultPortrait = true;
     }
 
     private void ClearChoices()

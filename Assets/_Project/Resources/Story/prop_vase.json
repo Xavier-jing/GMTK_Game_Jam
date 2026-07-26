@@ -1,26 +1,24 @@
 {
   "Version": 1,
   "ScriptId": "prop_vase",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一只看起来很容易摔碎的花瓶。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "放入携带槽",
+          "Dialog": "查看",
           "TargetScriptId": "prop_vase",
-          "TargetNodeId": "take",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "放入",
+          "TargetScriptId": "prop_vase",
+          "TargetNodeId": "put_in",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_vase",
               "StringValue": "TakeIntoCarrySlot"
@@ -28,12 +26,12 @@
           }
         },
         {
-          "Dialog": "放下",
+          "Dialog": "取出",
           "TargetScriptId": "prop_vase",
-          "TargetNodeId": "drop",
+          "TargetNodeId": "take_out",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_vase",
               "StringValue": "DropFromCarrySlot"
@@ -48,40 +46,51 @@
       ]
     },
     {
-      "Id": "take",
-      "Type": "Action",
-      "Actions": [
+      "Id": "inspect",
+      "Type": "Dialogue",
+      "PortraitId": "2",
+      "ActorId": "",
+      "Dialog": "它在你的天花板上，你目前浇不了它。\n主角：……",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_vase",
-            "StringValue": "TakeIntoCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
+            "StringValue": "Inspect"
           }
         }
       ],
       "Next": "complete"
     },
     {
-      "Id": "drop",
-      "Type": "Action",
-      "Actions": [
+      "Id": "put_in",
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "你回到了地面。",
+      "BeforeActions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_vase",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "take_out",
+      "Type": "Dialogue",
+      "PortraitId": "4",
+      "ActorId": "",
+      "Dialog": "难得一见的神奇体验。",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_vase",
             "StringValue": "DropFromCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
           }
         }
       ],

@@ -1,15 +1,8 @@
 {
   "Version": 1,
   "ScriptId": "prop_small_wall_hole",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】墙面上有一道不自然的裂缝。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
@@ -20,28 +13,15 @@
           "TargetNodeId": "inspect"
         },
         {
-          "Dialog": "用扳手第一次砸开墙面",
+          "Dialog": "用扳手击打",
           "TargetScriptId": "prop_small_wall_hole",
-          "TargetNodeId": "first_strike",
-          "Condition": {
-            "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
-            "Params": {
-              "TargetId": "prop_small_wall_hole",
-              "StringValue": "FirstWallStrike"
-            }
-          }
-        },
-        {
-          "Dialog": "放出降落伞",
-          "TargetScriptId": "prop_small_wall_hole",
-          "TargetNodeId": "deploy_parachute",
+          "TargetNodeId": "strike",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
             "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_small_wall_hole",
-              "StringValue": "DeployParachute"
+              "StringValue": "FirstWallStrike"
             }
           }
         },
@@ -54,8 +34,11 @@
     },
     {
       "Id": "inspect",
-      "Type": "Action",
-      "Actions": [
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "什么都看不清楚……",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -67,9 +50,12 @@
       "Next": "complete"
     },
     {
-      "Id": "first_strike",
-      "Type": "Action",
-      "Actions": [
+      "Id": "strike",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "试试就试试，万一有用呢。",
+      "AfterActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
@@ -84,34 +70,14 @@
           }
         }
       ],
-      "Next": "first_strike_text"
+      "Next": "strike_result"
     },
     {
-      "Id": "first_strike_text",
+      "Id": "strike_result",
       "Type": "Dialogue",
+      "PortraitId": "4",
       "ActorId": "",
-      "Dialog": "【占位】墙面被砸开了一个小洞，后面似乎还有空间。",
-      "Next": "complete"
-    },
-    {
-      "Id": "deploy_parachute",
-      "Type": "Action",
-      "Actions": [
-        {
-          "Id": "WorldPropCommand",
-          "Params": {
-            "TargetId": "prop_small_wall_hole",
-            "StringValue": "DeployParachute"
-          }
-        }
-      ],
-      "Next": "parachute_deployed"
-    },
-    {
-      "Id": "parachute_deployed",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】布料和绳子从洞口展开，房屋开始平稳下降。",
+      "Dialog": "墙以外是什么呢？",
       "Next": "complete"
     },
     {

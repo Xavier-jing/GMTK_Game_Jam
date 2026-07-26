@@ -1,26 +1,29 @@
 {
   "Version": 1,
   "ScriptId": "prop_tea_set",
-  "StartNodeId": "intro",
+  "StartNodeId": "menu",
   "Nodes": [
-    {
-      "Id": "intro",
-      "Type": "Dialogue",
-      "ActorId": "",
-      "Dialog": "【占位】一套摆放整齐的茶具。",
-      "Next": "menu"
-    },
     {
       "Id": "menu",
       "Type": "Choice",
       "Choices": [
         {
-          "Dialog": "放入携带槽",
+          "Dialog": "查看",
           "TargetScriptId": "prop_tea_set",
-          "TargetNodeId": "take",
+          "TargetNodeId": "inspect"
+        },
+        {
+          "Dialog": "喝茶",
+          "TargetScriptId": "prop_tea_set",
+          "TargetNodeId": "drink"
+        },
+        {
+          "Dialog": "放入",
+          "TargetScriptId": "prop_tea_set",
+          "TargetNodeId": "put_in",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_tea_set",
               "StringValue": "TakeIntoCarrySlot"
@@ -28,12 +31,12 @@
           }
         },
         {
-          "Dialog": "放下",
+          "Dialog": "取出",
           "TargetScriptId": "prop_tea_set",
-          "TargetNodeId": "drop",
+          "TargetNodeId": "take_out",
           "Condition": {
             "Id": "WorldPropCommandAvailable",
-            "UnavailableMode": "Disabled",
+            "UnavailableMode": "Hidden",
             "Params": {
               "TargetId": "prop_tea_set",
               "StringValue": "DropFromCarrySlot"
@@ -48,16 +51,29 @@
       ]
     },
     {
-      "Id": "take",
-      "Type": "Action",
-      "Actions": [
+      "Id": "inspect",
+      "Type": "Dialogue",
+      "PortraitId": "4",
+      "ActorId": "",
+      "Dialog": "它为什么会在天上？",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_tea_set",
-            "StringValue": "TakeIntoCarrySlot"
+            "StringValue": "Inspect"
           }
-        },
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "drink",
+      "Type": "Dialogue",
+      "PortraitId": "5",
+      "ActorId": "",
+      "Dialog": "为生活忙碌的同时，也不要忘记享受呀。",
+      "AfterActions": [
         {
           "Id": "SpendTurns",
           "Params": {
@@ -65,23 +81,49 @@
           }
         }
       ],
+      "Next": "drink_result"
+    },
+    {
+      "Id": "drink_result",
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "DialogOptions": [
+        "偶尔休息一下也不错。",
+        "生活本该如此。",
+        "是不是喝多了呢？"
+      ],
       "Next": "complete"
     },
     {
-      "Id": "drop",
-      "Type": "Action",
-      "Actions": [
+      "Id": "put_in",
+      "Type": "Dialogue",
+      "PortraitId": "0",
+      "ActorId": "",
+      "Dialog": "你回到了地面。",
+      "BeforeActions": [
+        {
+          "Id": "WorldPropCommand",
+          "Params": {
+            "TargetId": "prop_tea_set",
+            "StringValue": "TakeIntoCarrySlot"
+          }
+        }
+      ],
+      "Next": "complete"
+    },
+    {
+      "Id": "take_out",
+      "Type": "Dialogue",
+      "PortraitId": "3",
+      "ActorId": "",
+      "Dialog": "难得一见的神奇体验。",
+      "BeforeActions": [
         {
           "Id": "WorldPropCommand",
           "Params": {
             "TargetId": "prop_tea_set",
             "StringValue": "DropFromCarrySlot"
-          }
-        },
-        {
-          "Id": "SpendTurns",
-          "Params": {
-            "IntValue": 1
           }
         }
       ],
